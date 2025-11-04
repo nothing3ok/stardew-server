@@ -190,11 +190,11 @@ fi
 log_step "Step 6: Starting virtual display..."
 
 rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
-Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &
+Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
 export DISPLAY=:99
 sleep 3
 
-log_info "✓ Virtual display started on :99"
+log_info "✓ Virtual display started on :99 (1920x1080)"
 
 # Step 7: Start VNC server (optional)
 if [ "$ENABLE_VNC" = "true" ]; then
@@ -207,22 +207,12 @@ if [ "$ENABLE_VNC" = "true" ]; then
         VNC_PASSWORD="${VNC_PASSWORD:0:8}"
     fi
 
-    # Create VNC password file
-    mkdir -p ~/.vnc
-    echo -n "$VNC_PASSWORD" | x11vnc -storepasswd - /tmp/vncpass 2>&1 | grep -v "^$"
-
-    if [ ! -f /tmp/vncpass ]; then
-        log_error "Failed to create VNC password file"
-    else
-        log_info "VNC password file created"
-    fi
-
     # Wait for Xvfb to be fully ready
     sleep 2
 
-    # Start x11vnc with error output visible
+    # Start x11vnc with plaintext password (more reliable than password file)
     log_info "Starting x11vnc on port 5900..."
-    x11vnc -display :99 -forever -shared -rfbauth /tmp/vncpass -rfbport 5900 -noxdamage -bg 2>&1 | grep -v "^$"
+    x11vnc -display :99 -forever -shared -passwd "$VNC_PASSWORD" -rfbport 5900 -noxdamage -bg 2>&1 | grep -v "^$"
 
     # Wait for x11vnc to start
     sleep 2
