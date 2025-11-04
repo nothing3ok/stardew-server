@@ -149,7 +149,7 @@ configure_steam() {
     # Check if .env already exists
     if [ -f ".env" ]; then
         ask_question ".env file already exists. Do you want to reconfigure? (y/n)"
-        read -r reconfigure
+        read -r reconfigure </dev/tty
         if [[ ! $reconfigure =~ ^[Yy]$ ]]; then
             print_info "Using existing .env file"
             return
@@ -168,17 +168,17 @@ configure_steam() {
     echo -e "${CYAN}  y${NC} - Input Steam username, password and VNC password now"
     echo -e "${CYAN}  n${NC} - Manually edit .env file later (recommended for Linux experts)"
     echo ""
-    read -r manual_input
+    read -r manual_input </dev/tty
 
     if [[ $manual_input =~ ^[Yy]$ ]]; then
         # Manual input mode
         echo ""
         ask_question "Enter your Steam username:"
-        read -r steam_username
+        read -r steam_username </dev/tty
 
         echo ""
         ask_question "Enter your Steam password (input hidden):"
-        read -rs steam_password
+        read -rs steam_password </dev/tty
         echo ""
 
         # Validate inputs
@@ -193,7 +193,7 @@ configure_steam() {
 
         echo ""
         ask_question "Enter VNC password (max 8 chars, press Enter for default 'stardew1'):"
-        read -r vnc_password
+        read -r vnc_password </dev/tty
         if [ -z "$vnc_password" ]; then
             vnc_password="stardew1"
         fi
@@ -231,7 +231,7 @@ configure_steam() {
         echo -e "  ${YELLOW}VNC_PASSWORD${NC}    - VNC access password (max 8 characters)"
         echo ""
         ask_question "Press Enter to continue after configuration..."
-        read -r
+        read -r </dev/tty
     fi
 }
 
@@ -344,7 +344,7 @@ show_next_steps() {
 
     # Ask if user wants to see logs
     ask_question "Do you want to watch the logs now? (y/n)"
-    read -r watch_logs
+    read -r watch_logs </dev/tty
     if [[ $watch_logs =~ ^[Yy]$ ]]; then
         echo ""
         print_info "Showing logs... (Press Ctrl+C to exit)"

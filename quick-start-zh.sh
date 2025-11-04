@@ -121,7 +121,7 @@ configure_steam() {
 
     if [ -f ".env" ]; then
         ask_question ".env 文件已存在。是否要重新配置？(y/n)"
-        read -r reconfigure
+        read -r reconfigure </dev/tty
         if [[ ! $reconfigure =~ ^[Yy]$ ]]; then
             print_info "使用现有 .env 文件"
             return
@@ -139,22 +139,22 @@ configure_steam() {
     echo -e "${CYAN}  y${NC} - 现在在终端输入 Steam 用户名、密码和 VNC 密码"
     echo -e "${CYAN}  n${NC} - 稍后手动编辑 .env 文件（推荐熟悉 Linux 用户）"
     echo ""
-    read -r manual_input
+    read -r manual_input </dev/tty
 
     if [[ $manual_input =~ ^[Yy]$ ]]; then
         # 手动输入模式
         echo ""
         ask_question "请输入您的 Steam 用户名："
-        read -r steam_username
+        read -r steam_username </dev/tty
 
         echo ""
         ask_question "请输入您的 Steam 密码："
-        read -rs steam_password
+        read -rs steam_password </dev/tty
         echo ""
 
         echo ""
         ask_question "请输入 VNC 密码（最多8个字符，按回车使用默认 'stardew1'）："
-        read -r vnc_password
+        read -r vnc_password </dev/tty
         if [ -z "$vnc_password" ]; then
             vnc_password="stardew1"
         fi
@@ -184,7 +184,7 @@ configure_steam() {
         echo -e "  ${YELLOW}VNC_PASSWORD${NC}    - VNC 访问密码（最多8个字符）"
         echo ""
         ask_question "配置完成后，按回车继续..."
-        read -r
+        read -r </dev/tty
     fi
 }
 
@@ -330,7 +330,7 @@ print_next_steps() {
 
     # 询问是否查看日志
     ask_question "现在要查看日志吗？(y/n)"
-    read -r watch_logs
+    read -r watch_logs </dev/tty
     if [[ $watch_logs =~ ^[Yy]$ ]]; then
         echo ""
         print_info "显示日志...（按 Ctrl+C 退出）"
