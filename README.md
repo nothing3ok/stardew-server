@@ -124,23 +124,23 @@ graph LR
 Setting up a **Stardew Valley dedicated server** has never been easier! With **one simple command**, you can have your own 24/7 multiplayer server running on **any platform** - PC, Mac, Linux, iOS, and Android players can all join together.
 
 **Perfect for:**
-- ✅ **Remote Multiplayer** - Play with friends anywhere in the world
-- ✅ **Cross-Platform Gaming** - iOS, Android, and PC players together
-- ✅ **24/7 Always-On Server** - Join anytime, no need for host to be online
-- ✅ **Easy Setup** - One command deployment with Docker Compose
-- ✅ **Low Resource Usage** - Runs smoothly on just 2GB RAM
+- **Remote Multiplayer** - Play with friends anywhere in the world
+- **Cross-Platform Gaming** - iOS, Android, and PC players together
+- **24/7 Always-On Server** - Join anytime, no need for host to be online
+- **Easy Setup** - One command deployment with Docker Compose
+- **Low Resource Usage** - Runs smoothly on just 2GB RAM
 
 ### Key Features
 
 - **One-Command Deploy** - Deploy in 3 minutes with a single command
-- **Cross-Platform Support** 📱 - PC, Mac, Linux, iOS, Android all supported
+- **Cross-Platform Support** - PC, Mac, Linux, iOS, Android all supported
 - **24/7 Dedicated Server** ⚡ - Runs independently without requiring the host to be online
-- **Docker Compose** 🐳 - Easy deployment and management
-- **Resource Efficient** 💪 - Runs smoothly on servers with only 2GB RAM
-- **Auto-Save Loading** 💾 - Automatically loads your save on server restart
+- **Docker Compose** - Easy deployment and management
+- **Resource Efficient** - Runs smoothly on servers with only 2GB RAM
+- **Auto-Save Loading** - Automatically loads your save on server restart
 - **VNC Remote Access** 🖥️ - Built-in VNC for easy first-time setup
-- **Instant Sleep** 🛏️ - Bonus feature: Players can sleep at any time without waiting
-- **Hidden Host** 👻 - Host player is automatically hidden for seamless gameplay
+- **Instant Sleep** - Bonus feature: Players can sleep at any time without waiting
+- **Hidden Host** - Host player is automatically hidden for seamless gameplay
 - **Guard Window Protection** 🛡️ - NEW: Prevents host from appearing at Farm entrance
 
 <div align="center">
@@ -156,14 +156,14 @@ Setting up a **Stardew Valley dedicated server** has never been easier! With **o
 #### v1.0.29 (November 2025)
 
 **AutoHideHost v1.1.9 - Major Fix:**
-- ✅ **FIXED:** Host no longer appears at Farm entrance when players connect
-- ✅ **NEW:** Guard window mechanism activates daily at day start
-- ✅ **IMPROVED:** Multi-day persistence - works indefinitely across daily cycles
-- ✅ **ENHANCED:** Diagnostic logging for warp detection
+- **FIXED:** Host no longer appears at Farm entrance when players connect
+- **NEW:** Guard window mechanism activates daily at day start
+- **IMPROVED:** Multi-day persistence - works indefinitely across daily cycles
+- **ENHANCED:** Diagnostic logging for warp detection
 
 **Infrastructure:**
-- ✅ **OPTIMIZED:** CPU limit adjusted to 1.0 core for stability testing
-- ✅ **IMPROVED:** Resource efficiency for long-term 24/7 operation
+- **OPTIMIZED:** CPU limit adjusted to 1.0 core for stability testing
+- **IMPROVED:** Resource efficiency for long-term 24/7 operation
 
 ### Quick Start (2 Options)
 
@@ -172,7 +172,7 @@ Setting up a **Stardew Valley dedicated server** has never been easier! With **o
 [![asciicast](https://asciinema.org/a/SYBS2qWsb5ZlSolbFPuoA7EJY.svg)](https://asciinema.org/a/SYBS2qWsb5ZlSolbFPuoA7EJY)
 
 <details open>
-<summary><h4>⭐ Option 1: One-Command Deployment (Recommended for Beginners)</h4></summary>
+<summary><h4>Option 1: One-Command Deployment (Recommended for Beginners)</h4></summary>
 
 **English Version:**
 
@@ -187,12 +187,12 @@ curl -sSL https://raw.githubusercontent.com/truman-world/puppy-stardew-server/ma
 ```
 
 The script will:
-- ✅ Check your Docker installation
-- ✅ Guide you to enter Steam credentials
-- ✅ Create all necessary directories with correct permissions
-- ✅ Generate configuration files
-- ✅ Start the server
-- ✅ Show you connection information
+- Check your Docker installation
+- Guide you to enter Steam credentials
+- Create all necessary directories with correct permissions
+- Generate configuration files
+- Start the server
+- Show you connection information
 
 **That's it!** ☕ Grab a coffee while it downloads the game (~1.5GB).
 
@@ -241,11 +241,11 @@ ENABLE_VNC=true
 VNC_PASSWORD=stardew123
 ```
 
-⚠️ **Important**: You MUST own Stardew Valley on Steam. Game files are downloaded via your account.
+**Important**: You MUST own Stardew Valley on Steam. Game files are downloaded via your account.
 
 #### Step 3: Initialize Data Directories
 
-**⚠️ CRITICAL: This step prevents "Disk write failure" errors!**
+**CRITICAL: This step prevents "Disk write failure" errors!**
 
 **Option A: Using the init script (Recommended):**
 ```bash
@@ -313,7 +313,7 @@ After the server starts, you need to create or load a save file **once**:
    - Click "Co-op" → "Join LAN Game"
    - Your server should appear in the list automatically
    - Or manually enter your server IP: `192.168.1.100` (example)
-   - ⚠️ **Note**: Port 24642 is used by default, no need to specify
+   - **Note**: Port 24642 is used by default, no need to specify
 
 ### What's Inside
 
@@ -326,10 +326,10 @@ After the server starts, you need to create or load a save file **once**:
 | **ServerAutoLoad** | v1.2.1 | Custom mod - Automatically loads your save on startup | - |
 
 **AutoHideHost v1.1.9 Highlights:**
-- 🎯 **Fixed**: Host no longer teleports to Farm entrance at 6:40 AM
+- **Fixed**: Host no longer teleports to Farm entrance at 6:40 AM
 - 🛡️ **New**: Guard window mechanism with daily refresh
 - ⚡ **Instant**: Re-hide delay < 1 game tick
-- 🔄 **Persistent**: Works across multiple consecutive days
+- **Persistent**: Works across multiple consecutive days
 
 All mods are pre-configured and ready to use!
 
@@ -652,10 +652,10 @@ docker compose up -d
 **License**: MIT License - free to use, modify, and distribute.
 
 **Important Legal Notes:**
-- ✅ You MUST own Stardew Valley on Steam
-- ✅ Game files are downloaded via YOUR Steam account
-- ✅ This is NOT a piracy tool
-- ✅ Mods follow their original licenses:
+- You MUST own Stardew Valley on Steam
+- Game files are downloaded via YOUR Steam account
+- This is NOT a piracy tool
+- Mods follow their original licenses:
   - Always On Server: [GPL-3.0](https://github.com/funny-snek/Always-On-Server-for-Multiplayer)
   - ServerAutoLoad: MIT (custom mod for this project)
   - AutoHideHost: MIT (custom mod for this project)
@@ -782,23 +782,23 @@ graph LR
 搭建**星露谷物语专用服务器**从未如此简单！通过**一条命令**，您就可以拥有自己的 24/7 多人联机服务器，支持**全平台**联机 - PC、Mac、Linux、iOS 和 Android 玩家都可以一起游戏。
 
 **完美适用于：**
-- ✅ **远程联机** - 与世界各地的朋友一起玩
-- ✅ **跨平台游戏** - iOS、Android 和 PC 玩家一起联机
-- ✅ **24/7 在线服务器** - 随时加入，无需房主在线
-- ✅ **简单搭建** - 使用 Docker Compose 一键部署
-- ✅ **低资源占用** - 仅需 2GB 内存即可流畅运行
+- **远程联机** - 与世界各地的朋友一起玩
+- **跨平台游戏** - iOS、Android 和 PC 玩家一起联机
+- **24/7 在线服务器** - 随时加入，无需房主在线
+- **简单搭建** - 使用 Docker Compose 一键部署
+- **低资源占用** - 仅需 2GB 内存即可流畅运行
 
 ### 核心功能
 
 - **一键部署**  - 一条命令 3 分钟完成部署
-- **全平台支持** 📱 - PC、Mac、Linux、iOS、Android 全支持
+- **全平台支持** - PC、Mac、Linux、iOS、Android 全支持
 - **24/7 专用服务器** ⚡ - 服务器独立运行，不需要房主在线
-- **Docker Compose** 🐳 - 轻松部署和管理
-- **资源高效** 💪 - 2GB 内存服务器也能流畅运行
-- **自动加载存档** 💾 - 重启容器，存档自动加载
+- **Docker Compose** - 轻松部署和管理
+- **资源高效** - 2GB 内存服务器也能流畅运行
+- **自动加载存档** - 重启容器，存档自动加载
 - **VNC 远程访问** 🖥️ - 内置 VNC，首次设置超简单
-- **即时睡眠** 🛏️ - 附加功能：玩家随时可以睡觉，无需等待
-- **隐藏房主** 👻 - 房主玩家自动隐藏，零干扰
+- **即时睡眠** - 附加功能：玩家随时可以睡觉，无需等待
+- **隐藏房主** - 房主玩家自动隐藏，零干扰
 - **守护窗口保护** 🛡️ - 新功能：防止房主出现在Farm门口
 
 <div align="center">
@@ -814,14 +814,14 @@ graph LR
 #### v1.0.29 (2025年11月)
 
 **AutoHideHost v1.1.9 - 重大修复：**
-- ✅ **已修复：** 房主不再在玩家连接时出现在Farm门口
-- ✅ **新增：** 守护窗口机制每天自动激活
-- ✅ **改进：** 多日持久化 - 无限期跨日循环工作
-- ✅ **增强：** 传送检测的诊断日志记录
+- **已修复：** 房主不再在玩家连接时出现在Farm门口
+- **新增：** 守护窗口机制每天自动激活
+- **改进：** 多日持久化 - 无限期跨日循环工作
+- **增强：** 传送检测的诊断日志记录
 
 **基础设施：**
-- ✅ **优化：** CPU限制调整为1.0核心，进行稳定性测试
-- ✅ **改进：** 长期24/7运行的资源效率
+- **优化：** CPU限制调整为1.0核心，进行稳定性测试
+- **改进：** 长期24/7运行的资源效率
 
 ### 快速开始（2 种方式）
 
@@ -830,7 +830,7 @@ graph LR
 [![asciicast](https://asciinema.org/a/SYBS2qWsb5ZlSolbFPuoA7EJY.svg)](https://asciinema.org/a/SYBS2qWsb5ZlSolbFPuoA7EJY)
 
 <details open>
-<summary><h4>⭐ 方式 1：一键部署（推荐小白使用）</h4></summary>
+<summary><h4>方式 1：一键部署（推荐小白使用）</h4></summary>
 
 **英文版 (English Version):**
 
@@ -845,12 +845,12 @@ curl -sSL https://raw.githubusercontent.com/truman-world/puppy-stardew-server/ma
 ```
 
 脚本会自动：
-- ✅ 检查 Docker 安装
-- ✅ 引导输入 Steam 凭证
-- ✅ 创建必要目录并设置正确权限
-- ✅ 生成配置文件
-- ✅ 启动服务器
-- ✅ 显示连接信息
+- 检查 Docker 安装
+- 引导输入 Steam 凭证
+- 创建必要目录并设置正确权限
+- 生成配置文件
+- 启动服务器
+- 显示连接信息
 
 **就这么简单！** ☕ 下载游戏文件时去喝杯咖啡（约 1.5GB）。
 
@@ -899,11 +899,11 @@ ENABLE_VNC=true
 VNC_PASSWORD=stardew123
 ```
 
-⚠️ **重要**：您必须在 Steam 上拥有星露谷物语。游戏文件通过您的账户下载。
+**重要**：您必须在 Steam 上拥有星露谷物语。游戏文件通过您的账户下载。
 
 #### 步骤 3：初始化数据目录
 
-**⚠️ 关键步骤：此步骤可防止"磁盘写入失败"错误！**
+**关键步骤：此步骤可防止"磁盘写入失败"错误！**
 
 **方式 A：使用初始化脚本（推荐）：**
 ```bash
@@ -971,7 +971,7 @@ docker attach puppy-stardew
    - 点击"合作" → "加入局域网游戏"
    - 服务器会自动出现在列表中
    - 或手动输入服务器IP：`192.168.1.100`（示例）
-   - ⚠️ **注意**：默认使用 24642 端口，无需额外指定
+   - **注意**：默认使用 24642 端口，无需额外指定
 
 ### 包含内容
 
@@ -984,10 +984,10 @@ docker attach puppy-stardew
 | **ServerAutoLoad** | v1.2.1 | 自定义模组 - 启动时自动加载存档 | - |
 
 **AutoHideHost v1.1.9 亮点：**
-- 🎯 **已修复**：房主不再在早上6:40传送到Farm门口
+- **已修复**：房主不再在早上6:40传送到Farm门口
 - 🛡️ **新增**：守护窗口机制，每天自动刷新
 - ⚡ **即时**：重新隐藏延迟 < 1游戏帧
-- 🔄 **持久**：跨多个连续日期工作
+- **持久**：跨多个连续日期工作
 
 所有模组都已预配置，开箱即用！
 
@@ -1310,10 +1310,10 @@ docker compose up -d
 **许可证**：MIT 许可证 - 免费使用、修改和分发。
 
 **重要法律说明：**
-- ✅ 您必须在 Steam 上拥有星露谷物语
-- ✅ 游戏文件通过您的 Steam 账户下载
-- ✅ 这不是盗版工具
-- ✅ 模组遵循其原始许可证：
+- 您必须在 Steam 上拥有星露谷物语
+- 游戏文件通过您的 Steam 账户下载
+- 这不是盗版工具
+- 模组遵循其原始许可证：
   - Always On Server：[GPL-3.0](https://github.com/funny-snek/Always-On-Server-for-Multiplayer)
   - ServerAutoLoad：MIT（本项目自定义模组）
   - AutoHideHost：MIT（本项目自定义模组）
