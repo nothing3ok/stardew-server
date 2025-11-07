@@ -1,6 +1,6 @@
 #!/bin/bash
-# Puppy Stardew Server Entrypoint Script - v1.0.49
-# 小狗星谷服务器启动脚本 - v1.0.49
+# Puppy Stardew Server Entrypoint Script - v1.0.50
+# 小狗星谷服务器启动脚本 - v1.0.50
 
 # DO NOT use set -e - we need manual error handling
 # 不使用 set -e - 需要手动错误处理
@@ -93,8 +93,8 @@ download_game_via_steam() {
 # =============================================
 
 log_step "================================================"
-log_step "  Puppy Stardew Server v1.0.49 Starting..."
-log_step "  小狗星谷服务器 v1.0.49 启动中..."
+log_step "  Puppy Stardew Server v1.0.50 Starting..."
+log_step "  小狗星谷服务器 v1.0.50 启动中..."
 log_step "================================================"
 
 # Step 1: Validate Steam credentials
@@ -228,6 +228,31 @@ if [ "$ENABLE_VNC" = "true" ]; then
     fi
 else
     log_step "Step 7: VNC disabled (set ENABLE_VNC=true to enable)"
+fi
+
+# Step 7.5: Setup optimized game config for VNC display
+# 步骤 7.5：为VNC显示设置优化的游戏配置
+log_step "Step 7.5: Configuring game display settings..."
+
+CONFIG_DIR="/home/steam/.config/StardewValley"
+CONFIG_FILE="$CONFIG_DIR/startup_preferences"
+TEMPLATE="/home/steam/startup_preferences.template"
+
+# Create config directory if not exists
+mkdir -p "$CONFIG_DIR"
+
+# Copy optimized config template if startup_preferences doesn't exist yet
+# 如果startup_preferences还不存在，复制优化的配置模板
+if [ ! -f "$CONFIG_FILE" ]; then
+    if [ -f "$TEMPLATE" ]; then
+        cp "$TEMPLATE" "$CONFIG_FILE"
+        log_info "✓ Applied optimized display config (fullscreen mode for VNC)"
+        log_info "✓ 已应用优化的显示配置（VNC全屏模式）"
+    else
+        log_warn "⚠ Template not found, game will use default settings"
+    fi
+else
+    log_info "✓ Game config already exists, keeping user settings"
 fi
 
 # Step 8: Start log monitoring (optional)
