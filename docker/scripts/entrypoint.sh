@@ -1,6 +1,6 @@
 #!/bin/bash
-# Puppy Stardew Server Entrypoint Script - v1.0.47
-# 小狗星谷服务器启动脚本 - v1.0.47
+# Puppy Stardew Server Entrypoint Script - v1.0.48
+# 小狗星谷服务器启动脚本 - v1.0.48
 
 # DO NOT use set -e - we need manual error handling
 # 不使用 set -e - 需要手动错误处理
@@ -93,8 +93,8 @@ download_game_via_steam() {
 # =============================================
 
 log_step "================================================"
-log_step "  Puppy Stardew Server v1.0.47 Starting..."
-log_step "  小狗星谷服务器 v1.0.47 启动中..."
+log_step "  Puppy Stardew Server v1.0.48 Starting..."
+log_step "  小狗星谷服务器 v1.0.48 启动中..."
 log_step "================================================"
 
 # Step 1: Validate Steam credentials
@@ -258,10 +258,12 @@ log_info "  2. 点击 CO-OP → 开始新的联机农场"
 log_info ""
 log_info "Players connect via:"
 log_info "玩家连接方式："
-log_info "  Game → CO-OP → Enter Invite Code"
-log_info "  游戏 → CO-OP → 输入邀请码"
-log_info "  (Code shown in logs below)"
-log_info "  （邀请码显示在下方日志中）"
+log_info "  1. Open Stardew Valley → CO-OP → Join LAN Game"
+log_info "  1. 打开星露谷物语 → CO-OP → 加入局域网游戏"
+log_info "  2. Server will appear automatically, or enter server IP directly"
+log_info "  2. 服务器会自动出现，或直接输入服务器IP"
+log_info "  3. No port number needed (default: 24642/UDP)"
+log_info "  3. 无需输入端口号（默认：24642/UDP）"
 log_info "================================================"
 log_info ""
 

@@ -238,7 +238,7 @@ nano .env  # or use your favorite editor
 STEAM_USERNAME=your_steam_username
 STEAM_PASSWORD=your_steam_password
 ENABLE_VNC=true
-VNC_PASSWORD=stardew123
+VNC_PASSWORD=stardew1
 ```
 
 **Important**: You MUST own Stardew Valley on Steam. Game files are downloaded via your account.
@@ -284,7 +284,9 @@ docker logs -f puppy-stardew
 
 ```bash
 docker attach puppy-stardew
-# Enter your Steam Guard code
+# Paste your Steam Guard code and press ENTER
+# IMPORTANT: No output will be shown - this is normal!
+# Wait a few seconds, game download will start automatically
 # Press Ctrl+P Ctrl+Q to detach (NOT Ctrl+C!)
 ```
 
@@ -313,7 +315,10 @@ After the server starts, you need to create or load a save file **once**:
    - Click "Co-op" → "Join LAN Game"
    - Your server should appear in the list automatically
    - Or manually enter your server IP: `192.168.1.100` (example)
-   - **Note**: Port 24642 is used by default, no need to specify
+   - **Important**:
+     - Just enter IP address, **NO port number needed** (not `192.168.1.100:24642`)
+     - Port 24642/UDP is used automatically
+     - For internet play with port forwarding, forward **UDP** protocol (not TCP)
 
 ### What's Inside
 
@@ -432,7 +437,9 @@ If you have Steam Guard enabled:
 
 ```bash
 docker attach puppy-stardew
-# Enter the code from your email/mobile app
+# Paste the code from your email/mobile app and press ENTER
+# IMPORTANT: You won't see any output - this is normal!
+# Wait a few seconds for game download to start automatically
 # Press Ctrl+P Ctrl+Q to detach (NOT Ctrl+C!)
 ```
 
@@ -896,7 +903,7 @@ nano .env  # 或使用您喜欢的编辑器
 STEAM_USERNAME=your_steam_username
 STEAM_PASSWORD=your_steam_password
 ENABLE_VNC=true
-VNC_PASSWORD=stardew123
+VNC_PASSWORD=stardew1
 ```
 
 **重要**：您必须在 Steam 上拥有星露谷物语。游戏文件通过您的账户下载。
@@ -942,7 +949,9 @@ docker logs -f puppy-stardew
 
 ```bash
 docker attach puppy-stardew
-# 输入您的 Steam 令牌代码
+# 粘贴您的 Steam 令牌代码并按回车
+# 重要：不会显示任何内容 - 这是正常的！
+# 等待几秒钟，游戏会自动开始下载
 # 按 Ctrl+P Ctrl+Q 分离（不是 Ctrl+C！）
 ```
 
@@ -971,7 +980,10 @@ docker attach puppy-stardew
    - 点击"合作" → "加入局域网游戏"
    - 服务器会自动出现在列表中
    - 或手动输入服务器IP：`192.168.1.100`（示例）
-   - **注意**：默认使用 24642 端口，无需额外指定
+   - **重要说明**：
+     - 只需输入IP地址，**不需要加端口号**（不是`192.168.1.100:24642`）
+     - 自动使用24642/UDP端口
+     - 如需内网穿透或端口转发，必须转发**UDP协议**（不是TCP）
 
 ### 包含内容
 
@@ -1090,7 +1102,9 @@ docker compose restart
 
 ```bash
 docker attach puppy-stardew
-# 输入您邮箱/手机应用中的代码
+# 粘贴您邮箱/手机应用中的代码并按回车
+# 重要：不会显示任何输出 - 这是正常的！
+# 等待几秒钟，游戏会自动开始下载
 # 按 Ctrl+P Ctrl+Q 分离（不是 Ctrl+C！）
 ```
 
