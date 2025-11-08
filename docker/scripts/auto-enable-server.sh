@@ -36,8 +36,8 @@ while [ $elapsed -lt $MAX_WAIT ]; do
             log "检查 Always On Server 当前状态..."
 
             # 统计 "Auto Mode On" 和 "Auto mode off" 的出现次数
-            ON_COUNT=$(grep -c "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null || echo "0")
-            OFF_COUNT=$(grep -c "Auto mode off" "$SMAPI_LOG" 2>/dev/null || echo "0")
+            ON_COUNT=$(grep -o "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null | wc -l)
+            OFF_COUNT=$(grep -o "Auto mode off" "$SMAPI_LOG" 2>/dev/null | wc -l)
 
             log "  检测到 'Auto Mode On' 次数: $ON_COUNT"
             log "  检测到 'Auto mode off' 次数: $OFF_COUNT"
@@ -71,8 +71,8 @@ while [ $elapsed -lt $MAX_WAIT ]; do
                 sleep 3
 
                 # 重新检查状态
-                ON_COUNT_AFTER=$(grep -c "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null || echo "0")
-                OFF_COUNT_AFTER=$(grep -c "Auto mode off" "$SMAPI_LOG" 2>/dev/null || echo "0")
+                ON_COUNT_AFTER=$(grep -o "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null | wc -l)
+                OFF_COUNT_AFTER=$(grep -o "Auto mode off" "$SMAPI_LOG" 2>/dev/null | wc -l)
 
                 log "  按键后状态检查: ON=$ON_COUNT_AFTER, OFF=$OFF_COUNT_AFTER"
 
