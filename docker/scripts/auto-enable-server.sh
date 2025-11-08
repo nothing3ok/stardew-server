@@ -59,32 +59,56 @@ while [ $elapsed -lt $MAX_WAIT ]; do
             # 设置 DISPLAY 环境变量
             export DISPLAY=:99
 
-            # 使用 xdotool 模拟按键（修复：只按 1 次）
+            # 使用 xdotool 模拟按键（改进：先关闭菜单，再按F9，增加重试）
             if command -v xdotool >/dev/null 2>&1; then
-                log "模拟按 F9 键启用 Always On Server..."
+                log "准备启用 Always On Server..."
 
-                # 只按 1 次 F9（不再连续按 3 次）
-                xdotool key F9
-                log "✓ F9 按键已发送"
+                # 重试最多3次
+                for attempt in 1 2 3; do
+                    log "  尝试 #$attempt: 关闭可能的菜单并按 F9..."
 
-                # 等待 3 秒让游戏响应
-                sleep 3
+                    # 先按多次ESC关闭所有菜单
+                    for i in 1 2 3; do
+                        xdotool key Escape
+                        sleep 0.3
+                    done
 
-                # 重新检查状态
-                ON_COUNT_AFTER=$(grep -o "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null | wc -l)
-                OFF_COUNT_AFTER=$(grep -o "Auto mode off" "$SMAPI_LOG" 2>/dev/null | wc -l)
+                    # 等待菜单关闭
+                    sleep 1
 
-                log "  按键后状态检查: ON=$ON_COUNT_AFTER, OFF=$OFF_COUNT_AFTER"
+                    # 按F9启用Always On Server
+                    xdotool key F9
+                    log "  ✓ F9 按键已发送（尝试 #$attempt）"
 
-                if [ "$ON_COUNT_AFTER" -gt "$OFF_COUNT_AFTER" ]; then
-                    log "✅ Always On Server 已成功启用！"
-                    log "✅ 自动暂停功能已激活（无玩家时暂停，有玩家时继续）"
-                    exit 0
-                else
-                    log "⚠️ 状态验证失败，但可能已经启用"
-                    log "   建议通过 VNC 检查游戏是否在无玩家时暂停"
-                    exit 0  # 不返回错误，可能已经通过其他方式启用
-                fi
+                    # 等待游戏响应
+                    sleep 5
+
+                    # 检查状态
+                    ON_COUNT_AFTER=$(grep -o "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null | wc -l)
+                    OFF_COUNT_AFTER=$(grep -o "Auto mode off" "$SMAPI_LOG" 2>/dev/null | wc -l)
+
+                    log "  状态检查: ON=$ON_COUNT_AFTER, OFF=$OFF_COUNT_AFTER"
+
+                    if [ "$ON_COUNT_AFTER" -gt "$OFF_COUNT_AFTER" ]; then
+                        log "✅ Always On Server 已成功启用！"
+                        log "✅ 自动暂停功能已激活（无玩家时暂停，有玩家时继续）"
+                        exit 0
+                    fi
+
+                    # 如果不是最后一次尝试，等待后重试
+                    if [ "$attempt" -lt 3 ]; then
+                        log "  未检测到启用，10秒后重试..."
+                        sleep 10
+                    fi
+                done
+
+                log "⚠️ 3次尝试后仍未检测到 Auto Mode On 消息"
+                log "   可能原因："
+                log "   1. Always On Server 已通过其他方式启用"
+                log "   2. 游戏菜单仍在阻止按键响应"
+                log "   3. xdotool 在虚拟显示环境下无法正常工作"
+                log "   建议通过 VNC 手动按 F9 键启用"
+                exit 0  # 不返回错误，避免容器重启
             else
                 log "❌ xdotool 未安装"
                 exit 1
