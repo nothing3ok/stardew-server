@@ -39,7 +39,9 @@
   <img src="aliyun-coupon.png" alt="阿里云6.5折优惠券" width="800"/>
 </a>
 
-- **[阿里云 2核2G 200M峰值带宽 38元/年](https://www.aliyun.com/minisite/goods?userCode=9l3an8ag)**
+| 配置 | 价格 | 推荐指数 | 链接 |
+|------|------|----------|------|
+| **2核2G 200M峰值带宽** | **38元/年** | ⭐⭐⭐⭐⭐ | **[立即购买](https://www.aliyun.com/minisite/goods?userCode=9l3an8ag)** |
 
 ### 其他云服务商
 
@@ -61,6 +63,7 @@ graph TB
     subgraph "网络层"
         FW[防火墙<br/>端口 24642/UDP]
         VNC[VNC访问<br/>端口 5900/TCP]
+        Metrics[监控指标<br/>端口 9090/TCP]
     end
 
     subgraph "Docker容器"
@@ -134,6 +137,9 @@ graph TB
 - **即时睡眠** - 附加功能：玩家随时可以睡觉，无需等待
 - **隐藏房主** - 房主玩家自动隐藏，零干扰
 - **技能等级保护** 🛡️ - 新功能：防止等级异常，保持自然成长
+- **崩溃自动重启** 🔄 - 游戏崩溃后自动恢复，无需人工干预
+- **Prometheus 监控** 📊 - 实时服务器健康状态监控
+- **自定义模组** 🔧 - 通过挂载目录轻松安装自定义模组
 
 <div align="center">
 
@@ -145,18 +151,18 @@ graph TB
 
 ## 最新版本更新
 
-### v1.0.58 (2025年11月9日)
+### v1.0.66 (2026年3月)
 
-**Skill Level Guard v1.4.0 - 重大修复：**
-- **✅ 已修复：** Always On Server 容器重启后自动启用功能正常工作
-- **新增：** 通过反射调用ToggleAutoMode方法实现Auto Mode自动启用
-- **验证：** 游戏在无玩家时正确暂停，ServerAutoLoad自动加载存档
-- **保持：** 技能等级防护功能继续工作，基于经验值精确计算等级
-
-**核心改进：**
-- 完全自动化的Always On Server启用流程
-- 无需手动按F9或VNC操作
-- 容器重启后游戏自动暂停，等待玩家连接
+**架构全面升级：**
+- 🔄 **崩溃自动重启** - 游戏崩溃后自动重启（限速防止循环重启）
+- 📊 **Prometheus 监控** - 通过 `http://服务器IP:9090/metrics` 监控服务器健康
+- 💾 **存档选择器** - 通过 `SAVE_NAME` 环境变量指定自动加载的存档
+- 🔧 **自定义模组** - 将模组放入 `data/custom-mods/` 目录即可自动安装
+- 🛡️ **玩家访问控制** - 通过配置文件实现白名单/黑名单管理
+- 🐳 **初始化容器** - 独立的权限修复容器，架构更清晰
+- 🔐 **Docker Secrets** - 支持安全的凭证存储，替代明文 `.env`
+- 📦 **镜像优化** - 更小的 Docker 镜像，更少的层
+- 🔒 **权限精简** - 移除不必要的 Linux 权限
 
 ## 快速开始
 
@@ -231,7 +237,7 @@ services:
       - STEAM_USERNAME=${STEAM_USERNAME}
       - STEAM_PASSWORD=${STEAM_PASSWORD}
       - ENABLE_VNC=${ENABLE_VNC:-true}
-      - VNC_PASSWORD=${VNC_PASSWORD:-stardew123}
+      - VNC_PASSWORD=${VNC_PASSWORD:-stardew1}
     ports:
       - "24642:24642/udp"
       - "5900:5900/tcp"
@@ -256,7 +262,7 @@ STEAM_PASSWORD=your_steam_password
 
 # VNC 配置（可选）
 ENABLE_VNC=true
-VNC_PASSWORD=stardew123
+VNC_PASSWORD=stardew1
 EOF
 ```
 
@@ -273,7 +279,7 @@ nano .env  # 或使用 vi、vim 等编辑器
 
 ```bash
 # 创建数据目录并设置正确权限
-mkdir -p data/{saves,game,steam}
+mkdir -p data/{saves,game,steam,logs,backups,custom-mods}
 chown -R 1000:1000 data/
 ```
 
@@ -344,11 +350,11 @@ docker attach puppy-stardew
 | **ServerAutoLoad** | v1.2.1 | 自定义模组 - 启动时自动加载存档 | 无需手动VNC加载 |
 | **✨ Skill Level Guard** | v1.4.0 | **新版** - 防止Always On Server强制升到10级并实现自动启用 | 基于经验值精确计算等级 + Auto Mode自动启用 |
 
-**v1.0.58 新功能：**
-- 🎉 **已修复**：Always On Server容器重启后自动启用
-- ✅ **新增**：Skill Level Guard v1.4.0通过反射调用ToggleAutoMode
-- ✅ **已验证**：游戏在无玩家时正确暂停
-- ✅ **已测试**：ServerAutoLoad和Always On Server协同工作正常
+**v1.0.66 新功能：**
+- 🔄 **崩溃自动重启**：游戏进程意外退出后自动恢复
+- 📊 **实时监控**：Prometheus 指标端点，支持 Grafana 仪表板
+- 🔧 **自定义模组**：通过 `data/custom-mods/` 安装任意 SMAPI 模组
+- 🔐 **安全凭证**：支持 Docker Secrets 替代明文密码
 
 所有模组都已预配置，开箱即用！
 
@@ -568,6 +574,132 @@ docker attach puppy-stardew
 </details>
 
 ## 高级配置
+
+<details>
+<summary><b>崩溃自动重启</b></summary>
+
+游戏崩溃时自动重启，限制 5 分钟内最多重启 5 次，防止无限循环。
+
+在 `.env` 中添加：
+```env
+ENABLE_CRASH_RESTART=true
+MAX_CRASH_RESTARTS=5
+```
+
+重启后生效：
+```bash
+docker compose down && docker compose up -d
+```
+</details>
+
+<details>
+<summary><b>Prometheus 监控指标</b></summary>
+
+服务器自动在端口 9090 暴露 Prometheus 格式的指标：
+
+```bash
+# 查看指标
+curl http://localhost:9090/metrics
+```
+
+**可用指标：**
+| 指标名 | 说明 |
+|--------|------|
+| `puppy_stardew_game_running` | 游戏进程是否运行 (1/0) |
+| `puppy_stardew_players_online` | 在线玩家数 |
+| `puppy_stardew_uptime_seconds` | 运行时间（秒） |
+| `puppy_stardew_memory_usage_mb` | 内存使用（MB） |
+| `puppy_stardew_cpu_usage_percent` | CPU 使用率 |
+| `puppy_stardew_events_passout_total` | 晕倒事件次数 |
+
+自定义端口：在 `.env` 中设置 `METRICS_PORT=8080`
+</details>
+
+<details>
+<summary><b>存档选择器</b></summary>
+
+指定自动加载哪个存档：
+
+```env
+SAVE_NAME=MyFarm_123456789
+```
+
+查看可用存档：
+```bash
+docker exec puppy-stardew ls /home/steam/.config/StardewValley/Saves/
+```
+</details>
+
+<details>
+<summary><b>安装自定义模组</b></summary>
+
+将模组放入 `data/custom-mods/` 目录，重启容器后自动安装。
+
+```bash
+# 支持两种格式：
+# 1. 模组目录
+cp -r MyCustomMod/ data/custom-mods/
+
+# 2. ZIP 压缩包
+cp MyMod.zip data/custom-mods/
+```
+
+重启生效：
+```bash
+docker compose restart
+```
+
+> 注意：自定义模组目录以只读方式挂载，原始文件不会被修改。
+</details>
+
+<details>
+<summary><b>玩家访问控制（白名单/黑名单）</b></summary>
+
+在存档目录创建配置文件 `data/saves/player-access.conf`：
+
+**白名单模式**（只允许列表中的玩家）：
+```
+MODE=whitelist
+Alice
+Bob
+Charlie
+```
+
+**黑名单模式**（禁止列表中的玩家）：
+```
+MODE=blacklist
+Griefer123
+BadPlayer
+```
+
+**禁用**（默认，允许所有人）：
+```
+MODE=disabled
+```
+
+重启后生效。
+</details>
+
+<details>
+<summary><b>Docker Secrets（安全凭证存储）</b></summary>
+
+替代明文 `.env` 文件，更安全地存储 Steam 凭证：
+
+```bash
+# 1. 创建密钥文件
+mkdir -p secrets
+echo "your_username" > secrets/steam_username.txt
+echo "your_password" > secrets/steam_password.txt
+chmod 600 secrets/*.txt
+
+# 2. 在 docker-compose.yml 中启用 secrets 部分
+# 详见 docker-compose.yml 底部的注释说明
+
+# 3. 从 environment 中移除 STEAM_USERNAME 和 STEAM_PASSWORD
+```
+
+容器会自动从 `/run/secrets/` 读取凭证。
+</details>
 
 <details>
 <summary><b>自定义模组设置</b></summary>
