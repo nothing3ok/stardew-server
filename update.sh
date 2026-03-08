@@ -112,6 +112,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 log_info "  ✓ Server started / 服务器已启动"
+
+# Verify init container completed
+sleep 2
+INIT_EXIT=$(docker inspect --format='{{.State.ExitCode}}' puppy-stardew-init 2>/dev/null)
+if [ "$INIT_EXIT" != "0" ] && [ -n "$INIT_EXIT" ]; then
+    log_warn "  ⚠ Init container exit code: $INIT_EXIT"
+    log_warn "  Check: docker logs puppy-stardew-init"
+fi
 echo ""
 
 # Step 7: Show new version
@@ -121,6 +129,8 @@ log_info "步骤 7: 验证更新..."
 sleep 3
 NEW_IMAGE=$(docker inspect --format='{{.Config.Image}}' "$CONTAINER" 2>/dev/null)
 log_info "  Running / 运行中: $NEW_IMAGE"
+INIT_STATUS=$(docker inspect --format='{{.State.Status}}' puppy-stardew-init 2>/dev/null)
+log_info "  Init container / 初始化容器: $INIT_STATUS"
 echo ""
 
 # Cleanup old images

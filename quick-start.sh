@@ -239,7 +239,7 @@ setup_directories() {
     print_step "Step 4: Setting up data directories..."
 
     # Create directories (including logs for log monitoring)
-    mkdir -p data/{saves,game,steam,logs}
+    mkdir -p data/{saves,game,steam,logs,backups,custom-mods}
 
     # Fix permissions (UID 1000 is the steam user in the container)
     print_info "Setting correct permissions (UID 1000)..."
@@ -277,6 +277,24 @@ start_server() {
     docker compose up -d
 
     print_success "Server started!"
+
+    # Wait for init container to complete
+    print_info "Waiting for init container to complete..."
+    for i in {1..30}; do
+        INIT_STATUS=$(docker inspect --format='{{.State.Status}}' puppy-stardew-init 2>/dev/null)
+        if [ "$INIT_STATUS" = "exited" ]; then
+            INIT_EXIT=$(docker inspect --format='{{.State.ExitCode}}' puppy-stardew-init 2>/dev/null)
+            if [ "$INIT_EXIT" = "0" ]; then
+                print_success "Init container completed successfully!"
+                break
+            else
+                print_error "Init container failed (exit code: $INIT_EXIT)!"
+                echo "Check logs: docker logs puppy-stardew-init"
+                exit 1
+            fi
+        fi
+        sleep 1
+    done
 
     echo ""
     print_info "Waiting for server to initialize (5 seconds)..."

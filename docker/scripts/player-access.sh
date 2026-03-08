@@ -79,7 +79,7 @@ get_player_list() {
     fi
 
     # Return all non-empty, non-comment, non-MODE lines
-    grep -v "^#" "$CONFIG_FILE" | grep -v "^MODE=" | grep -v "^$" | tr -d '[:space:]' | while read -r line; do
+    grep -v "^#" "$CONFIG_FILE" | grep -v "^MODE=" | grep -v "^$" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | while read -r line; do
         [ -n "$line" ] && echo "$line"
     done
 }

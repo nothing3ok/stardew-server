@@ -40,6 +40,7 @@ graph TB
     subgraph "Network Layer"
         FW[Firewall<br/>Port 24642/UDP]
         VNC[VNC Access<br/>Port 5900/TCP]
+        Metrics[Metrics<br/>Port 9090/TCP]
     end
 
     subgraph "Docker Container"
@@ -113,6 +114,9 @@ Setting up a **Stardew Valley dedicated server** has never been easier! With **o
 - **Instant Sleep** - Bonus feature: Players can sleep at any time without waiting
 - **Hidden Host** - Host player is automatically hidden for seamless gameplay
 - **Skill Protection** 🛡️ - NEW: Prevents level anomalies, maintains natural progression
+- **Crash Auto-Restart** 🔄 - Automatic recovery from game crashes
+- **Prometheus Metrics** 📊 - Real-time server health monitoring
+- **Custom Mods Support** 🔧 - Easy mod installation via volume mount
 
 <div align="center">
 
@@ -124,18 +128,18 @@ Setting up a **Stardew Valley dedicated server** has never been easier! With **o
 
 ## What's New in Latest Version
 
-### v1.0.58 (November 9, 2025)
+### v1.0.66 (March 2026)
 
-**Skill Level Guard v1.4.0 - Major Fix:**
-- **✅ FIXED:** Always On Server auto-enable works correctly after container restart
-- **NEW:** ToggleAutoMode method invocation via reflection for Auto Mode activation
-- **VERIFIED:** Game pauses correctly when no players are connected, ServerAutoLoad works seamlessly
-- **MAINTAINED:** Skill level protection continues to work, XP-based level calculation preserved
-
-**Core Improvements:**
-- Fully automated Always On Server enablement workflow
-- No manual F9 or VNC intervention required
-- Game automatically pauses after container restart, awaiting player connections
+**Major Architecture Upgrade:**
+- **🔄 Crash Auto-Restart** - Game automatically restarts if it crashes (rate-limited to prevent loops)
+- **📊 Prometheus Metrics** - Monitor server health at `http://your-server:9090/metrics`
+- **💾 Save Selector** - Choose which save to auto-load via `SAVE_NAME` env var
+- **🔧 Custom Mods** - Install your own mods via `data/custom-mods/` volume
+- **🛡️ Player Access Control** - Whitelist/blacklist players via config file
+- **🐳 Init Container** - Separate permission-fixing container for cleaner architecture
+- **🔐 Docker Secrets** - Secure credential storage alternative to `.env` file
+- **📦 Optimized Image** - Smaller Docker image with fewer layers
+- **🔒 Reduced Privileges** - Dropped unnecessary Linux capabilities
 
 ## Quick Start
 
@@ -201,7 +205,7 @@ nano .env  # or use your favorite editor
 STEAM_USERNAME=your_steam_username
 STEAM_PASSWORD=your_steam_password
 ENABLE_VNC=true
-VNC_PASSWORD=stardew123
+VNC_PASSWORD=stardew1
 ```
 
 **Important**: You MUST own Stardew Valley on Steam. Game files are downloaded via your account.
@@ -215,7 +219,7 @@ VNC_PASSWORD=stardew123
 ./init.sh
 
 # Or manual setup
-mkdir -p data/{saves,game,steam,logs}
+mkdir -p data/{saves,game,steam,logs,backups,custom-mods}
 chown -R 1000:1000 data/
 ```
 
@@ -508,6 +512,216 @@ If you still experience this after updating:
 </details>
 
 ## Advanced Configuration
+
+<details>
+<summary><b>Crash Auto-Restart</b></summary>
+
+The server automatically restarts the game if it crashes. Restarts are rate-limited to prevent infinite loops.
+
+**Configuration** (via environment variables in `.env`):
+```env
+ENABLE_CRASH_RESTART=true        # Enable/disable auto-restart (default: true)
+CRASH_RESTART_DELAY=10           # Seconds to wait before restarting (default: 10)
+CRASH_RESTART_MAX=5              # Max restarts within the cooldown window (default: 5)
+CRASH_RESTART_COOLDOWN=3600      # Cooldown window in seconds (default: 3600 = 1 hour)
+```
+
+**How it works:**
+- If the game process exits unexpectedly, the entrypoint script detects it and restarts
+- A maximum of `CRASH_RESTART_MAX` restarts are allowed within `CRASH_RESTART_COOLDOWN` seconds
+- If the limit is exceeded, the container stops to prevent restart loops
+- Check logs for restart events: `docker logs puppy-stardew | grep "restart"`
+
+</details>
+
+<details>
+<summary><b>Prometheus Metrics</b></summary>
+
+Monitor your server health with Prometheus-compatible metrics at `http://your-server:9090/metrics`.
+
+**Enable metrics** (in `.env`):
+```env
+ENABLE_METRICS=true
+METRICS_PORT=9090
+```
+
+**Expose the port** (in `docker-compose.yml`):
+```yaml
+ports:
+  - "24642:24642/udp"
+  - "5900:5900/tcp"
+  - "9090:9090/tcp"   # Prometheus metrics
+```
+
+**Available metrics:**
+- `stardew_players_online` - Number of connected players
+- `stardew_server_uptime_seconds` - Server uptime
+- `stardew_crash_restarts_total` - Total crash restarts
+- `stardew_save_last_loaded_timestamp` - Last save load time
+
+**Example Prometheus scrape config:**
+```yaml
+scrape_configs:
+  - job_name: 'stardew'
+    static_configs:
+      - targets: ['your-server:9090']
+```
+
+</details>
+
+<details>
+<summary><b>Save Selector</b></summary>
+
+Choose which save file to auto-load by setting the `SAVE_NAME` environment variable.
+
+**Configuration** (in `.env`):
+```env
+SAVE_NAME=MyFarm_123456789
+```
+
+**How it works:**
+- If `SAVE_NAME` is set, ServerAutoLoad will load that specific save
+- If not set, the most recently modified save is loaded (default behavior)
+- The save name must match the folder name in `data/saves/Saves/`
+
+**List available saves:**
+```bash
+ls data/saves/Saves/
+# Output: MyFarm_123456789  AnotherFarm_987654321
+```
+
+</details>
+
+<details>
+<summary><b>Custom Mods</b></summary>
+
+Install your own SMAPI mods by placing them in the `data/custom-mods/` directory.
+
+**Step 1:** Create the custom mods directory (if not already present):
+```bash
+mkdir -p data/custom-mods
+```
+
+**Step 2:** Download and extract your mod into the directory:
+```bash
+# Example: Install a mod from Nexus Mods
+unzip CJBCheatsMenu-1.35.0.zip -d data/custom-mods/
+```
+
+**Step 3:** Restart the server:
+```bash
+docker compose restart
+```
+
+**How it works:**
+- On startup, the container copies mods from `data/custom-mods/` into the SMAPI Mods folder
+- Mods persist across container recreations via the volume mount
+- Each mod should be in its own subfolder with a `manifest.json`
+
+**Directory structure:**
+```
+data/custom-mods/
+├── CJBCheatsMenu/
+│   ├── manifest.json
+│   └── CJBCheatsMenu.dll
+└── ChatCommands/
+    ├── manifest.json
+    └── ChatCommands.dll
+```
+
+</details>
+
+<details>
+<summary><b>Player Access Control</b></summary>
+
+Restrict who can join your server using a whitelist or blacklist.
+
+**Configuration** (in `.env`):
+```env
+PLAYER_ACCESS_MODE=whitelist      # "whitelist", "blacklist", or "open" (default: open)
+PLAYER_ACCESS_FILE=data/player-access.json
+```
+
+**Whitelist example** (`data/player-access.json`):
+```json
+{
+  "mode": "whitelist",
+  "players": [
+    { "name": "FarmerJane", "note": "My friend" },
+    { "name": "FarmerBob", "note": "Brother" }
+  ]
+}
+```
+
+**Blacklist example** (`data/player-access.json`):
+```json
+{
+  "mode": "blacklist",
+  "players": [
+    { "name": "Griefer123", "note": "Destroyed crops" }
+  ]
+}
+```
+
+**How it works:**
+- **whitelist** mode: Only listed players can join
+- **blacklist** mode: Listed players are blocked from joining
+- **open** mode: Anyone can join (default)
+- Changes take effect on server restart
+
+</details>
+
+<details>
+<summary><b>Docker Secrets</b></summary>
+
+Use Docker Secrets for secure credential storage instead of plain-text `.env` files.
+
+**Step 1:** Create secret files:
+```bash
+echo "your_steam_username" | docker secret create steam_username -
+echo "your_steam_password" | docker secret create steam_password -
+echo "your_vnc_password" | docker secret create vnc_password -
+```
+
+**Step 2:** Update `docker-compose.yml`:
+```yaml
+services:
+  stardew:
+    image: truemanlive/puppy-stardew-server:latest
+    secrets:
+      - steam_username
+      - steam_password
+      - vnc_password
+    environment:
+      - STEAM_USERNAME_FILE=/run/secrets/steam_username
+      - STEAM_PASSWORD_FILE=/run/secrets/steam_password
+      - VNC_PASSWORD_FILE=/run/secrets/vnc_password
+
+secrets:
+  steam_username:
+    external: true
+  steam_password:
+    external: true
+  vnc_password:
+    external: true
+```
+
+**How it works:**
+- Secrets are mounted as files at `/run/secrets/<name>` inside the container
+- The entrypoint script reads `*_FILE` environment variables and loads values from those files
+- Secrets are never exposed in `docker inspect` or process listings
+- **Note:** Docker Secrets require Docker Swarm mode (`docker swarm init`)
+
+**Alternative for Docker Compose (non-Swarm):**
+```yaml
+secrets:
+  steam_username:
+    file: ./secrets/steam_username.txt
+  steam_password:
+    file: ./secrets/steam_password.txt
+```
+
+</details>
 
 <details>
 <summary><b>Customize Mod Settings</b></summary>

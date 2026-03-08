@@ -192,7 +192,7 @@ setup_directories() {
     print_step "步骤 4: 设置数据目录..."
 
     # 创建目录（包括日志监控需要的 logs 目录）
-    mkdir -p data/{saves,game,steam,logs}
+    mkdir -p data/{saves,game,steam,logs,backups,custom-mods}
 
     print_info "设置正确的权限 (UID 1000)..."
     if chown -R 1000:1000 data/ 2>/dev/null; then
@@ -245,6 +245,24 @@ start_server() {
         echo -e "  ${CYAN}docker compose logs${NC}"
         exit 1
     fi
+
+    # 等待初始化容器完成
+    print_info "等待初始化容器完成..."
+    for i in {1..30}; do
+        INIT_STATUS=$(docker inspect --format='{{.State.Status}}' puppy-stardew-init 2>/dev/null)
+        if [ "$INIT_STATUS" = "exited" ]; then
+            INIT_EXIT=$(docker inspect --format='{{.State.ExitCode}}' puppy-stardew-init 2>/dev/null)
+            if [ "$INIT_EXIT" = "0" ]; then
+                print_success "初始化容器已完成！"
+                break
+            else
+                print_error "初始化容器失败（退出码：$INIT_EXIT）！"
+                echo "查看日志: docker logs puppy-stardew-init"
+                exit 1
+            fi
+        fi
+        sleep 1
+    done
 
     print_info "等待服务器初始化（5秒）..."
     sleep 5
