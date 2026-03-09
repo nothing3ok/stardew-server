@@ -71,7 +71,8 @@ function openTerminal(ws) {
     }
 
     // Start tailing the SMAPI log for output
-    const logPath = '/home/steam/stardewvalley/ErrorLogs/SMAPI-latest.txt';
+    const config = require('../server');
+    const logPath = config.SMAPI_LOG;
     const tail = spawn('tail', ['-f', '-n', '30', logPath], {
       stdio: ['ignore', 'pipe', 'pipe'],
     });

@@ -39,25 +39,62 @@ function collectStatus() {
   };
 
   // Read status.json from status-reporter.sh
+  // The JSON has nested structure: { server: { game_running, uptime_seconds }, game: { day, players_online }, resources: { memory_mb, cpu_percent } }
   try {
     if (fs.existsSync(config.STATUS_FILE)) {
       const data = JSON.parse(fs.readFileSync(config.STATUS_FILE, 'utf-8'));
-      status.gameRunning = data.server_status === 'running' || data.game_running === 1;
-      status.uptime = data.uptime_seconds || 0;
-      status.players.online = data.players_online || 0;
-      status.cpu = data.cpu_usage_percent || 0;
-      status.memory.used = data.memory_usage_mb || 0;
-      if (data.game_day) status.day = data.game_day;
-      if (data.season) status.season = data.season;
+      // Support nested structure from status-reporter.sh
+      if (data.server) {
+        status.gameRunning = data.server.game_running === true || data.server.game_running === 1;
+        status.uptime = data.server.uptime_seconds || 0;
+      }
+      if (data.game) {
+        status.players.online = data.game.players_online || 0;
+        if (data.game.day) status.day = data.game.day;
+      }
+      if (data.resources) {
+        status.cpu = parseFloat(data.resources.cpu_percent) || 0;
+        status.memory.used = data.resources.memory_mb || 0;
+      }
+      // Also support flat structure for backward compatibility
+      if (!data.server && !data.game && !data.resources) {
+        status.gameRunning = data.server_status === 'running' || data.game_running === 1;
+        status.uptime = data.uptime_seconds || 0;
+        status.players.online = data.players_online || 0;
+        status.cpu = data.cpu_usage_percent || 0;
+        status.memory.used = data.memory_usage_mb || 0;
+        if (data.game_day) status.day = data.game_day;
+        if (data.season) status.season = data.season;
+      }
     }
   } catch (e) {
     // status.json may not exist yet
   }
 
-  // Check if game process is running
+  // Check if game process is running (and collect live metrics if no status.json)
   try {
-    execSync('pgrep -f StardewModdingAPI', { stdio: 'ignore' });
+    const pidStr = execSync('pgrep -f StardewModdingAPI', { encoding: 'utf-8' }).trim().split('\n')[0];
     status.gameRunning = true;
+
+    // If we didn't get data from status.json, collect live
+    if (status.cpu === 0 && status.memory.used === 0 && pidStr) {
+      try {
+        const cpuStr = execSync('ps -p ' + pidStr + ' -o %cpu= 2>/dev/null', { encoding: 'utf-8' }).trim();
+        status.cpu = parseFloat(cpuStr) || 0;
+      } catch (e2) {}
+      try {
+        const rssStr = execSync('grep VmRSS /proc/' + pidStr + '/status 2>/dev/null | awk \'{print $2}\'', { encoding: 'utf-8' }).trim();
+        if (rssStr) status.memory.used = Math.round(parseInt(rssStr, 10) / 1024);
+      } catch (e2) {}
+    }
+
+    // If no uptime from status.json, compute from process start time
+    if (status.uptime === 0 && pidStr) {
+      try {
+        const startTime = execSync('stat -c %Y /proc/' + pidStr + ' 2>/dev/null', { encoding: 'utf-8' }).trim();
+        if (startTime) status.uptime = Math.floor(Date.now() / 1000) - parseInt(startTime, 10);
+      } catch (e2) {}
+    }
   } catch (e) {
     // Process not found
   }

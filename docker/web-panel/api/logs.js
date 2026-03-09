@@ -18,8 +18,8 @@ const LOG_FILES = {
 
 function getLogPath(filter) {
   if (filter === 'all' || filter === 'smapi') {
-    // SMAPI log is in the game directory
-    return path.join(config.GAME_DIR, 'ErrorLogs', 'SMAPI-latest.txt');
+    // SMAPI log path from central config
+    return config.SMAPI_LOG;
   }
   const filename = LOG_FILES[filter] || LOG_FILES.all;
   return path.join(config.LOG_DIR, filename);

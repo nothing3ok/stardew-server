@@ -25,8 +25,10 @@ log_info "================================================"
 log_info "Creating data directories..."
 DIRS=(
     "/home/steam/.config/StardewValley"
+    "/home/steam/.config/StardewValley/ErrorLogs"
     "/home/steam/stardewvalley"
     "/home/steam/Steam"
+    "/home/steam/.local/share/puppy-stardew"
     "/home/steam/.local/share/puppy-stardew/logs"
     "/home/steam/.local/share/puppy-stardew/backups"
 )

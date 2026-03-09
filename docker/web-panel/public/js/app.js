@@ -56,6 +56,14 @@ const translations = {
     'config.password': '修改面板密码', 'config.currentPassword': '当前密码', 'config.newPassword': '新密码',
     'config.update': '更新', 'config.saveChanges': '保存更改', 'mods.title': '已安装模组', 'mods.none': '未找到模组',
     'mods.custom': '自定义', 'mods.builtin': '内置',
+    'mods.upload': '上传模组', 'mods.delete': '删除', 'mods.confirmDelete': '确定要删除模组 {name} 吗？',
+    'mods.uploadHint': '选择 .zip 模组文件', 'mods.uploading': '上传中...',
+    'toast.modUploadOk': '模组上传成功！重启服务器后生效。', 'toast.modUploadFail': '模组上传失败',
+    'toast.modDeleteOk': '模组已删除', 'toast.modDeleteFail': '模组删除失败',
+    'config.group.Steam': 'Steam 设置', 'config.group.VNC': 'VNC 设置',
+    'config.group.Display': '显示设置', 'config.group.Performance': '性能优化',
+    'config.group.Backup': '备份设置', 'config.group.Stability': '稳定性',
+    'config.group.Monitoring': '监控', 'config.group.Game': '游戏', 'config.group.Other': '其他',
     'login.subtitle': '服务器管理面板', 'login.password': '密码', 'login.button': '登录',
     'setup.title': '设置管理密码', 'setup.subtitle': '首次使用，请设置您的管理密码',
     'setup.password': '设置密码', 'setup.confirm': '确认密码', 'setup.button': '开始使用',
@@ -89,6 +97,14 @@ const translations = {
     'config.password': 'Change Panel Password', 'config.currentPassword': 'Current password', 'config.newPassword': 'New password',
     'config.update': 'Update', 'config.saveChanges': 'Save Changes', 'mods.title': 'Installed Mods', 'mods.none': 'No mods found',
     'mods.custom': 'Custom', 'mods.builtin': 'Built-in',
+    'mods.upload': 'Upload Mod', 'mods.delete': 'Delete', 'mods.confirmDelete': 'Are you sure you want to delete mod {name}?',
+    'mods.uploadHint': 'Select a .zip mod file', 'mods.uploading': 'Uploading...',
+    'toast.modUploadOk': 'Mod uploaded! Restart server to apply.', 'toast.modUploadFail': 'Mod upload failed',
+    'toast.modDeleteOk': 'Mod deleted', 'toast.modDeleteFail': 'Mod delete failed',
+    'config.group.Steam': 'Steam', 'config.group.VNC': 'VNC',
+    'config.group.Display': 'Display', 'config.group.Performance': 'Performance',
+    'config.group.Backup': 'Backup', 'config.group.Stability': 'Stability',
+    'config.group.Monitoring': 'Monitoring', 'config.group.Game': 'Game', 'config.group.Other': 'Other',
     'login.subtitle': 'Server Management Panel', 'login.password': 'Password', 'login.button': 'Login',
     'setup.title': 'Set Admin Password', 'setup.subtitle': 'First time setup - please create your admin password',
     'setup.password': 'Password', 'setup.confirm': 'Confirm Password', 'setup.button': 'Get Started',
@@ -576,7 +592,8 @@ async function loadConfig() {
   for (const group of data.groups) {
     const card = document.createElement('div');
     card.className = 'card config-group';
-    card.innerHTML = `<div class="config-group-title">${escapeHtml(group.name)}</div>`;
+    var groupLabel = t('config.group.' + group.name) || group.name;
+    card.innerHTML = `<div class="config-group-title">${escapeHtml(groupLabel)}</div>`;
 
     for (const item of group.items) {
       const row = document.createElement('div');
@@ -651,21 +668,89 @@ async function loadMods() {
   if (!data) return;
 
   const list = document.getElementById('modsList');
+
+  // Upload section
+  var uploadHtml = `
+    <div class="card" style="margin-bottom:16px;padding:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <input type="file" id="modFileInput" accept=".zip" style="display:none" onchange="handleModUpload(this)">
+      <button class="btn btn-primary" onclick="document.getElementById('modFileInput').click()">
+        ${icon('mods', 'icon')} ${t('mods.upload')}
+      </button>
+      <span style="color:var(--text-muted);font-size:13px">${t('mods.uploadHint')}</span>
+      <span id="modUploadStatus" style="color:var(--text-muted);font-size:13px"></span>
+    </div>
+  `;
+
   if (!data.mods || data.mods.length === 0) {
-    list.innerHTML = `<div class="empty-state">${t('mods.none')}</div>`;
+    list.innerHTML = uploadHtml + '<div class="empty-state">' + t('mods.none') + '</div>';
     return;
   }
 
-  list.innerHTML = data.mods.map(m => `
-    <div class="mod-item">
-      <div class="mod-info">
-        <div class="mod-name">${escapeHtml(m.name)}</div>
-        <div class="mod-meta">v${escapeHtml(m.version)} · ${escapeHtml(m.author || '')} · ${escapeHtml(m.id)}</div>
-        ${m.description ? `<div class="mod-meta">${escapeHtml(m.description)}</div>` : ''}
-      </div>
-      <span class="mod-badge ${m.isCustom ? 'custom' : ''}">${m.isCustom ? t('mods.custom') : t('mods.builtin')}</span>
-    </div>
-  `).join('');
+  list.innerHTML = uploadHtml + data.mods.map(function(m) {
+    var deleteBtn = m.isCustom
+      ? '<button class="btn btn-sm" style="color:#ef4444;border-color:#ef4444" onclick="deleteMod(\'' + escapeHtml(m.folder) + '\', \'' + escapeHtml(m.name) + '\')">' + icon('trash', 'icon') + ' ' + t('mods.delete') + '</button>'
+      : '';
+    return '<div class="mod-item">' +
+      '<div class="mod-info">' +
+        '<div class="mod-name">' + escapeHtml(m.name) + '</div>' +
+        '<div class="mod-meta">v' + escapeHtml(m.version) + ' · ' + escapeHtml(m.author || '') + ' · ' + escapeHtml(m.id) + '</div>' +
+        (m.description ? '<div class="mod-meta">' + escapeHtml(m.description) + '</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span class="mod-badge ' + (m.isCustom ? 'custom' : '') + '">' + (m.isCustom ? t('mods.custom') : t('mods.builtin')) + '</span>' +
+        deleteBtn +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function handleModUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+
+  if (!file.name.endsWith('.zip')) {
+    showToast('Only .zip files are supported', 'error');
+    return;
+  }
+
+  if (file.size > 50 * 1024 * 1024) {
+    showToast('File too large (max 50MB)', 'error');
+    return;
+  }
+
+  document.getElementById('modUploadStatus').textContent = t('mods.uploading');
+
+  var reader = new FileReader();
+  reader.onload = async function() {
+    var base64 = reader.result.split(',')[1];
+    var data = await API.post('/api/mods/upload', {
+      filename: file.name,
+      data: base64,
+    });
+
+    document.getElementById('modUploadStatus').textContent = '';
+    input.value = '';
+
+    if (data && data.success) {
+      showToast(t('toast.modUploadOk'), 'success');
+      loadMods();
+    } else {
+      showToast((data && data.error) || t('toast.modUploadFail'), 'error');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function deleteMod(folder, name) {
+  if (!confirm(tf('mods.confirmDelete', { name: name }))) return;
+
+  var data = await API.del('/api/mods/' + encodeURIComponent(folder));
+  if (data && data.success) {
+    showToast(t('toast.modDeleteOk'), 'success');
+    loadMods();
+  } else {
+    showToast((data && data.error) || t('toast.modDeleteFail'), 'error');
+  }
 }
 
 // ─── Actions ─────────────────────────────────────────────────────

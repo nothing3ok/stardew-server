@@ -19,6 +19,7 @@ const LOG_DIR = process.env.LOG_DIR || '/home/steam/.local/share/puppy-stardew/l
 const SAVES_DIR = process.env.SAVES_DIR || '/home/steam/.config/StardewValley/Saves';
 const BACKUPS_DIR = process.env.BACKUPS_DIR || '/home/steam/.local/share/puppy-stardew/backups';
 const GAME_DIR = process.env.GAME_DIR || '/home/steam/stardewvalley';
+const SMAPI_LOG = process.env.SMAPI_LOG || '/home/steam/.config/StardewValley/ErrorLogs/SMAPI-latest.txt';
 const ENV_FILE = process.env.ENV_FILE || '/home/steam/.env';
 
 // Export paths for use by API modules
@@ -30,6 +31,7 @@ const config = {
   SAVES_DIR,
   BACKUPS_DIR,
   GAME_DIR,
+  SMAPI_LOG,
   ENV_FILE,
 };
 module.exports = config;
@@ -39,8 +41,8 @@ const app = express();
 const server = http.createServer(app);
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '60mb' }));
+app.use(express.urlencoded({ extended: false, limit: '60mb' }));
 
 // ─── Auth Routes (no JWT required) ───────────────────────────────
 app.get('/api/auth/status', auth.getStatus);
@@ -80,6 +82,8 @@ app.post('/api/server/restart', auth.verifyMiddleware, statusAPI.restartServer);
 // Mods API
 const modsAPI = require('./api/mods');
 app.get('/api/mods', auth.verifyMiddleware, modsAPI.getMods);
+app.post('/api/mods/upload', auth.verifyMiddleware, modsAPI.uploadMod);
+app.delete('/api/mods/:folder', auth.verifyMiddleware, modsAPI.deleteMod);
 
 // ─── Static Files ────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));

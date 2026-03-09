@@ -19,7 +19,7 @@ function parsePlayersFromLogs() {
   if (now - lastLogParse < 10000) return connectedPlayers; // Cache 10s
 
   try {
-    const logPath = `${config.GAME_DIR}/ErrorLogs/SMAPI-latest.txt`;
+    const logPath = config.SMAPI_LOG;
     if (!fs.existsSync(logPath)) return connectedPlayers;
 
     const content = fs.readFileSync(logPath, 'utf-8');
@@ -59,6 +59,10 @@ function getOnlineCount() {
   try {
     if (fs.existsSync(config.STATUS_FILE)) {
       const data = JSON.parse(fs.readFileSync(config.STATUS_FILE, 'utf-8'));
+      // Support nested structure
+      if (data.game && data.game.players_online !== undefined) {
+        return data.game.players_online || 0;
+      }
       return data.players_online || 0;
     }
   } catch (e) {}

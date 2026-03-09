@@ -56,6 +56,14 @@ const API = {
     return resp.json();
   },
 
+  async del(url) {
+    const resp = await this.fetch(url, {
+      method: 'DELETE',
+    });
+    if (!resp) return null;
+    return resp.json();
+  },
+
   getWsUrl() {
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${location.host}/ws?token=${this.token}`;

@@ -8,34 +8,41 @@ const config = require('../server');
 
 // Config field definitions with metadata
 const CONFIG_SCHEMA = {
-  'Steam 设置': [
+  'Steam': [
     { key: 'STEAM_USERNAME', label: 'Steam Username', type: 'text', sensitive: false, readonly: true },
     { key: 'STEAM_PASSWORD', label: 'Steam Password', type: 'password', sensitive: true, readonly: true },
   ],
-  'VNC 设置': [
+  'VNC': [
     { key: 'ENABLE_VNC', label: 'Enable VNC', type: 'boolean', default: 'true' },
     { key: 'VNC_PASSWORD', label: 'VNC Password', type: 'password', sensitive: true, default: 'stardew1', maxLength: 8 },
   ],
-  '显示设置': [
+  'Display': [
     { key: 'RESOLUTION_WIDTH', label: 'Resolution Width', type: 'number', default: '1280' },
     { key: 'RESOLUTION_HEIGHT', label: 'Resolution Height', type: 'number', default: '720' },
     { key: 'REFRESH_RATE', label: 'Refresh Rate', type: 'number', default: '60' },
     { key: 'USE_GPU', label: 'Use GPU', type: 'boolean', default: 'false' },
   ],
-  '备份设置': [
+  'Performance': [
+    { key: 'LOW_PERF_MODE', label: 'Low Performance Mode', type: 'boolean', default: 'false' },
+    { key: 'TARGET_FPS', label: 'Target FPS', type: 'number', default: '' },
+  ],
+  'Backup': [
     { key: 'ENABLE_AUTO_BACKUP', label: 'Auto Backup', type: 'boolean', default: 'false' },
     { key: 'MAX_BACKUPS', label: 'Max Backups', type: 'number', default: '7' },
     { key: 'BACKUP_HOUR', label: 'Backup Hour (0-23)', type: 'number', default: '4', min: 0, max: 23 },
   ],
-  '稳定性': [
+  'Stability': [
     { key: 'ENABLE_CRASH_RESTART', label: 'Auto Crash Restart', type: 'boolean', default: 'false' },
     { key: 'MAX_CRASH_RESTARTS', label: 'Max Restarts', type: 'number', default: '5' },
   ],
-  '监控': [
+  'Monitoring': [
     { key: 'ENABLE_LOG_MONITOR', label: 'Log Monitor', type: 'boolean', default: 'true' },
     { key: 'METRICS_PORT', label: 'Metrics Port', type: 'number', default: '9090' },
   ],
-  '其他': [
+  'Game': [
+    { key: 'SAVE_NAME', label: 'Save Name', type: 'text', default: '' },
+  ],
+  'Other': [
     { key: 'TZ', label: 'Timezone', type: 'text', default: 'UTC' },
   ],
 };
@@ -118,7 +125,8 @@ function getConfig(req, res) {
 
   for (const [groupName, fields] of Object.entries(CONFIG_SCHEMA)) {
     const items = fields.map(field => {
-      let value = env[field.key] || field.default || '';
+      // Try .env file first, then process.env, then default
+      let value = env[field.key] || process.env[field.key] || field.default || '';
 
       // Mask sensitive fields
       if (field.sensitive && value) {
@@ -128,7 +136,7 @@ function getConfig(req, res) {
       return {
         ...field,
         value: field.sensitive ? undefined : value,
-        hasValue: !!env[field.key],
+        hasValue: !!(env[field.key] || process.env[field.key]),
       };
     });
 
