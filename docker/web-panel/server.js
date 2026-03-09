@@ -11,7 +11,6 @@ const auth = require('./auth');
 
 // ─── Configuration ───────────────────────────────────────────────
 const PORT = parseInt(process.env.PANEL_PORT || '18642', 10);
-const PANEL_PASSWORD = process.env.PANEL_PASSWORD || 'admin123';
 
 // Paths (inside container)
 const DATA_DIR = process.env.PANEL_DATA_DIR || path.join(__dirname, 'data');
@@ -25,7 +24,6 @@ const ENV_FILE = process.env.ENV_FILE || '/home/steam/.env';
 // Export paths for use by API modules
 const config = {
   PORT,
-  PANEL_PASSWORD,
   DATA_DIR,
   STATUS_FILE,
   LOG_DIR,
@@ -44,7 +42,9 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ─── Auth Routes (no JWT required) ─────────────────────────────��
+// ─── Auth Routes (no JWT required) ───────────────────────────────
+app.get('/api/auth/status', auth.getStatus);
+app.post('/api/auth/setup', auth.setup);
 app.post('/api/auth/login', auth.login);
 app.get('/api/auth/verify', auth.verifyMiddleware, auth.verify);
 app.post('/api/auth/password', auth.verifyMiddleware, auth.changePassword);
@@ -171,12 +171,11 @@ function handleWebSocketMessage(ws, msg) {
 
 // ─── Initialize & Start ──────────────────────────────────────────
 async function start() {
-  // Initialize auth (generate password hash on first run)
-  await auth.initialize(DATA_DIR, PANEL_PASSWORD);
+  // Initialize auth and detect whether first-run setup is required.
+  await auth.initialize(DATA_DIR);
 
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`[Web Panel] ✅ Management panel running on http://0.0.0.0:${PORT}`);
-    console.log(`[Web Panel] Default password: ${PANEL_PASSWORD} (change it after first login!)`);
   });
 }
 

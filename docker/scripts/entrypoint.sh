@@ -13,10 +13,24 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Resolution environment variables with defaults
-RESOLUTION_WIDTH=${RESOLUTION_WIDTH:-1280}
-RESOLUTION_HEIGHT=${RESOLUTION_HEIGHT:-720}
-REFRESH_RATE=${REFRESH_RATE:-60}
+# Resolution and performance environment variables with defaults
+DEFAULT_RESOLUTION_WIDTH=1280
+DEFAULT_RESOLUTION_HEIGHT=720
+DEFAULT_REFRESH_RATE=60
+LOW_PERF_DEFAULT_WIDTH=800
+LOW_PERF_DEFAULT_HEIGHT=600
+LOW_PERF_DEFAULT_FPS=30
+LOW_PERF_DEFAULT_COLOR_DEPTH=16
+
+LOW_PERF_MODE=${LOW_PERF_MODE:-false}
+TARGET_FPS_RAW=${TARGET_FPS:-}
+RESOLUTION_WIDTH=${RESOLUTION_WIDTH:-$DEFAULT_RESOLUTION_WIDTH}
+RESOLUTION_HEIGHT=${RESOLUTION_HEIGHT:-$DEFAULT_RESOLUTION_HEIGHT}
+REFRESH_RATE=${REFRESH_RATE:-${TARGET_FPS_RAW:-$DEFAULT_REFRESH_RATE}}
+TARGET_FPS=${TARGET_FPS_RAW:-$REFRESH_RATE}
+XVFB_COLOR_DEPTH=24
+XVFB_FB_DIR=""
+XVFB_FB_ARGS=()
 
 # Logging functions
 log_info() {
@@ -37,6 +51,72 @@ log_step() {
 
 log_steam() {
     echo -e "${CYAN}$1${NC}"
+}
+
+configure_performance_mode() {
+    if [ "$LOW_PERF_MODE" != "true" ]; then
+        return 0
+    fi
+
+    RESOLUTION_WIDTH=${LOW_PERF_RESOLUTION_WIDTH:-$LOW_PERF_DEFAULT_WIDTH}
+    RESOLUTION_HEIGHT=${LOW_PERF_RESOLUTION_HEIGHT:-$LOW_PERF_DEFAULT_HEIGHT}
+
+    if [ -z "$TARGET_FPS_RAW" ]; then
+        TARGET_FPS=$LOW_PERF_DEFAULT_FPS
+    fi
+    REFRESH_RATE=${LOW_PERF_REFRESH_RATE:-$TARGET_FPS}
+    XVFB_COLOR_DEPTH=${LOW_PERF_COLOR_DEPTH:-$LOW_PERF_DEFAULT_COLOR_DEPTH}
+
+    export SDL_VIDEODRIVER=${SDL_VIDEODRIVER:-x11}
+    export SDL_AUDIODRIVER=${SDL_AUDIODRIVER:-dummy}
+    export MONO_GC_PARAMS=${MONO_GC_PARAMS:-nursery-size=8m}
+    export DOTNET_GCHeapHardLimit=${DOTNET_GCHeapHardLimit:-0x30000000}
+
+    if [ "${USE_GPU:-false}" != "true" ]; then
+        export LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE:-1}
+    fi
+
+    XVFB_FB_DIR=${XVFB_FB_DIR:-/dev/shm/xvfb}
+    if mkdir -p "$XVFB_FB_DIR" 2>/dev/null; then
+        XVFB_FB_ARGS=(-fbdir "$XVFB_FB_DIR")
+    else
+        XVFB_FB_DIR=""
+        XVFB_FB_ARGS=()
+    fi
+
+    log_info "Low performance mode enabled"
+    log_info "低性能模式已启用"
+    log_info "  Render target: ${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT} @ ${REFRESH_RATE}fps"
+    log_info "  Xvfb color depth: ${XVFB_COLOR_DEPTH}bit"
+    log_info "  SDL_VIDEODRIVER=${SDL_VIDEODRIVER}"
+    log_info "  SDL_AUDIODRIVER=${SDL_AUDIODRIVER}"
+    log_info "  MONO_GC_PARAMS=${MONO_GC_PARAMS}"
+    log_info "  DOTNET_GCHeapHardLimit=${DOTNET_GCHeapHardLimit}"
+    if [ -n "${LIBGL_ALWAYS_SOFTWARE:-}" ]; then
+        log_info "  LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE}"
+    fi
+    if [ -n "$XVFB_FB_DIR" ]; then
+        log_info "  Xvfb framebuffer directory: $XVFB_FB_DIR"
+    fi
+}
+
+apply_startup_preferences_tuning() {
+    local config_file=$1
+
+    [ -f "$config_file" ] || return 0
+
+    if [ "$LOW_PERF_MODE" != "true" ]; then
+        return 0
+    fi
+
+    perl -0pi -e "s#<fullscreenResolutionX>.*?</fullscreenResolutionX>#<fullscreenResolutionX>${RESOLUTION_WIDTH}</fullscreenResolutionX>#s;
+        s#<fullscreenResolutionY>.*?</fullscreenResolutionY>#<fullscreenResolutionY>${RESOLUTION_HEIGHT}</fullscreenResolutionY>#s;
+        s#<preferredResolutionX>.*?</preferredResolutionX>#<preferredResolutionX>${RESOLUTION_WIDTH}</preferredResolutionX>#s;
+        s#<preferredResolutionY>.*?</preferredResolutionY>#<preferredResolutionY>${RESOLUTION_HEIGHT}</preferredResolutionY>#s;
+        s#<vsyncEnabled>.*?</vsyncEnabled>#<vsyncEnabled>true</vsyncEnabled>#s;
+        s#<startMuted>.*?</startMuted>#<startMuted>true</startMuted>#s;
+        s#<musicVolumeLevel>.*?</musicVolumeLevel>#<musicVolumeLevel>0</musicVolumeLevel>#s;
+        s#<soundVolumeLevel>.*?</soundVolumeLevel>#<soundVolumeLevel>0</soundVolumeLevel>#s;" "$config_file"
 }
 
 # Function to download game via steamcmd
@@ -173,6 +253,8 @@ start_gpu_xorg() {
 # 权限修复由初始化容器 (init-container.sh) 处理。
 # 此阶段仅处理 GPU Xorg 启动（需要 root）和用户切换。
 # =============================================
+
+configure_performance_mode
 
 if [ "$(id -u)" = "0" ]; then
     log_step "================================================"
@@ -364,11 +446,11 @@ if [ "$START_XVFB_FALLBACK" = "true" ]; then
     log_info "Starting Xvfb (software rendering fallback)..."
     log_info "启动 Xvfb（软件渲染后备）..."
     rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
-    Xvfb :99 -screen 0 ${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x24 -ac +extension GLX +render -noreset &
+    Xvfb :99 -screen 0 "${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x${XVFB_COLOR_DEPTH}" -ac +extension GLX +render -noreset "${XVFB_FB_ARGS[@]}" &
     export DISPLAY=${DISPLAY:-:99}
     sleep 3
-    log_info "✓ Virtual display started on ${DISPLAY} (${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT})"
-    log_info "✓ 虚拟显示已启动 ${DISPLAY} (${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT})"
+    log_info "✓ Virtual display started on ${DISPLAY} (${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x${XVFB_COLOR_DEPTH})"
+    log_info "✓ 虚拟显示已启动 ${DISPLAY} (${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x${XVFB_COLOR_DEPTH})"
 fi
 
 # Step 6: Start VNC server (optional)
@@ -435,6 +517,12 @@ if [ ! -f "$CONFIG_FILE" ]; then
     fi
 else
     log_info "✓ Game config already exists, keeping user settings"
+fi
+
+apply_startup_preferences_tuning "$CONFIG_FILE"
+if [ "$LOW_PERF_MODE" = "true" ]; then
+    log_info "✓ Applied low performance startup preferences"
+    log_info "✓ 已应用低性能启动偏好设置"
 fi
 
 # Step 7.5: Select save if specified

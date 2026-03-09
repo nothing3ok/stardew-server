@@ -73,6 +73,11 @@ services:
       - RESOLUTION_HEIGHT=${RESOLUTION_HEIGHT:-720}
       - REFRESH_RATE=${REFRESH_RATE:-60}
 
+      # Performance optimization - OPTIONAL (default: disabled)
+      # 性能优化 - 可选（默认：禁用）
+      - LOW_PERF_MODE=${LOW_PERF_MODE:-false}
+      - TARGET_FPS=${TARGET_FPS:-}
+
       # Auto-backup - OPTIONAL (default: disabled)
       # 自动备份 - 可选（默认：禁用）
       - ENABLE_AUTO_BACKUP=${ENABLE_AUTO_BACKUP:-false}
@@ -87,10 +92,6 @@ services:
       # Save selection - OPTIONAL (default: auto-detect)
       # 存档选择 - 可选（默认：自动检测）
       - SAVE_NAME=${SAVE_NAME:-}
-
-      # Web panel password - OPTIONAL (default: admin123)
-      # Web 面板密码 - 可选（默认：admin123）
-      - PANEL_PASSWORD=${PANEL_PASSWORD:-admin123}
 
     # Port mappings
     # 端口映射

@@ -18,8 +18,39 @@ const loginAttempts = new Map(); // ip -> { count, lastAttempt }
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
 
+function normalizeConfig(config) {
+  if (!config || typeof config !== 'object') {
+    return { config: null, changed: false };
+  }
+
+  let changed = false;
+  const normalized = { ...config };
+
+  if (!normalized.jwtSecret) {
+    normalized.jwtSecret = crypto.randomBytes(32).toString('hex');
+    changed = true;
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(normalized, 'passwordHash')) {
+    normalized.passwordHash = null;
+    changed = true;
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(normalized, 'needsSetup')) {
+    normalized.needsSetup = !normalized.passwordHash;
+    changed = true;
+  }
+
+  if (normalized.needsSetup && normalized.passwordHash) {
+    normalized.needsSetup = false;
+    changed = true;
+  }
+
+  return { config: normalized, changed };
+}
+
 // ─── Initialize ──────────────────────────────────────────────────
-async function initialize(dataDir, defaultPassword) {
+async function initialize(dataDir) {
   configPath = path.join(dataDir, 'panel.json');
 
   // Ensure data directory exists
@@ -30,7 +61,12 @@ async function initialize(dataDir, defaultPassword) {
   // Load or create config
   if (fs.existsSync(configPath)) {
     try {
-      panelConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const { config: normalized, changed } = normalizeConfig(parsed);
+      panelConfig = normalized;
+      if (changed && panelConfig) {
+        saveConfig();
+      }
       console.log('[Auth] Loaded existing panel configuration');
     } catch (e) {
       console.error('[Auth] Failed to parse panel.json, recreating...');
@@ -39,11 +75,11 @@ async function initialize(dataDir, defaultPassword) {
   }
 
   if (!panelConfig) {
-    // First run - create config with hashed default password
-    const hash = await bcrypt.hash(defaultPassword, 12);
+    // First run - require explicit setup instead of bootstrapping a default password
     panelConfig = {
-      passwordHash: hash,
+      passwordHash: null,
       jwtSecret: crypto.randomBytes(32).toString('hex'),
+      needsSetup: true,
       createdAt: new Date().toISOString(),
     };
     saveConfig();
@@ -52,6 +88,7 @@ async function initialize(dataDir, defaultPassword) {
 }
 
 function saveConfig() {
+  if (!panelConfig) return;
   fs.writeFileSync(configPath, JSON.stringify(panelConfig, null, 2), 'utf-8');
 }
 
@@ -93,6 +130,9 @@ function signToken() {
 }
 
 function verifyToken(token) {
+  if (!panelConfig || !panelConfig.jwtSecret) {
+    return false;
+  }
   try {
     jwt.verify(token, panelConfig.jwtSecret);
     return true;
@@ -104,11 +144,71 @@ function verifyToken(token) {
 // ─── Route Handlers ──────────────────────────────────────────────
 
 /**
+ * GET /api/auth/status
+ * Public setup status
+ */
+function getStatus(req, res) {
+  res.json({ needsSetup: !!panelConfig?.needsSetup });
+}
+
+/**
+ * POST /api/auth/setup
+ * Body: { password, confirmPassword }
+ */
+async function setup(req, res) {
+  if (!panelConfig?.needsSetup) {
+    return res.status(403).json({ error: 'Setup already completed' });
+  }
+
+  // Rate limit setup attempts (same rules as login)
+  const ip = req.ip || req.connection.remoteAddress;
+  if (!checkRateLimit(ip)) {
+    const attempt = loginAttempts.get(ip);
+    const remainingMs = LOCKOUT_MINUTES * 60 * 1000 - (Date.now() - attempt.lastAttempt);
+    const remainingMin = Math.ceil(remainingMs / 60000);
+    return res.status(429).json({
+      error: `Too many attempts. Try again in ${remainingMin} minutes.`,
+      locked: true,
+      retryAfter: remainingMin,
+    });
+  }
+
+  const { password, confirmPassword } = req.body || {};
+
+  if (!password || !confirmPassword) {
+    return res.status(400).json({ error: 'Password and confirmation are required' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({ error: 'Passwords do not match' });
+  }
+
+  panelConfig.passwordHash = await bcrypt.hash(password, 12);
+  panelConfig.needsSetup = false;
+  panelConfig.setupCompletedAt = new Date().toISOString();
+  saveConfig();
+
+  res.json({
+    success: true,
+    token: signToken(),
+    expiresIn: '24h',
+  });
+}
+
+/**
  * POST /api/auth/login
  * Body: { password }
  */
 async function login(req, res) {
   const ip = req.ip || req.connection.remoteAddress;
+
+  if (panelConfig?.needsSetup) {
+    return res.status(403).json({ error: 'Setup required', needsSetup: true });
+  }
 
   // Check rate limit
   if (!checkRateLimit(ip)) {
@@ -125,6 +225,10 @@ async function login(req, res) {
   const { password } = req.body;
   if (!password) {
     return res.status(400).json({ error: 'Password is required' });
+  }
+
+  if (!panelConfig.passwordHash) {
+    return res.status(500).json({ error: 'Server configuration error: no password set' });
   }
 
   const valid = await bcrypt.compare(password, panelConfig.passwordHash);
@@ -161,14 +265,22 @@ function verify(req, res) {
  * Body: { oldPassword, newPassword }
  */
 async function changePassword(req, res) {
+  if (panelConfig?.needsSetup) {
+    return res.status(403).json({ error: 'Setup required', needsSetup: true });
+  }
+
   const { oldPassword, newPassword } = req.body;
 
   if (!oldPassword || !newPassword) {
     return res.status(400).json({ error: 'Old and new passwords are required' });
   }
 
-  if (newPassword.length < 4) {
-    return res.status(400).json({ error: 'New password must be at least 4 characters' });
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters' });
+  }
+
+  if (!panelConfig.passwordHash) {
+    return res.status(500).json({ error: 'Server configuration error: no password set' });
   }
 
   const valid = await bcrypt.compare(oldPassword, panelConfig.passwordHash);
@@ -195,6 +307,10 @@ async function changePassword(req, res) {
  * Express middleware to verify JWT
  */
 function verifyMiddleware(req, res, next) {
+  if (!panelConfig || !panelConfig.jwtSecret) {
+    return res.status(401).json({ error: 'Server not initialized' });
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'No token provided' });
@@ -211,6 +327,8 @@ function verifyMiddleware(req, res, next) {
 
 module.exports = {
   initialize,
+  getStatus,
+  setup,
   login,
   verify,
   changePassword,

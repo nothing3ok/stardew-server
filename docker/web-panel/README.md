@@ -18,22 +18,15 @@ Lightweight web management panel for Puppy Stardew Server.
 
 Default URL: `http://localhost:18642`
 
-Default credentials:
-- Username: `admin`
-- Password: `admin123`
-
-**⚠️ Change the default password immediately after first login!**
+On first visit, the panel will ask you to create the admin password in the browser.
 
 ## Environment Variables
 
 Set in `.env` file or docker-compose:
 
 ```bash
-# Web panel admin password (default: admin123)
-WEB_PANEL_PASSWORD=your_secure_password
-
-# JWT secret (auto-generated if not set)
-WEB_PANEL_JWT_SECRET=your_jwt_secret
+# The panel stores its password hash and JWT secret in panel.json on first setup.
+# 首次设置后，面板会将密码哈希和 JWT secret 写入 panel.json。
 ```
 
 ## API Endpoints

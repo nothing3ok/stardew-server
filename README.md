@@ -256,7 +256,7 @@ After the server starts, you have **two options** to manage your server:
 
 Access the web panel at `http://your-server-ip:18642`
 
-- **Default credentials**: `admin` / `admin123` (⚠️ change immediately!)
+- **First visit**: you'll be prompted to create the admin password in the browser
 - **Features**:
   - Real-time server status dashboard
   - Live log streaming with filters

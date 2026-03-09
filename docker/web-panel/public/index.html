@@ -7,113 +7,264 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <!-- Auth check: redirect to login if no token -->
-  <div id="app" style="display:none;">
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="icon-dog" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6.5 8.5 4.5 4.5 8 6.5" />
+        <path d="M17.5 8.5 19.5 4.5 16 6.5" />
+        <path d="M6 14.5c0-3.8 2.9-6.5 6-6.5s6 2.7 6 6.5c0 3.2-2.6 5.5-6 5.5s-6-2.3-6-5.5Z" />
+        <path d="M9.5 13.5h.01" />
+        <path d="M14.5 13.5h.01" />
+        <path d="M10 17c1 .7 3 .7 4 0" />
+        <path d="M12 14.6 10.8 15.7 12 16.3l1.2-.6Z" />
+      </g>
+    </symbol>
+    <symbol id="icon-dashboard" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 19V11" />
+        <path d="M12 19V6" />
+        <path d="M19 19V9" />
+        <path d="M3.5 19.5h17" />
+      </g>
+    </symbol>
+    <symbol id="icon-logs" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 4.5h8l2 2v12.5H6V6.5Z" />
+        <path d="M10 4.5v3h4v-3" />
+        <path d="M9 11h6" />
+        <path d="M9 15h6" />
+      </g>
+    </symbol>
+    <symbol id="icon-terminal" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4.5 6.5h15v11h-15Z" />
+        <path d="m8 10 2.5 2-2.5 2" />
+        <path d="M12.5 15.5h3.5" />
+      </g>
+    </symbol>
+    <symbol id="icon-players" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11a2.7 2.7 0 1 0 0-5.4A2.7 2.7 0 0 0 9 11Z" />
+        <path d="M16.5 10a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z" />
+        <path d="M4.8 18.5c.6-2.6 2.5-4 4.7-4s4.2 1.4 4.7 4" />
+        <path d="M13.8 18.5c.5-1.9 1.9-3 3.8-3 1.3 0 2.4.5 3.1 1.6" />
+      </g>
+    </symbol>
+    <symbol id="icon-player" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+        <path d="M6.5 19c.8-2.7 2.9-4 5.5-4s4.7 1.3 5.5 4" />
+        <path d="M8.5 6.2 12 4.5l3.5 1.7" />
+      </g>
+    </symbol>
+    <symbol id="icon-saves" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 5.5h10l2 2V19H6Z" />
+        <path d="M9 5.5v4h5v-4" />
+        <path d="M9 19v-5h6v5" />
+      </g>
+    </symbol>
+    <symbol id="icon-config" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z" />
+        <path d="m4.8 13.4-.7-1.4 1.4-2.4 1.8.2c.4-.3.8-.5 1.3-.7l.7-1.7h2.8l.7 1.7c.5.1.9.3 1.3.7l1.8-.2 1.4 2.4-.7 1.4.7 1.4-1.4 2.4-1.8-.2c-.4.3-.8.5-1.3.7l-.7 1.7H9.3l-.7-1.7c-.5-.1-.9-.3-1.3-.7l-1.8.2-1.4-2.4Z" />
+      </g>
+    </symbol>
+    <symbol id="icon-mods" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 5.5c0-1 1-1.8 2.2-1.8S13.5 4.5 13.5 5.5c0 .7-.3 1.2-.8 1.6h2.1c1.8 0 3.2 1.4 3.2 3.2v1.6h-2.4c-1 0-1.8.8-1.8 1.8s.8 1.8 1.8 1.8H18V18c0 1.8-1.4 3.2-3.2 3.2h-2.1c.5-.4.8-.9.8-1.6 0-1-.9-1.8-2.3-1.8S9 18.6 9 19.6c0 .7.3 1.2.8 1.6H7.7A3.2 3.2 0 0 1 4.5 18v-2.5H7c1 0 1.8-.8 1.8-1.8S8 11.9 7 11.9H4.5v-1.6c0-1.8 1.4-3.2 3.2-3.2h2.1c-.5-.4-.8-.9-.8-1.6Z" />
+      </g>
+    </symbol>
+    <symbol id="icon-globe" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M3.8 12h16.4" />
+        <path d="M12 3.5c2 2 3.1 5 3.1 8.5S14 18.5 12 20.5c-2-2-3.1-5-3.1-8.5S10 5.5 12 3.5Z" />
+      </g>
+    </symbol>
+    <symbol id="icon-logout" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 5.5H5.5v13H9" />
+        <path d="M13 8.5 18 12l-5 3.5" />
+        <path d="M18 12H8" />
+      </g>
+    </symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4.5 7h15" />
+        <path d="M4.5 12h15" />
+        <path d="M4.5 17h15" />
+      </g>
+    </symbol>
+    <symbol id="icon-loader" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 4.5a7.5 7.5 0 1 0 7 4.8" />
+        <path d="M18 4.5h1.5V8" />
+      </g>
+    </symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 7.5v5l3 1.8" />
+      </g>
+    </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5.5 7.5h13v11h-13Z" />
+        <path d="M8 4.5v3" />
+        <path d="M16 4.5v3" />
+        <path d="M5.5 10.5h13" />
+        <path d="M9 14h2" />
+      </g>
+    </symbol>
+    <symbol id="icon-refresh" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18.5 9.5a7 7 0 0 0-11.7-2" />
+        <path d="M6.8 3.8v4.3h4.4" />
+        <path d="M5.5 14.5a7 7 0 0 0 11.8 2" />
+        <path d="M17.2 20.2v-4.3h-4.4" />
+      </g>
+    </symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5.5v9" />
+        <path d="m8.5 11.5 3.5 3.5 3.5-3.5" />
+        <path d="M5 18.5h14" />
+      </g>
+    </symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6.5 7.5h11" />
+        <path d="M9.5 7.5V5.3h5V7.5" />
+        <path d="M8 7.5 9 18.5h6l1-11" />
+      </g>
+    </symbol>
+    <symbol id="icon-sprout" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19.5v-7" />
+        <path d="M12 12.5c0-3.2 2.2-5.6 5.5-6-0.2 3.6-2.3 5.9-5.5 6Z" />
+        <path d="M12 14c0-2.6-1.8-4.5-4.8-4.9.2 2.9 2 4.7 4.8 4.9Z" />
+      </g>
+    </symbol>
+    <symbol id="icon-package" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 4.5 7 3.5v8L12 19.5 5 16V8Z" />
+        <path d="M12 4.5 5 8l7 3.5L19 8" />
+        <path d="M12 11.5v8" />
+      </g>
+    </symbol>
+  </svg>
 
-    <!-- Sidebar -->
+  <div id="app" style="display:none;">
     <nav id="sidebar">
       <div class="sidebar-header">
-        <span class="logo-emoji">🐶</span>
+        <span class="logo-mark"><svg class="icon"><use href="#icon-dog"></use></svg></span>
         <span class="logo-text">Puppy Stardew</span>
       </div>
       <ul class="nav-menu">
         <li class="nav-item active" data-page="dashboard">
-          <span class="nav-icon">📊</span>
+          <span class="nav-icon"><svg class="icon"><use href="#icon-dashboard"></use></svg></span>
           <span class="nav-label" data-i18n="nav.dashboard">Dashboard</span>
         </li>
         <li class="nav-item" data-page="logs">
-          <span class="nav-icon">📋</span>
+          <span class="nav-icon"><svg class="icon"><use href="#icon-logs"></use></svg></span>
           <span class="nav-label" data-i18n="nav.logs">Logs</span>
         </li>
         <li class="nav-item" data-page="terminal">
-          <span class="nav-icon">🖥️</span>
+          <span class="nav-icon"><svg class="icon"><use href="#icon-terminal"></use></svg></span>
           <span class="nav-label" data-i18n="nav.terminal">Terminal</span>
         </li>
         <li class="nav-item" data-page="players">
-          <span class="nav-icon">👥</span>
+          <span class="nav-icon"><svg class="icon"><use href="#icon-players"></use></svg></span>
           <span class="nav-label" data-i18n="nav.players">Players</span>
         </li>
         <li class="nav-item" data-page="saves">
-          <span class="nav-icon">💾</span>
+          <span class="nav-icon"><svg class="icon"><use href="#icon-saves"></use></svg></span>
           <span class="nav-label" data-i18n="nav.saves">Saves</span>
         </li>
         <li class="nav-item" data-page="config">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon"><svg class="icon"><use href="#icon-config"></use></svg></span>
           <span class="nav-label" data-i18n="nav.config">Config</span>
         </li>
         <li class="nav-item" data-page="mods">
-          <span class="nav-icon">🧩</span>
+          <span class="nav-icon"><svg class="icon"><use href="#icon-mods"></use></svg></span>
           <span class="nav-label" data-i18n="nav.mods">Mods</span>
         </li>
       </ul>
       <div class="sidebar-footer">
-        <button class="btn-icon" id="langToggle" title="中文/EN">🌐</button>
-        <button class="btn-icon" id="logoutBtn" title="Logout">🚪</button>
+        <button class="btn-icon" id="langToggle" type="button" data-i18n-title="lang.toggle">
+          <svg class="icon"><use href="#icon-globe"></use></svg>
+        </button>
+        <button class="btn-icon" id="logoutBtn" type="button" data-i18n-title="logout.title">
+          <svg class="icon"><use href="#icon-logout"></use></svg>
+        </button>
       </div>
     </nav>
 
-    <!-- Mobile bottom nav -->
     <nav id="mobile-nav">
-      <button class="mob-nav-item active" data-page="dashboard">📊</button>
-      <button class="mob-nav-item" data-page="logs">📋</button>
-      <button class="mob-nav-item" data-page="terminal">🖥️</button>
-      <button class="mob-nav-item" data-page="players">👥</button>
-      <button class="mob-nav-item" data-page="saves">💾</button>
-      <button class="mob-nav-item" data-page="config">⚙️</button>
-      <button class="mob-nav-item" data-page="mods">🧩</button>
+      <button class="mob-nav-item active" type="button" data-page="dashboard"><svg class="icon"><use href="#icon-dashboard"></use></svg></button>
+      <button class="mob-nav-item" type="button" data-page="logs"><svg class="icon"><use href="#icon-logs"></use></svg></button>
+      <button class="mob-nav-item" type="button" data-page="terminal"><svg class="icon"><use href="#icon-terminal"></use></svg></button>
+      <button class="mob-nav-item" type="button" data-page="players"><svg class="icon"><use href="#icon-players"></use></svg></button>
+      <button class="mob-nav-item" type="button" data-page="saves"><svg class="icon"><use href="#icon-saves"></use></svg></button>
+      <button class="mob-nav-item" type="button" data-page="config"><svg class="icon"><use href="#icon-config"></use></svg></button>
+      <button class="mob-nav-item" type="button" data-page="mods"><svg class="icon"><use href="#icon-mods"></use></svg></button>
     </nav>
 
-    <!-- Main content -->
     <main id="content">
       <header id="topbar">
-        <button id="menuToggle" class="btn-icon mobile-only">☰</button>
+        <button id="menuToggle" class="btn-icon mobile-only" type="button">
+          <svg class="icon"><use href="#icon-menu"></use></svg>
+        </button>
         <h2 id="pageTitle">Dashboard</h2>
         <div class="topbar-right">
-          <span id="serverStatus" class="status-badge offline">● Checking...</span>
+          <span id="serverStatus" class="status-badge checking">
+            <span class="status-dot checking" aria-hidden="true"></span>
+            <span data-i18n="status.checking">Checking...</span>
+          </span>
         </div>
       </header>
 
       <div id="page-container">
-        <!-- Dashboard Page -->
         <section id="page-dashboard" class="page active">
           <div class="cards-grid">
             <div class="card stat-card">
-              <div class="stat-icon" id="stat-status-icon">⏳</div>
+              <div class="stat-icon" id="stat-status-icon"><svg class="icon icon-spin"><use href="#icon-loader"></use></svg></div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-status">Checking...</div>
                 <div class="stat-label" data-i18n="dash.status">Server Status</div>
               </div>
             </div>
             <div class="card stat-card">
-              <div class="stat-icon">👥</div>
+              <div class="stat-icon"><svg class="icon"><use href="#icon-players"></use></svg></div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-players">-/-</div>
                 <div class="stat-label" data-i18n="dash.players">Online Players</div>
               </div>
             </div>
             <div class="card stat-card">
-              <div class="stat-icon">⏱️</div>
+              <div class="stat-icon"><svg class="icon"><use href="#icon-clock"></use></svg></div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-uptime">--</div>
                 <div class="stat-label" data-i18n="dash.uptime">Uptime</div>
               </div>
             </div>
             <div class="card stat-card">
-              <div class="stat-icon">📅</div>
+              <div class="stat-icon"><svg class="icon"><use href="#icon-calendar"></use></svg></div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-day">--</div>
                 <div class="stat-label" data-i18n="dash.gameDay">Game Day</div>
               </div>
             </div>
             <div class="card stat-card">
-              <div class="stat-icon">💾</div>
+              <div class="stat-icon"><svg class="icon"><use href="#icon-saves"></use></svg></div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-backups">--</div>
                 <div class="stat-label" data-i18n="dash.backups">Backups</div>
               </div>
             </div>
             <div class="card stat-card">
-              <div class="stat-icon">🧩</div>
+              <div class="stat-icon"><svg class="icon"><use href="#icon-mods"></use></svg></div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-mods">--</div>
                 <div class="stat-label" data-i18n="dash.mods">Loaded Mods</div>
@@ -121,7 +272,6 @@
             </div>
           </div>
 
-          <!-- Resource bars -->
           <div class="card" id="resources-card">
             <h3 data-i18n="dash.resources">System Resources</h3>
             <div class="resource-bar">
@@ -144,62 +294,73 @@
             </div>
           </div>
 
-          <!-- Quick actions -->
           <div class="card">
             <h3 data-i18n="dash.quickActions">Quick Actions</h3>
             <div class="action-buttons">
-              <button class="btn btn-primary" onclick="navigateTo('logs')" data-i18n="dash.viewLogs">📋 View Logs</button>
-              <button class="btn btn-warning" onclick="restartServer()" data-i18n="dash.restart">🔄 Restart Server</button>
-              <button class="btn btn-success" onclick="createBackup()" data-i18n="dash.backup">💾 Backup Now</button>
+              <button class="btn btn-primary" type="button" onclick="navigateTo('logs')">
+                <svg class="icon"><use href="#icon-logs"></use></svg>
+                <span data-i18n="dash.viewLogs">View Logs</span>
+              </button>
+              <button class="btn btn-warning" type="button" onclick="restartServer()">
+                <svg class="icon"><use href="#icon-refresh"></use></svg>
+                <span data-i18n="dash.restart">Restart Server</span>
+              </button>
+              <button class="btn btn-success" type="button" onclick="createBackup()">
+                <svg class="icon"><use href="#icon-saves"></use></svg>
+                <span data-i18n="dash.backup">Backup Now</span>
+              </button>
             </div>
           </div>
         </section>
 
-        <!-- Logs Page -->
         <section id="page-logs" class="page">
           <div class="card">
             <div class="logs-toolbar">
               <div class="log-filters">
-                <button class="log-filter active" data-filter="all">All</button>
-                <button class="log-filter" data-filter="error">Errors</button>
-                <button class="log-filter" data-filter="mod">Mods</button>
-                <button class="log-filter" data-filter="server">Server</button>
-                <button class="log-filter" data-filter="game">Game</button>
+                <button class="log-filter active" type="button" data-filter="all" data-i18n="logs.all">All</button>
+                <button class="log-filter" type="button" data-filter="error" data-i18n="logs.errors">Errors</button>
+                <button class="log-filter" type="button" data-filter="mod" data-i18n="logs.mods">Mods</button>
+                <button class="log-filter" type="button" data-filter="server" data-i18n="logs.server">Server</button>
+                <button class="log-filter" type="button" data-filter="game" data-i18n="logs.game">Game</button>
               </div>
               <div class="log-search">
-                <input type="text" id="logSearch" placeholder="Search logs..." />
+                <input type="text" id="logSearch" data-i18n-placeholder="logs.search" placeholder="Search logs..." />
               </div>
               <div class="log-controls">
-                <button class="btn btn-sm" id="logAutoScroll" title="Auto-scroll">⬇️ Auto</button>
-                <button class="btn btn-sm" id="logClear" title="Clear">🗑️</button>
+                <button class="btn btn-sm" id="logAutoScroll" type="button" data-i18n-title="logs.auto">
+                  <svg class="icon"><use href="#icon-download"></use></svg>
+                  <span data-i18n="logs.auto">Auto</span>
+                </button>
+                <button class="btn btn-sm" id="logClear" type="button" data-i18n-title="logs.clear">
+                  <svg class="icon"><use href="#icon-trash"></use></svg>
+                  <span data-i18n="logs.clear">Clear</span>
+                </button>
               </div>
             </div>
             <div id="logOutput" class="log-output"></div>
           </div>
         </section>
 
-        <!-- Terminal Page -->
         <section id="page-terminal" class="page">
           <div class="card">
             <div class="terminal-toolbar">
               <span data-i18n="term.title">SMAPI Console</span>
               <div>
-                <button class="btn btn-sm btn-success" id="termConnect" onclick="terminalConnect()">Connect</button>
-                <button class="btn btn-sm btn-danger" id="termDisconnect" onclick="terminalDisconnect()" style="display:none">Disconnect</button>
+                <button class="btn btn-sm btn-success" id="termConnect" type="button" onclick="terminalConnect()" data-i18n="term.connect">Connect</button>
+                <button class="btn btn-sm btn-danger" id="termDisconnect" type="button" onclick="terminalDisconnect()" style="display:none" data-i18n="term.disconnect">Disconnect</button>
               </div>
             </div>
             <div id="termOutput" class="terminal-output">
               <div class="terminal-hint" data-i18n="term.hint">Click "Connect" to open SMAPI console. You can enter Steam Guard codes or SMAPI commands here.</div>
             </div>
             <div class="terminal-input-row">
-              <input type="text" id="termInput" placeholder="Type command or Steam Guard code..." disabled
+              <input type="text" id="termInput" data-i18n-placeholder="term.input" placeholder="Type command or Steam Guard code..." disabled
                      onkeydown="if(event.key==='Enter')terminalSend()">
-              <button class="btn btn-primary" id="termSendBtn" onclick="terminalSend()" disabled>Send</button>
+              <button class="btn btn-primary" id="termSendBtn" type="button" onclick="terminalSend()" disabled data-i18n="term.send">Send</button>
             </div>
           </div>
         </section>
 
-        <!-- Players Page -->
         <section id="page-players" class="page">
           <div class="card">
             <h3 data-i18n="players.title">Online Players</h3>
@@ -209,15 +370,17 @@
           </div>
         </section>
 
-        <!-- Saves Page -->
         <section id="page-saves" class="page">
           <div class="card">
             <div class="section-header">
               <h3 data-i18n="saves.title">Save Files</h3>
-              <button class="btn btn-success btn-sm" onclick="createBackup()">💾 Backup Now</button>
+              <button class="btn btn-success btn-sm" type="button" onclick="createBackup()">
+                <svg class="icon"><use href="#icon-saves"></use></svg>
+                <span data-i18n="saves.backupNow">Backup Now</span>
+              </button>
             </div>
             <div id="savesList" class="saves-list">
-              <div class="empty-state">Loading...</div>
+              <div class="empty-state" data-i18n="players.loading">Loading...</div>
             </div>
           </div>
           <div class="card">
@@ -225,12 +388,11 @@
               <h3 data-i18n="saves.backups">Backups</h3>
             </div>
             <div id="backupsList" class="saves-list">
-              <div class="empty-state">Loading...</div>
+              <div class="empty-state" data-i18n="players.loading">Loading...</div>
             </div>
           </div>
         </section>
 
-        <!-- Config Page -->
         <section id="page-config" class="page">
           <div id="configContainer"></div>
           <div class="card" style="margin-top:16px;">
@@ -238,23 +400,21 @@
               <h3 data-i18n="config.password">Change Panel Password</h3>
             </div>
             <div class="form-row">
-              <input type="password" id="oldPassword" placeholder="Current password" class="input" />
-              <input type="password" id="newPassword" placeholder="New password" class="input" />
-              <button class="btn btn-primary" onclick="changePassword()">Update</button>
+              <input type="password" id="oldPassword" class="input" data-i18n-placeholder="config.currentPassword" placeholder="Current password" />
+              <input type="password" id="newPassword" class="input" data-i18n-placeholder="config.newPassword" placeholder="New password" />
+              <button class="btn btn-primary" type="button" onclick="changePassword()" data-i18n="config.update">Update</button>
             </div>
           </div>
         </section>
 
-        <!-- Mods Page -->
         <section id="page-mods" class="page">
           <div class="card">
             <h3 data-i18n="mods.title">Installed Mods</h3>
             <div id="modsList" class="mods-list">
-              <div class="empty-state">Loading...</div>
+              <div class="empty-state" data-i18n="players.loading">Loading...</div>
             </div>
           </div>
         </section>
-
       </div>
     </main>
   </div>

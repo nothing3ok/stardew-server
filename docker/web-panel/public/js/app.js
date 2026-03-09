@@ -26,27 +26,52 @@ let ws = null;
 let currentPage = 'dashboard';
 let logAutoScroll = true;
 let statusInterval = null;
+let lastStatusData = null;
 
 // ─── i18n ────────────────────────────────────────────────────────
-let currentLang = localStorage.getItem('panel_lang') || 'en';
+function detectLanguage() {
+  const saved = localStorage.getItem('panel_lang');
+  if (saved === 'zh' || saved === 'en') {
+    return saved;
+  }
+
+  return (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+
+let currentLang = detectLanguage();
 const translations = {
   zh: {
     'nav.dashboard': '仪表盘', 'nav.logs': '日志', 'nav.terminal': '终端',
-    'nav.players': '玩家', 'nav.saves': '存档', 'nav.config': '配置', 'nav.mods': 'Mods',
+    'nav.players': '玩家', 'nav.saves': '存档', 'nav.config': '配置', 'nav.mods': '模组',
     'dash.status': '服务器状态', 'dash.players': '在线玩家', 'dash.uptime': '运行时间',
     'dash.gameDay': '游戏日期', 'dash.backups': '备份数量', 'dash.mods': '已加载Mod',
     'dash.resources': '系统资源', 'dash.quickActions': '快捷操作',
-    'dash.viewLogs': '📋 查看日志', 'dash.restart': '🔄 重启服务器', 'dash.backup': '💾 立即备份',
+    'dash.viewLogs': '查看日志', 'dash.restart': '重启服务器', 'dash.backup': '立即备份',
     'term.title': 'SMAPI 控制台', 'term.hint': '点击"连接"打开 SMAPI 控制台。可在此输入 Steam Guard 验证码或 SMAPI 命令。',
+    'term.connect': '连接', 'term.disconnect': '断开', 'term.send': '发送', 'term.input': '输入命令或 Steam Guard 验证码...',
     'players.title': '在线玩家', 'players.loading': '加载中...',
-    'saves.title': '存档文件', 'saves.backups': '备份列表',
-    'config.password': '修改面板密码', 'mods.title': '已安装 Mods',
+    'players.none': '当前没有在线玩家', 'players.online': '在线：{online}/{max}', 'players.farm': '农场：{farm}',
+    'saves.title': '存档文件', 'saves.backups': '备份列表', 'saves.noFiles': '未找到存档文件', 'saves.noBackups': '未找到备份',
+    'saves.backupNow': '立即备份', 'saves.unknown': '未知',
+    'config.password': '修改面板密码', 'config.currentPassword': '当前密码', 'config.newPassword': '新密码',
+    'config.update': '更新', 'config.saveChanges': '保存更改', 'mods.title': '已安装模组', 'mods.none': '未找到模组',
+    'mods.custom': '自定义', 'mods.builtin': '内置',
     'login.subtitle': '服务器管理面板', 'login.password': '密码', 'login.button': '登录',
+    'setup.title': '设置管理密码', 'setup.subtitle': '首次使用，请设置您的管理密码',
+    'setup.password': '设置密码', 'setup.confirm': '确认密码', 'setup.button': '开始使用',
+    'setup.minLength': '密码至少需要6个字符', 'setup.mismatch': '两次输入的密码不一致',
+    'setup.success': '密码设置成功！', 'setup.failed': '设置失败',
     'status.running': '运行中', 'status.stopped': '已停止', 'status.checking': '检查中...',
+    'logs.all': '全部', 'logs.errors': '错误', 'logs.mods': '模组', 'logs.server': '服务器', 'logs.game': '游戏',
+    'logs.search': '搜索日志...', 'logs.auto': '自动', 'logs.clear': '清空',
+    'logs.notFound': '日志文件尚未生成，服务器可能仍在启动中...',
     'toast.backupOk': '备份创建成功！', 'toast.backupFail': '备份失败',
     'toast.restartOk': '重启指令已发送', 'toast.restartFail': '重启失败',
     'toast.pwdOk': '密码修改成功', 'toast.pwdFail': '密码修改失败',
-    'toast.configOk': '配置已保存，重启后生效', 'players.none': '当前没有在线玩家',
+    'toast.configOk': '配置已保存，重启后生效', 'toast.configFail': '配置保存失败',
+    'toast.creatingBackup': '正在创建备份...', 'toast.passwordFields': '请填写两个密码字段',
+    'actions.confirmRestart': '确定要重启服务器吗？',
+    'lang.toggle': '切换语言', 'logout.title': '退出登录',
   },
   en: {
     'nav.dashboard': 'Dashboard', 'nav.logs': 'Logs', 'nav.terminal': 'Terminal',
@@ -54,17 +79,32 @@ const translations = {
     'dash.status': 'Server Status', 'dash.players': 'Online Players', 'dash.uptime': 'Uptime',
     'dash.gameDay': 'Game Day', 'dash.backups': 'Backups', 'dash.mods': 'Loaded Mods',
     'dash.resources': 'System Resources', 'dash.quickActions': 'Quick Actions',
-    'dash.viewLogs': '📋 View Logs', 'dash.restart': '🔄 Restart', 'dash.backup': '💾 Backup Now',
+    'dash.viewLogs': 'View Logs', 'dash.restart': 'Restart Server', 'dash.backup': 'Backup Now',
     'term.title': 'SMAPI Console', 'term.hint': 'Click "Connect" to open SMAPI console. You can enter Steam Guard codes or SMAPI commands here.',
+    'term.connect': 'Connect', 'term.disconnect': 'Disconnect', 'term.send': 'Send', 'term.input': 'Type command or Steam Guard code...',
     'players.title': 'Online Players', 'players.loading': 'Loading...',
-    'saves.title': 'Save Files', 'saves.backups': 'Backups',
-    'config.password': 'Change Panel Password', 'mods.title': 'Installed Mods',
+    'players.none': 'No players online', 'players.online': 'Online: {online}/{max}', 'players.farm': 'Farm: {farm}',
+    'saves.title': 'Save Files', 'saves.backups': 'Backups', 'saves.noFiles': 'No save files found', 'saves.noBackups': 'No backups found',
+    'saves.backupNow': 'Backup Now', 'saves.unknown': 'unknown',
+    'config.password': 'Change Panel Password', 'config.currentPassword': 'Current password', 'config.newPassword': 'New password',
+    'config.update': 'Update', 'config.saveChanges': 'Save Changes', 'mods.title': 'Installed Mods', 'mods.none': 'No mods found',
+    'mods.custom': 'Custom', 'mods.builtin': 'Built-in',
     'login.subtitle': 'Server Management Panel', 'login.password': 'Password', 'login.button': 'Login',
+    'setup.title': 'Set Admin Password', 'setup.subtitle': 'First time setup - please create your admin password',
+    'setup.password': 'Password', 'setup.confirm': 'Confirm Password', 'setup.button': 'Get Started',
+    'setup.minLength': 'Password must be at least 6 characters', 'setup.mismatch': 'Passwords do not match',
+    'setup.success': 'Password set successfully!', 'setup.failed': 'Setup failed',
     'status.running': 'Running', 'status.stopped': 'Stopped', 'status.checking': 'Checking...',
+    'logs.all': 'All', 'logs.errors': 'Errors', 'logs.mods': 'Mods', 'logs.server': 'Server', 'logs.game': 'Game',
+    'logs.search': 'Search logs...', 'logs.auto': 'Auto', 'logs.clear': 'Clear',
+    'logs.notFound': 'Log file not found yet. Server may still be starting...',
     'toast.backupOk': 'Backup created!', 'toast.backupFail': 'Backup failed',
     'toast.restartOk': 'Restart initiated', 'toast.restartFail': 'Restart failed',
     'toast.pwdOk': 'Password changed', 'toast.pwdFail': 'Password change failed',
-    'toast.configOk': 'Config saved. Restart to apply.', 'players.none': 'No players online',
+    'toast.configOk': 'Config saved. Restart to apply.', 'toast.configFail': 'Failed to save config',
+    'toast.creatingBackup': 'Creating backup...', 'toast.passwordFields': 'Please fill in both password fields',
+    'actions.confirmRestart': 'Are you sure you want to restart the server?',
+    'lang.toggle': 'Switch language', 'logout.title': 'Log out',
   },
 };
 
@@ -72,10 +112,40 @@ function t(key) {
   return (translations[currentLang] && translations[currentLang][key]) || key;
 }
 
+function tf(key, params = {}) {
+  return Object.entries(params).reduce(
+    (result, [param, value]) => result.replace(`{${param}}`, value),
+    t(key)
+  );
+}
+
+function icon(name, className = 'icon') {
+  return `<svg class="${className}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+}
+
+function statusOrb(state) {
+  return `<span class="status-orb ${state}" aria-hidden="true"></span>`;
+}
+
+function statusDot(state) {
+  return `<span class="status-dot ${state}" aria-hidden="true"></span>`;
+}
+
 function applyTranslations() {
+  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = t(el.dataset.i18n);
   });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.setAttribute('placeholder', t(el.dataset.i18nPlaceholder));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.setAttribute('title', t(el.dataset.i18nTitle));
+  });
+  document.getElementById('pageTitle').textContent = t(`nav.${currentPage}`) || t('nav.dashboard');
+  if (lastStatusData) {
+    updateDashboardUI(lastStatusData);
+  }
 }
 
 // ─── Init ────────────────────────────────────────────────────────
@@ -96,6 +166,7 @@ function init() {
     currentLang = currentLang === 'en' ? 'zh' : 'en';
     localStorage.setItem('panel_lang', currentLang);
     applyTranslations();
+    reloadCurrentPage();
   };
 
   // Mobile menu toggle
@@ -135,6 +206,38 @@ function init() {
 
   // Auto-refresh dashboard
   statusInterval = setInterval(loadDashboard, 10000);
+}
+
+function reloadCurrentPage() {
+  switch (currentPage) {
+    case 'dashboard':
+      if (lastStatusData) {
+        updateDashboardUI(lastStatusData);
+      } else {
+        loadDashboard();
+      }
+      break;
+    case 'logs':
+      loadLogs(
+        document.querySelector('.log-filter.active')?.dataset.filter || 'all',
+        document.getElementById('logSearch')?.value || ''
+      );
+      break;
+    case 'players':
+      loadPlayers();
+      break;
+    case 'saves':
+      loadSaves();
+      break;
+    case 'config':
+      loadConfig();
+      break;
+    case 'mods':
+      loadMods();
+      break;
+    default:
+      break;
+  }
 }
 
 // ─── Navigation ──────────────────────────────────────────────────
@@ -261,6 +364,8 @@ async function loadDashboard() {
 }
 
 function updateDashboardUI(data) {
+  lastStatusData = data;
+
   // Status
   const statusEl = document.getElementById('stat-status');
   const statusIcon = document.getElementById('stat-status-icon');
@@ -268,13 +373,13 @@ function updateDashboardUI(data) {
 
   if (data.gameRunning) {
     statusEl.textContent = t('status.running');
-    statusIcon.textContent = '🟢';
-    statusBadge.textContent = '● ' + t('status.running');
+    statusIcon.innerHTML = statusOrb('online');
+    statusBadge.innerHTML = `${statusDot('online')}<span>${t('status.running')}</span>`;
     statusBadge.className = 'status-badge online';
   } else {
     statusEl.textContent = t('status.stopped');
-    statusIcon.textContent = '🔴';
-    statusBadge.textContent = '● ' + t('status.stopped');
+    statusIcon.innerHTML = statusOrb('offline');
+    statusBadge.innerHTML = `${statusDot('offline')}<span>${t('status.stopped')}</span>`;
     statusBadge.className = 'status-badge offline';
   }
 
@@ -329,7 +434,7 @@ async function loadLogs(filter, search) {
   output.innerHTML = '';
 
   if (!data.exists) {
-    output.innerHTML = '<div class="log-line info">Log file not found yet. Server may still be starting...</div>';
+    output.innerHTML = `<div class="log-line info">${t('logs.notFound')}</div>`;
     return;
   }
 
@@ -400,19 +505,19 @@ async function loadPlayers() {
 
   if (!data.players || data.players.length === 0) {
     list.innerHTML = `<div class="empty-state">
-      <div style="font-size:48px;margin-bottom:12px;">👥</div>
+      ${icon('players', 'icon empty-icon')}
       <div>${t('players.none')}</div>
-      <div style="margin-top:8px;color:var(--text-muted)">Online: ${data.online}/${data.max}</div>
+      <div style="margin-top:8px;color:var(--text-muted)">${tf('players.online', { online: data.online, max: data.max })}</div>
     </div>`;
     return;
   }
 
   list.innerHTML = data.players.map(p => `
     <div class="player-card">
-      <div class="player-avatar">🧑‍🌾</div>
+      <div class="player-avatar">${icon('player', 'icon')}</div>
       <div>
         <div class="player-name">${escapeHtml(p.name)}</div>
-        <div class="player-info">${p.farm ? 'Farm: ' + escapeHtml(p.farm) : ''}</div>
+        <div class="player-info">${p.farm ? tf('players.farm', { farm: escapeHtml(p.farm) }) : ''}</div>
       </div>
     </div>
   `).join('');
@@ -428,13 +533,13 @@ async function loadSaves() {
   if (savesData) {
     const list = document.getElementById('savesList');
     if (!savesData.saves || savesData.saves.length === 0) {
-      list.innerHTML = '<div class="empty-state">No save files found</div>';
+      list.innerHTML = `<div class="empty-state">${t('saves.noFiles')}</div>`;
     } else {
       list.innerHTML = savesData.saves.map(s => `
         <div class="save-item">
           <div class="save-info">
-            <div class="save-name">🌾 ${escapeHtml(s.farm || s.name)}</div>
-            <div class="save-meta">${formatSize(s.size)} · ${s.lastModified ? new Date(s.lastModified).toLocaleString() : 'unknown'}</div>
+            <div class="save-name">${icon('sprout', 'icon save-name-icon')}<span>${escapeHtml(s.farm || s.name)}</span></div>
+            <div class="save-meta">${formatSize(s.size)} · ${s.lastModified ? new Date(s.lastModified).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US') : t('saves.unknown')}</div>
           </div>
         </div>
       `).join('');
@@ -444,16 +549,16 @@ async function loadSaves() {
   if (backupsData) {
     const list = document.getElementById('backupsList');
     if (!backupsData.backups || backupsData.backups.length === 0) {
-      list.innerHTML = '<div class="empty-state">No backups found</div>';
+      list.innerHTML = `<div class="empty-state">${t('saves.noBackups')}</div>`;
     } else {
       list.innerHTML = backupsData.backups.map(b => `
         <div class="backup-item">
           <div class="save-info">
-            <div class="save-name">📦 ${escapeHtml(b.filename)}</div>
-            <div class="save-meta">${formatSize(b.size)} · ${new Date(b.date).toLocaleString()}</div>
+            <div class="save-name">${icon('package', 'icon save-name-icon')}<span>${escapeHtml(b.filename)}</span></div>
+            <div class="save-meta">${formatSize(b.size)} · ${new Date(b.date).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US')}</div>
           </div>
           <a href="/api/saves/download/${encodeURIComponent(b.filename)}" class="btn btn-sm btn-primary"
-             onclick="this.href += '?token=' + API.token; return true;">⬇️</a>
+             onclick="this.href=this.href.split('?')[0]+'?token='+API.token; return true;">${icon('download', 'icon')}</a>
         </div>
       `).join('');
     }
@@ -510,7 +615,7 @@ async function loadConfig() {
   // Add save button
   const saveBtn = document.createElement('div');
   saveBtn.style.textAlign = 'right';
-  saveBtn.innerHTML = `<button class="btn btn-success" id="saveConfigBtn" onclick="saveConfig()" style="display:none">Save Changes</button>`;
+  saveBtn.innerHTML = `<button class="btn btn-success" id="saveConfigBtn" onclick="saveConfig()" style="display:none">${t('config.saveChanges')}</button>`;
   container.appendChild(saveBtn);
 }
 
@@ -547,7 +652,7 @@ async function loadMods() {
 
   const list = document.getElementById('modsList');
   if (!data.mods || data.mods.length === 0) {
-    list.innerHTML = '<div class="empty-state">No mods found</div>';
+    list.innerHTML = `<div class="empty-state">${t('mods.none')}</div>`;
     return;
   }
 
@@ -558,14 +663,14 @@ async function loadMods() {
         <div class="mod-meta">v${escapeHtml(m.version)} · ${escapeHtml(m.author || '')} · ${escapeHtml(m.id)}</div>
         ${m.description ? `<div class="mod-meta">${escapeHtml(m.description)}</div>` : ''}
       </div>
-      <span class="mod-badge ${m.isCustom ? 'custom' : ''}">${m.isCustom ? 'Custom' : 'Built-in'}</span>
+      <span class="mod-badge ${m.isCustom ? 'custom' : ''}">${m.isCustom ? t('mods.custom') : t('mods.builtin')}</span>
     </div>
   `).join('');
 }
 
 // ─── Actions ─────────────────────────────────────────────────────
 async function restartServer() {
-  if (!confirm('Are you sure you want to restart the server?')) return;
+  if (!confirm(t('actions.confirmRestart'))) return;
   const data = await API.post('/api/server/restart');
   if (data && data.success) {
     showToast(t('toast.restartOk'), 'success');
@@ -575,7 +680,7 @@ async function restartServer() {
 }
 
 async function createBackup() {
-  showToast('Creating backup...', 'warn');
+  showToast(t('toast.creatingBackup'), 'warn');
   const data = await API.post('/api/saves/backup');
   if (data && data.success) {
     showToast(t('toast.backupOk'), 'success');
@@ -590,7 +695,7 @@ async function changePassword() {
   const newPwd = document.getElementById('newPassword').value;
 
   if (!oldPwd || !newPwd) {
-    showToast('Please fill in both password fields', 'error');
+    showToast(t('toast.passwordFields'), 'error');
     return;
   }
 
@@ -612,6 +717,7 @@ async function changePassword() {
 // ─── Utilities ───────────────────────────────────────────────────
 function showToast(message, type = 'info') {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   toast.textContent = message;
   toast.className = `toast show ${type}`;
   setTimeout(() => toast.classList.remove('show'), 3000);
