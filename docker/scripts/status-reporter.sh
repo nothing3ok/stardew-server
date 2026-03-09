@@ -73,7 +73,7 @@ get_player_count() {
                 for (id in connected) count++
                 print count
             }
-        ' "$SMAPI_LOG" 2>/dev/null
+        ' "$SMAPI_LOG" 2>/dev/null || echo "0"
     else
         echo "0"
     fi
@@ -158,6 +158,11 @@ update_metrics() {
 
     local uptime=$(get_uptime_seconds)
     local players=$(get_player_count)
+    case "$players" in
+        ''|*[!0-9]*)
+            players=0
+            ;;
+    esac
     local game_day=$(get_game_day)
     local game_paused=$(get_game_paused)
     local memory=$(get_memory_usage_mb)
@@ -216,7 +221,7 @@ EOPROM
 {
   "timestamp": "$timestamp",
   "server": {
-    "version": "1.0.76",
+    "version": "1.0.77",
     "game_running": $([ "$game_running" = "1" ] && echo "true" || echo "false"),
     "uptime_seconds": $uptime
   },

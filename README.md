@@ -140,7 +140,7 @@ Setting up a **Stardew Valley dedicated server** has never been easier! With **o
 
 ## What's New in Latest Version
 
-### v1.0.76 (March 2026)
+### v1.0.77 (March 2026)
 
 **Web Panel, One-Click Setup, and Runtime Improvements:**
 - **🌐 First-Run Setup Flow** - The web panel now prompts for an admin password on first visit instead of relying on a shared default password

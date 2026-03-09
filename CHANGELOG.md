@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.77 (March 2026)
+
+### Bug Fixes
+- Fixed `status.json` player count output so the web panel status file stays valid JSON when no players are connected.
+
 ## v1.0.76 (March 2026)
 
 ### New Features
