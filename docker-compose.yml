@@ -17,7 +17,7 @@ services:
   # Init container: fixes permissions before main server starts
   # 初始化容器：在主服务器启动前修复权限
   stardew-init:
-    image: truemanlive/puppy-stardew-server:v1.0.71
+    image: truemanlive/puppy-stardew-server:v1.0.72
     container_name: puppy-stardew-init
     user: root
     entrypoint: ["/home/steam/scripts/init-container.sh"]
@@ -31,7 +31,7 @@ services:
       - ./data/backups:/home/steam/.local/share/puppy-stardew/backups:rw
 
   stardew-server:
-    image: truemanlive/puppy-stardew-server:v1.0.71
+    image: truemanlive/puppy-stardew-server:v1.0.72
     container_name: puppy-stardew
     restart: unless-stopped  # Keep running after Steam Guard
     depends_on:
@@ -93,6 +93,10 @@ services:
       # 存档选择 - 可选（默认：自动检测）
       - SAVE_NAME=${SAVE_NAME:-}
 
+      # Public join IP shown in dashboard - OPTIONAL
+      # 仪表盘显示的公网联机 IP - 可选
+      - PUBLIC_IP=${PUBLIC_IP:-}
+
     # Port mappings
     # 端口映射
     ports:
@@ -130,7 +134,7 @@ services:
       # 自定义模组卷（可选 - 将您的模组放在这里）
       # Supports: mod directories or .zip files
       # 支持：模组目录或 .zip 文件
-      - ./data/custom-mods:/home/steam/custom-mods:ro
+      - ./data/custom-mods:/home/steam/custom-mods:rw
 
     # GPU device mapping (OPTIONAL - only needed if USE_GPU=true)
     # GPU 设备映射（可选 - 仅当 USE_GPU=true 时需要）

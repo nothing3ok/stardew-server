@@ -13,6 +13,33 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+PANEL_ENV_FILE=${ENV_FILE:-/home/steam/.env}
+
+load_panel_env_overrides() {
+    local env_file=${1:-$PANEL_ENV_FILE}
+
+    [ -f "$env_file" ] || return 0
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+            ''|\#*) continue ;;
+        esac
+
+        local key=${line%%=*}
+        local value=${line#*=}
+
+        case "$key" in
+            ''|*[!A-Za-z0-9_]*)
+                continue
+                ;;
+        esac
+
+        export "$key=$value"
+    done < "$env_file"
+}
+
+load_panel_env_overrides
+
 # Resolution and performance environment variables with defaults
 DEFAULT_RESOLUTION_WIDTH=1280
 DEFAULT_RESOLUTION_HEIGHT=720

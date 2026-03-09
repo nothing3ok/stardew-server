@@ -3,85 +3,227 @@
  */
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const config = require('../server');
 
 const CUSTOM_MODS_DIR = '/home/steam/custom-mods';
+const GAME_MODS_DIR = path.join(config.GAME_DIR, 'Mods');
+const PREINSTALLED_MODS_DIR = '/home/steam/preinstalled-mods';
+const METADATA_SUFFIX = '.panel-meta.json';
+
+function isSuccessful(result) {
+  return result && result.status === 0;
+}
+
+function runCommand(command, args, options = {}) {
+  const result = spawnSync(command, args, {
+    encoding: 'utf-8',
+    ...options,
+  });
+
+  if (!isSuccessful(result)) {
+    const reason = result.error ? result.error.message : (result.stderr || result.stdout || 'unknown error').trim();
+    throw new Error(`${command} failed: ${reason}`);
+  }
+
+  return result.stdout || '';
+}
+
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+function readManifest(modDir, fallbackName) {
+  const manifestPath = path.join(modDir, 'manifest.json');
+  if (!fs.existsSync(manifestPath)) {
+    return null;
+  }
+
+  try {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    return {
+      id: manifest.UniqueID || fallbackName,
+      name: manifest.Name || fallbackName,
+      version: manifest.Version || 'unknown',
+      author: manifest.Author || 'unknown',
+      description: manifest.Description || '',
+    };
+  } catch (error) {
+    return {
+      id: fallbackName,
+      name: fallbackName,
+      version: 'unknown',
+      author: 'unknown',
+      description: '',
+    };
+  }
+}
+
+function getPreinstalledModFolders() {
+  const folders = new Set();
+
+  if (!fs.existsSync(PREINSTALLED_MODS_DIR)) {
+    return folders;
+  }
+
+  const entries = fs.readdirSync(PREINSTALLED_MODS_DIR, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      folders.add(entry.name);
+    }
+  }
+
+  return folders;
+}
+
+function getMetadataPath(baseName) {
+  return path.join(CUSTOM_MODS_DIR, `${baseName}${METADATA_SUFFIX}`);
+}
+
+function loadMetadataByBaseName(baseName) {
+  const metadataPath = getMetadataPath(baseName);
+  if (!fs.existsSync(metadataPath)) {
+    return null;
+  }
+
+  try {
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
+    metadata._path = metadataPath;
+    return metadata;
+  } catch (error) {
+    return null;
+  }
+}
+
+function loadAllMetadata() {
+  if (!fs.existsSync(CUSTOM_MODS_DIR)) {
+    return [];
+  }
+
+  return fs.readdirSync(CUSTOM_MODS_DIR)
+    .filter(name => name.endsWith(METADATA_SUFFIX))
+    .map(name => loadMetadataByBaseName(name.slice(0, -METADATA_SUFFIX.length)))
+    .filter(Boolean);
+}
+
+function findManifestDirectories(rootDir, maxDepth = 3, depth = 0) {
+  if (depth > maxDepth || !fs.existsSync(rootDir)) {
+    return [];
+  }
+
+  const manifestPath = path.join(rootDir, 'manifest.json');
+  if (fs.existsSync(manifestPath)) {
+    return [rootDir];
+  }
+
+  const found = [];
+  const entries = fs.readdirSync(rootDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    found.push(...findManifestDirectories(path.join(rootDir, entry.name), maxDepth, depth + 1));
+  }
+
+  return found;
+}
+
+function installArchiveToGameMods(zipPath) {
+  ensureDir(GAME_MODS_DIR);
+
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'puppy-mod-'));
+
+  try {
+    runCommand('unzip', ['-q', '-o', zipPath, '-d', tempRoot], { timeout: 30000 });
+
+    const manifestDirs = findManifestDirectories(tempRoot);
+    const installedFolders = [];
+
+    for (const manifestDir of manifestDirs) {
+      const folderName = path.basename(manifestDir);
+      const destDir = path.join(GAME_MODS_DIR, folderName);
+      fs.rmSync(destDir, { recursive: true, force: true });
+      fs.cpSync(manifestDir, destDir, { recursive: true });
+      installedFolders.push(folderName);
+    }
+
+    return {
+      installedFolders,
+      hasManifest: installedFolders.length > 0,
+    };
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
 
 function getMods(req, res) {
   const mods = [];
+  const seenFolders = new Set();
+  const preinstalledFolders = getPreinstalledModFolders();
 
-  // Scan built-in mods
+  // Scan installed game mods. Anything not in the preinstalled set is treated as custom.
   try {
-    const modsDir = path.join(config.GAME_DIR, 'Mods');
-    if (fs.existsSync(modsDir)) {
-      const entries = fs.readdirSync(modsDir, { withFileTypes: true });
+    if (fs.existsSync(GAME_MODS_DIR)) {
+      const entries = fs.readdirSync(GAME_MODS_DIR, { withFileTypes: true });
       for (const entry of entries) {
         if (!entry.isDirectory()) continue;
 
-        const manifestPath = path.join(modsDir, entry.name, 'manifest.json');
-        if (!fs.existsSync(manifestPath)) continue;
+        const manifest = readManifest(path.join(GAME_MODS_DIR, entry.name), entry.name);
+        if (!manifest) continue;
 
-        try {
-          const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-          mods.push({
-            id: manifest.UniqueID || entry.name,
-            name: manifest.Name || entry.name,
-            version: manifest.Version || 'unknown',
-            author: manifest.Author || 'unknown',
-            description: manifest.Description || '',
-            enabled: true,
-            isCustom: false,
-            folder: entry.name,
-          });
-        } catch (e) {
-          mods.push({
-            id: entry.name,
-            name: entry.name,
-            version: 'unknown',
-            enabled: true,
-            isCustom: false,
-            folder: entry.name,
-          });
-        }
+        mods.push({
+          ...manifest,
+          enabled: true,
+          isCustom: !preinstalledFolders.has(entry.name),
+          folder: entry.name,
+        });
+        seenFolders.add(entry.name);
       }
     }
   } catch (e) {}
 
-  // Scan custom mods
+  // Scan pending custom source entries which are not already installed into the game Mods directory.
   try {
     if (fs.existsSync(CUSTOM_MODS_DIR)) {
       const entries = fs.readdirSync(CUSTOM_MODS_DIR, { withFileTypes: true });
       for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const manifestPath = path.join(CUSTOM_MODS_DIR, entry.name, 'manifest.json');
-          if (!fs.existsSync(manifestPath)) continue;
+        if (entry.name.endsWith(METADATA_SUFFIX)) {
+          continue;
+        }
 
-          try {
-            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-            mods.push({
-              id: manifest.UniqueID || entry.name,
-              name: manifest.Name || entry.name,
-              version: manifest.Version || 'unknown',
-              author: manifest.Author || 'unknown',
-              description: manifest.Description || '',
-              enabled: true,
-              isCustom: true,
-              folder: entry.name,
-            });
-          } catch (e) {}
-        } else if (entry.name.endsWith('.zip')) {
-          // Zip files in custom mods
+        if (entry.isDirectory()) {
+          if (seenFolders.has(entry.name)) continue;
+
+          const manifest = readManifest(path.join(CUSTOM_MODS_DIR, entry.name), entry.name);
+          if (!manifest) continue;
+
           mods.push({
-            id: entry.name,
-            name: entry.name.replace('.zip', ''),
-            version: 'zip',
-            author: '',
-            description: 'Uploaded mod archive',
+            ...manifest,
             enabled: true,
             isCustom: true,
             folder: entry.name,
+          });
+          seenFolders.add(entry.name);
+        } else if (entry.name.endsWith('.zip')) {
+          const baseName = entry.name.replace(/\.zip$/i, '');
+          const metadata = loadMetadataByBaseName(baseName);
+          if (metadata && Array.isArray(metadata.installedFolders) && metadata.installedFolders.every(folder => seenFolders.has(folder))) {
+            continue;
+          }
+
+          mods.push({
+            id: entry.name,
+            name: baseName,
+            version: 'zip',
+            author: '',
+            description: 'Uploaded mod archive (pending restart or manual setup)',
+            enabled: true,
+            isCustom: true,
+            folder: baseName,
           });
         }
       }
@@ -97,8 +239,6 @@ function getMods(req, res) {
  * Expects multipart/form-data with a 'modfile' field
  */
 function uploadMod(req, res) {
-  // Simple file upload via raw body (base64 encoded JSON)
-  // Request body: { filename: string, data: base64string }
   try {
     var body = req.body || {};
     var filename = body.filename;
@@ -114,19 +254,18 @@ function uploadMod(req, res) {
       return res.status(400).json({ error: 'Only .zip files are supported' });
     }
 
-    // Ensure custom mods dir exists
-    if (!fs.existsSync(CUSTOM_MODS_DIR)) {
-      try {
-        fs.mkdirSync(CUSTOM_MODS_DIR, { recursive: true });
-      } catch (e) {
-        return res.status(500).json({ error: 'Cannot create custom mods directory' });
-      }
+    try {
+      ensureDir(CUSTOM_MODS_DIR);
+      ensureDir(GAME_MODS_DIR);
+    } catch (e) {
+      return res.status(500).json({ error: 'Cannot create mods directory', details: e.message });
     }
 
     var destPath = path.join(CUSTOM_MODS_DIR, filename);
+    var metadataPath = getMetadataPath(filename.replace(/\.zip$/i, ''));
 
     // Check if already exists
-    if (fs.existsSync(destPath)) {
+    if (fs.existsSync(destPath) || fs.existsSync(metadataPath)) {
       return res.status(409).json({ error: 'A mod with this filename already exists' });
     }
 
@@ -140,35 +279,41 @@ function uploadMod(req, res) {
 
     fs.writeFileSync(destPath, buffer);
 
-    // Try to extract to see if it's a valid zip with manifest.json
-    var extractDir = path.join(CUSTOM_MODS_DIR, filename.replace('.zip', ''));
     try {
-      if (!fs.existsSync(extractDir)) {
-        fs.mkdirSync(extractDir, { recursive: true });
-      }
-      execSync('unzip -o "' + destPath + '" -d "' + extractDir + '"', { stdio: 'ignore', timeout: 30000 });
+      const installResult = installArchiveToGameMods(destPath);
 
-      // Check if manifest exists (may be in a subdirectory)
-      var hasManifest = false;
-      try {
-        var result = execSync('find "' + extractDir + '" -name manifest.json -maxdepth 2', { encoding: 'utf-8', timeout: 5000 }).trim();
-        hasManifest = result.length > 0;
-      } catch (e2) {}
+      if (installResult.installedFolders.length > 0) {
+        fs.writeFileSync(metadataPath, JSON.stringify({
+          filename: filename,
+          installedFolders: installResult.installedFolders,
+          uploadedAt: new Date().toISOString(),
+        }, null, 2));
+      }
 
       res.json({
         success: true,
-        message: hasManifest ? 'Mod uploaded and extracted successfully' : 'Mod uploaded (no manifest.json found - may need manual setup)',
+        message: installResult.hasManifest
+          ? 'Mod uploaded successfully. Restart the server to load the new mod.'
+          : 'Mod archive uploaded, but no manifest.json was found. Check the archive structure.',
         filename: filename,
-        extracted: true,
-        hasManifest: hasManifest,
+        extracted: installResult.hasManifest,
+        hasManifest: installResult.hasManifest,
+        noManifest: !installResult.hasManifest,
+        autoInstallFailed: false,
+        needsRestart: true,
+        installedFolders: installResult.installedFolders,
       });
     } catch (e) {
-      // Extraction failed, keep zip anyway
+      fs.rmSync(metadataPath, { force: true });
       res.json({
         success: true,
-        message: 'Mod zip uploaded (extraction failed - will be available as zip)',
+        message: 'Mod archive uploaded, but automatic installation failed. Restart may still install it from the archive.',
         filename: filename,
         extracted: false,
+        hasManifest: false,
+        noManifest: false,
+        autoInstallFailed: true,
+        needsRestart: true,
       });
     }
   } catch (e) {
@@ -186,33 +331,48 @@ function deleteMod(req, res) {
     return res.status(400).json({ error: 'Mod folder name is required' });
   }
 
-  // Sanitize to prevent path traversal
   folder = path.basename(folder);
+  const preinstalledFolders = getPreinstalledModFolders();
+  if (preinstalledFolders.has(folder)) {
+    return res.status(403).json({ error: 'Built-in mods cannot be deleted from the web panel' });
+  }
 
-  // Only allow deleting from custom mods directory
-  var modPath = path.join(CUSTOM_MODS_DIR, folder);
-  var zipPath = path.join(CUSTOM_MODS_DIR, folder + '.zip');
+  const metadataEntries = loadAllMetadata();
+  const matchingMetadata = metadataEntries.filter(entry =>
+    entry.filename === `${folder}.zip` ||
+    (Array.isArray(entry.installedFolders) && entry.installedFolders.includes(folder))
+  );
 
-  if (!fs.existsSync(modPath) && !fs.existsSync(zipPath)) {
+  const sourcePaths = new Set([
+    path.join(CUSTOM_MODS_DIR, folder),
+    path.join(CUSTOM_MODS_DIR, `${folder}.zip`),
+  ]);
+  const gamePaths = new Set([
+    path.join(GAME_MODS_DIR, folder),
+  ]);
+
+  for (const metadata of matchingMetadata) {
+    sourcePaths.add(path.join(CUSTOM_MODS_DIR, metadata.filename));
+    sourcePaths.add(metadata._path);
+
+    if (Array.isArray(metadata.installedFolders)) {
+      for (const installedFolder of metadata.installedFolders) {
+        gamePaths.add(path.join(GAME_MODS_DIR, installedFolder));
+      }
+    }
+  }
+
+  const hasExistingTarget = [...sourcePaths, ...gamePaths].some(target => fs.existsSync(target));
+  if (!hasExistingTarget) {
     return res.status(404).json({ error: 'Custom mod not found' });
   }
 
   try {
-    // Delete the folder
-    if (fs.existsSync(modPath)) {
-      if (fs.statSync(modPath).isDirectory()) {
-        execSync('rm -rf "' + modPath + '"', { timeout: 10000 });
-      } else {
-        fs.unlinkSync(modPath);
-      }
+    for (const target of [...sourcePaths, ...gamePaths]) {
+      fs.rmSync(target, { recursive: true, force: true });
     }
 
-    // Also delete the zip if it exists
-    if (fs.existsSync(zipPath)) {
-      fs.unlinkSync(zipPath);
-    }
-
-    res.json({ success: true, message: 'Mod deleted successfully' });
+    res.json({ success: true, message: 'Mod deleted successfully', needsRestart: true });
   } catch (e) {
     res.status(500).json({ error: 'Failed to delete mod: ' + e.message });
   }

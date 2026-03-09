@@ -18,6 +18,25 @@ let cachedStatus = null;
 let cacheTime = 0;
 const CACHE_TTL = 3000; // 3 seconds
 
+function getNetworkInfo() {
+  const configuredPublicIp = process.env.PUBLIC_IP || process.env.SERVER_IP || '';
+  let localIps = [];
+
+  try {
+    localIps = execSync('hostname -I 2>/dev/null', { encoding: 'utf-8' })
+      .trim()
+      .split(/\s+/)
+      .filter(ip => ip && ip !== '127.0.0.1' && ip !== '::1');
+  } catch (error) {}
+
+  return {
+    joinIp: configuredPublicIp || localIps[0] || '',
+    localIps,
+    joinPort: 24642,
+    metricsPort: parseInt(process.env.METRICS_PORT || '9090', 10),
+  };
+}
+
 function collectStatus() {
   const now = Date.now();
   if (cachedStatus && now - cacheTime < CACHE_TTL) {
@@ -36,6 +55,13 @@ function collectStatus() {
     backupCount: 0,
     modCount: 0,
     version: 'v1.0.66',
+    scriptsHealthy: false,
+    events: {
+      passout: 0,
+      readycheck: 0,
+      offline: 0,
+    },
+    network: getNetworkInfo(),
   };
 
   // Read status.json from status-reporter.sh
@@ -56,6 +82,14 @@ function collectStatus() {
         status.cpu = parseFloat(data.resources.cpu_percent) || 0;
         status.memory.used = data.resources.memory_mb || 0;
       }
+      if (data.events) {
+        status.events.passout = data.events.passout || 0;
+        status.events.readycheck = data.events.readycheck || 0;
+        status.events.offline = data.events.offline || 0;
+      }
+      if (typeof data.scripts_healthy === 'boolean') {
+        status.scriptsHealthy = data.scripts_healthy;
+      }
       // Also support flat structure for backward compatibility
       if (!data.server && !data.game && !data.resources) {
         status.gameRunning = data.server_status === 'running' || data.game_running === 1;
@@ -65,6 +99,12 @@ function collectStatus() {
         status.memory.used = data.memory_usage_mb || 0;
         if (data.game_day) status.day = data.game_day;
         if (data.season) status.season = data.season;
+        status.events.passout = data.passout || 0;
+        status.events.readycheck = data.readycheck || 0;
+        status.events.offline = data.offline || 0;
+        if (typeof data.scripts_healthy === 'boolean') {
+          status.scriptsHealthy = data.scripts_healthy;
+        }
       }
     }
   } catch (e) {

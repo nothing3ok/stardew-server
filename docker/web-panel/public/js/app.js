@@ -60,9 +60,15 @@ const translations = {
     'dash.status': '服务器状态', 'dash.players': '在线玩家', 'dash.uptime': '运行时间',
     'dash.gameDay': '游戏日期', 'dash.backups': '备份数量', 'dash.mods': '已加载Mod',
     'dash.resources': '系统资源', 'dash.quickActions': '快捷操作',
+    'dash.details': '服务器详情', 'dash.joinIp': '联机 IP', 'dash.joinPort': '联机端口',
+    'dash.localIps': '容器 IP', 'dash.version': '版本', 'dash.scriptHealth': '自动化脚本',
+    'dash.metricsPort': '监控端口', 'dash.events': '自动化事件',
+    'dash.passout': '昏倒处理', 'dash.readyCheck': '准备检查', 'dash.offlineEvents': '离线恢复',
+    'dash.joinHint': '游戏内通常只需要输入 IP 地址。', 'dash.portHint': '星露谷联机输入框里不要追加端口号。',
+    'dash.healthy': '正常', 'dash.unhealthy': '异常',
     'dash.viewLogs': '查看日志', 'dash.restart': '重启服务器', 'dash.backup': '立即备份',
-    'term.title': 'SMAPI 控制台', 'term.hint': '点击"连接"打开 SMAPI 控制台。可在此输入 Steam Guard 验证码或 SMAPI 命令。',
-    'term.connect': '连接', 'term.disconnect': '断开', 'term.send': '发送', 'term.input': '输入命令或 Steam Guard 验证码...',
+    'term.title': 'SMAPI 控制台（非系统终端）', 'term.hint': '点击“连接”后会附着到正在运行的 SMAPI 进程。这里只能输入 SMAPI 命令或 Steam Guard 验证码，不能执行 Linux 命令。',
+    'term.connect': '连接', 'term.disconnect': '断开', 'term.send': '发送', 'term.input': '输入 SMAPI 命令或 Steam Guard 验证码...',
     'players.title': '在线玩家', 'players.loading': '加载中...',
     'players.none': '当前没有在线玩家', 'players.online': '在线：{online}/{max}', 'players.farm': '农场：{farm}',
     'saves.title': '存档文件', 'saves.backups': '备份列表', 'saves.noFiles': '未找到存档文件', 'saves.noBackups': '未找到备份',
@@ -72,12 +78,17 @@ const translations = {
     'mods.custom': '自定义', 'mods.builtin': '内置',
     'mods.upload': '上传模组', 'mods.delete': '删除', 'mods.confirmDelete': '确定要删除模组 {name} 吗？',
     'mods.uploadHint': '选择 .zip 模组文件', 'mods.uploading': '上传中...',
+    'mods.uploadInstalled': '模组已上传并安装到游戏目录。重启服务器后会加载新模组。',
+    'mods.uploadNoManifest': '模组压缩包已上传，但未找到 manifest.json，请检查压缩包结构。',
+    'mods.uploadFallback': '模组压缩包已上传，但自动安装失败。重启后仍会尝试从压缩包安装。',
+    'mods.deleteNeedsRestart': '模组已删除。重启服务器后将完全卸载。',
     'toast.modUploadOk': '模组上传成功！重启服务器后生效。', 'toast.modUploadFail': '模组上传失败',
     'toast.modDeleteOk': '模组已删除', 'toast.modDeleteFail': '模组删除失败',
     'config.group.Steam': 'Steam 设置', 'config.group.VNC': 'VNC 设置',
     'config.group.Display': '显示设置', 'config.group.Performance': '性能优化',
     'config.group.Backup': '备份设置', 'config.group.Stability': '稳定性',
     'config.group.Monitoring': '监控', 'config.group.Game': '游戏', 'config.group.Other': '其他',
+    'config.help.PUBLIC_IP': '公网联机时填你的公网 IP 或域名，例如 23.128.116.41。留空时仪表盘会显示容器当前检测到的内网 IP。',
     'login.subtitle': '服务器管理面板', 'login.password': '密码', 'login.button': '登录',
     'setup.title': '设置管理密码', 'setup.subtitle': '首次使用，请设置您的管理密码',
     'setup.password': '设置密码', 'setup.confirm': '确认密码', 'setup.button': '开始使用',
@@ -105,9 +116,15 @@ const translations = {
     'dash.status': 'Server Status', 'dash.players': 'Online Players', 'dash.uptime': 'Uptime',
     'dash.gameDay': 'Game Day', 'dash.backups': 'Backups', 'dash.mods': 'Loaded Mods',
     'dash.resources': 'System Resources', 'dash.quickActions': 'Quick Actions',
+    'dash.details': 'Server Details', 'dash.joinIp': 'Join IP', 'dash.joinPort': 'Join Port',
+    'dash.localIps': 'Container IPs', 'dash.version': 'Version', 'dash.scriptHealth': 'Automation',
+    'dash.metricsPort': 'Metrics Port', 'dash.events': 'Automation Events',
+    'dash.passout': 'Passout', 'dash.readyCheck': 'Ready Check', 'dash.offlineEvents': 'Offline Recovery',
+    'dash.joinHint': 'In-game usually only needs the IP address.', 'dash.portHint': 'Do not append the port in Stardew\'s join field.',
+    'dash.healthy': 'Healthy', 'dash.unhealthy': 'Unhealthy',
     'dash.viewLogs': 'View Logs', 'dash.restart': 'Restart Server', 'dash.backup': 'Backup Now',
-    'term.title': 'SMAPI Console', 'term.hint': 'Click "Connect" to open SMAPI console. You can enter Steam Guard codes or SMAPI commands here.',
-    'term.connect': 'Connect', 'term.disconnect': 'Disconnect', 'term.send': 'Send', 'term.input': 'Type command or Steam Guard code...',
+    'term.title': 'SMAPI Console (Not a System Shell)', 'term.hint': 'Click "Connect" to attach to the running SMAPI process. This accepts SMAPI commands and Steam Guard codes, not Linux shell commands.',
+    'term.connect': 'Connect', 'term.disconnect': 'Disconnect', 'term.send': 'Send', 'term.input': 'Type a SMAPI command or Steam Guard code...',
     'players.title': 'Online Players', 'players.loading': 'Loading...',
     'players.none': 'No players online', 'players.online': 'Online: {online}/{max}', 'players.farm': 'Farm: {farm}',
     'saves.title': 'Save Files', 'saves.backups': 'Backups', 'saves.noFiles': 'No save files found', 'saves.noBackups': 'No backups found',
@@ -117,12 +134,17 @@ const translations = {
     'mods.custom': 'Custom', 'mods.builtin': 'Built-in',
     'mods.upload': 'Upload Mod', 'mods.delete': 'Delete', 'mods.confirmDelete': 'Are you sure you want to delete mod {name}?',
     'mods.uploadHint': 'Select a .zip mod file', 'mods.uploading': 'Uploading...',
+    'mods.uploadInstalled': 'Mod uploaded and installed into the game Mods directory. Restart the server to load it.',
+    'mods.uploadNoManifest': 'Mod archive uploaded, but no manifest.json was found. Check the archive structure.',
+    'mods.uploadFallback': 'Mod archive uploaded, but automatic installation failed. Restart may still install it from the archive.',
+    'mods.deleteNeedsRestart': 'Mod deleted. Restart the server to fully unload it.',
     'toast.modUploadOk': 'Mod uploaded! Restart server to apply.', 'toast.modUploadFail': 'Mod upload failed',
     'toast.modDeleteOk': 'Mod deleted', 'toast.modDeleteFail': 'Mod delete failed',
     'config.group.Steam': 'Steam', 'config.group.VNC': 'VNC',
     'config.group.Display': 'Display', 'config.group.Performance': 'Performance',
     'config.group.Backup': 'Backup', 'config.group.Stability': 'Stability',
     'config.group.Monitoring': 'Monitoring', 'config.group.Game': 'Game', 'config.group.Other': 'Other',
+    'config.help.PUBLIC_IP': 'Enter your public IP or domain for internet play, for example 23.128.116.41. Leave it empty to show the container-detected LAN IP instead.',
     'login.subtitle': 'Server Management Panel', 'login.password': 'Password', 'login.button': 'Login',
     'setup.title': 'Set Admin Password', 'setup.subtitle': 'First time setup - please create your admin password',
     'setup.password': 'Password', 'setup.confirm': 'Confirm Password', 'setup.button': 'Get Started',
@@ -167,6 +189,13 @@ function statusOrb(state) {
 
 function statusDot(state) {
   return `<span class="status-dot ${state}" aria-hidden="true"></span>`;
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.textContent = value;
+  }
 }
 
 function applyTheme() {
@@ -470,6 +499,17 @@ function updateDashboardUI(data) {
   const ramBar = document.getElementById('ram-bar');
   ramBar.style.width = Math.min(memPct, 100) + '%';
   ramBar.className = 'progress-fill' + (memPct > 80 ? ' danger' : memPct > 60 ? ' warn' : '');
+
+  const network = data.network || {};
+  setText('detail-join-ip', network.joinIp || '--');
+  setText('detail-join-port', `${network.joinPort || 24642}/UDP`);
+  setText('detail-local-ips', network.localIps && network.localIps.length ? network.localIps.join(', ') : '--');
+  setText('detail-version', data.version || '--');
+  setText('detail-script-health', data.scriptsHealthy ? t('dash.healthy') : t('dash.unhealthy'));
+  setText('detail-metrics-port', network.metricsPort ? String(network.metricsPort) : '--');
+  setText('detail-event-passout', String(data.events?.passout || 0));
+  setText('detail-event-readycheck', String(data.events?.readycheck || 0));
+  setText('detail-event-offline', String(data.events?.offline || 0));
 }
 
 function formatUptime(seconds) {
@@ -675,6 +715,7 @@ async function loadConfig() {
         '<div>' +
           '<div class="config-label">' + escapeHtml(item.label) + '</div>' +
           '<div class="config-key">' + item.key + '</div>' +
+          (item.descriptionKey ? '<div class="config-help">' + escapeHtml(t(item.descriptionKey)) + '</div>' : '') +
         '</div>' +
         '<div class="config-value">' + valueHtml + '</div>';
       card.appendChild(row);
@@ -794,7 +835,7 @@ async function loadMods() {
 
   list.innerHTML = uploadHtml + data.mods.map(function(m) {
     var deleteBtn = m.isCustom
-      ? '<button class="btn btn-sm" style="color:#ef4444;border-color:#ef4444" onclick="deleteMod(\'' + escapeHtml(m.folder) + '\', \'' + escapeHtml(m.name) + '\')">' + icon('trash', 'icon') + ' ' + t('mods.delete') + '</button>'
+      ? '<button class="btn btn-sm mod-delete-btn" style="color:#ef4444;border-color:#ef4444" data-folder="' + escapeHtml(m.folder) + '" data-name="' + escapeHtml(m.name) + '">' + icon('trash', 'icon') + ' ' + t('mods.delete') + '</button>'
       : '';
     return '<div class="mod-item">' +
       '<div class="mod-info">' +
@@ -808,6 +849,12 @@ async function loadMods() {
       '</div>' +
     '</div>';
   }).join('');
+
+  list.querySelectorAll('.mod-delete-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      deleteMod(btn.dataset.folder, btn.dataset.name);
+    });
+  });
 }
 
 async function handleModUpload(input) {
@@ -838,7 +885,7 @@ async function handleModUpload(input) {
     input.value = '';
 
     if (data && data.success) {
-      showToast(t('toast.modUploadOk'), 'success');
+      showToast(getModUploadToast(data), 'success');
       loadMods();
     } else {
       showToast((data && data.error) || t('toast.modUploadFail'), 'error');
@@ -852,11 +899,36 @@ async function deleteMod(folder, name) {
 
   var data = await API.del('/api/mods/' + encodeURIComponent(folder));
   if (data && data.success) {
-    showToast(t('toast.modDeleteOk'), 'success');
+    showToast(getModDeleteToast(data), 'success');
     loadMods();
   } else {
     showToast((data && data.error) || t('toast.modDeleteFail'), 'error');
   }
+}
+
+function getModUploadToast(data) {
+  if (data && data.success) {
+    if (data.hasManifest) {
+      return t('mods.uploadInstalled');
+    }
+    if (data.noManifest) {
+      return t('mods.uploadNoManifest');
+    }
+    if (data.autoInstallFailed) {
+      return t('mods.uploadFallback');
+    }
+    return t('toast.modUploadOk');
+  }
+
+  return t('toast.modUploadOk');
+}
+
+function getModDeleteToast(data) {
+  if (data && data.success && data.needsRestart) {
+    return t('mods.deleteNeedsRestart');
+  }
+
+  return t('toast.modDeleteOk');
 }
 
 // ─── Actions ─────────────────────────────────────────────────────

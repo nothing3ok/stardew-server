@@ -41,6 +41,7 @@ const CONFIG_SCHEMA = {
   ],
   'Game': [
     { key: 'SAVE_NAME', label: 'Save Name', type: 'text', default: '' },
+    { key: 'PUBLIC_IP', label: 'Public Join IP', type: 'text', default: '', descriptionKey: 'config.help.PUBLIC_IP' },
   ],
   'Other': [
     { key: 'TZ', label: 'Timezone', type: 'text', default: 'UTC' },
@@ -80,12 +81,26 @@ function findEnvFile() {
   for (const p of candidates) {
     if (fs.existsSync(p)) return p;
   }
-  return null;
+
+  return config.ENV_FILE || '/home/steam/.env';
 }
 
 function writeEnvFile(envData) {
   const envPath = findEnvFile();
   if (!envPath) throw new Error('.env file not found');
+
+  const envDir = path.dirname(envPath);
+  if (!fs.existsSync(envDir)) {
+    fs.mkdirSync(envDir, { recursive: true });
+  }
+
+  if (!fs.existsSync(envPath)) {
+    fs.writeFileSync(
+      envPath,
+      '# Managed by Puppy Stardew Server web panel\n',
+      'utf-8'
+    );
+  }
 
   // Read original file to preserve comments and order
   const original = fs.readFileSync(envPath, 'utf-8');

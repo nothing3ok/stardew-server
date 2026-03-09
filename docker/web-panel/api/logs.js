@@ -4,7 +4,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 const config = require('../server');
 
 // Log file mapping
@@ -16,13 +15,31 @@ const LOG_FILES = {
   game: 'game.log',
 };
 
-function getLogPath(filter) {
-  if (filter === 'all' || filter === 'smapi') {
-    // SMAPI log path from central config
-    return config.SMAPI_LOG;
-  }
+function getCategorizedLogPath(filter) {
   const filename = LOG_FILES[filter] || LOG_FILES.all;
-  return path.join(config.LOG_DIR, filename);
+  return path.join(config.LOG_DIR, 'categorized', filename);
+}
+
+function getLogSource(filter) {
+  if (filter === 'all' || filter === 'smapi') {
+    return { path: config.SMAPI_LOG, filtered: false };
+  }
+
+  const categorizedPath = getCategorizedLogPath(filter);
+  if (fs.existsSync(categorizedPath)) {
+    return { path: categorizedPath, filtered: false };
+  }
+
+  return { path: config.SMAPI_LOG, filtered: true };
+}
+
+function matchesFilter(filter, line) {
+  if (!line || filter === 'all' || filter === 'smapi') return true;
+  if (filter === 'error') return /ERROR|FATAL|Exception/i.test(line);
+  if (filter === 'mod') return /\[.*\].*(Always On Server|AutoHideHost|Server Auto Load)/i.test(line) || /(Always On Server|AutoHideHost|Server Auto Load)/i.test(line);
+  if (filter === 'server') return /Server|Multiplayer|Connection|Player/i.test(line);
+  if (filter === 'game') return true;
+  return true;
 }
 
 function parseLogLevel(line) {
@@ -39,7 +56,8 @@ function getLogs(req, res) {
   const lines = parseInt(req.query.lines || '200', 10);
   const search = req.query.search || '';
 
-  const logPath = getLogPath(filter);
+  const source = getLogSource(filter);
+  const logPath = source.path;
 
   if (!fs.existsSync(logPath)) {
     return res.json({ lines: [], total: 0, file: logPath, exists: false });
@@ -48,6 +66,10 @@ function getLogs(req, res) {
   try {
     const content = fs.readFileSync(logPath, 'utf-8');
     let allLines = content.split('\n').filter(l => l.trim());
+
+    if (source.filtered) {
+      allLines = allLines.filter(line => matchesFilter(filter, line));
+    }
 
     // Search filter
     if (search) {
@@ -75,7 +97,8 @@ function getLogs(req, res) {
 // ─── WebSocket Log Streaming ─────────────────────────────────────
 
 function subscribeLogs(ws, filter) {
-  const logPath = getLogPath(filter);
+  const source = getLogSource(filter);
+  const logPath = source.path;
 
   // Close existing watcher
   if (ws._logWatcher) {
@@ -120,6 +143,9 @@ function subscribeLogs(ws, filter) {
         fileSize = stat.size;
         const lines = newData.split('\n').filter(l => l.trim());
         for (const line of lines) {
+          if (source.filtered && !matchesFilter(filter, line)) {
+            continue;
+          }
           if (ws.readyState === 1) {
             ws.send(JSON.stringify({
               type: 'log',

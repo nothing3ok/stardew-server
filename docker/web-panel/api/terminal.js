@@ -112,7 +112,7 @@ function openTerminal(ws) {
 
     ws.send(JSON.stringify({
       type: 'terminal:opened',
-      data: `Connected to SMAPI (PID: ${smapiPid}). You can type commands or Steam Guard code below.\r\n`,
+      data: `Connected to SMAPI (PID: ${smapiPid}). This is not a Linux shell; type SMAPI commands or Steam Guard codes below.\r\n`,
     }));
 
     resetIdleTimeout();
