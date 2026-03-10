@@ -8,7 +8,7 @@
 <td width="70%">
 
 # Puppy Stardew Server
-## One-Command Stardew Valley Multiplayer Server
+## Dockerized Stardew Valley Multiplayer Server
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/truemanlive/puppy-stardew-server)](https://hub.docker.com/r/truemanlive/puppy-stardew-server)
 [![Docker Image Size](https://img.shields.io/docker/image-size/truemanlive/puppy-stardew-server)](https://hub.docker.com/r/truemanlive/puppy-stardew-server)
@@ -17,7 +17,7 @@
 
 English | [中文](README_CN.md)
 
-**One-Command Deployment | Cross-Platform Multiplayer Support**
+**Production-ready deployment, browser-based operations, and persistent save management**
 
 </td>
 </tr>
@@ -27,7 +27,15 @@ English | [中文](README_CN.md)
 
 ---
 
+## Overview
+
+Puppy Stardew Server packages Stardew Valley, SMAPI, and a curated server-oriented mod stack into a Docker-based deployment workflow. The project is designed for operators who want a repeatable multiplayer server setup with persistent data, predictable restart behavior, and a web-based management surface.
+
+It supports both one-command bootstrap and manual Docker Compose deployment. Once installed, the server can be operated through the web panel for save management, log inspection, runtime configuration, backups, and mod workflows.
+
 ## Project Architecture
+
+The runtime is organized as a single game container with persistent bind mounts for saves, logs, backups, panel state, and custom mods. The web panel and automation scripts live alongside the game process so operators can manage the server without attaching to the container for routine tasks.
 
 ```mermaid
 graph TB
@@ -92,39 +100,23 @@ graph TB
     style SLG fill:#FFA500
 ```
 
-## Deploy Your Stardew Valley Server in 3 Minutes
+## Core Capabilities
 
-Setting up a **Stardew Valley dedicated server** has never been easier! With **one simple command**, you can have your own 24/7 multiplayer server running on **any platform** - PC, Mac, Linux, iOS, and Android players can all join together.
-
-**Perfect for:**
-- **Remote Multiplayer** - Play with friends anywhere in the world
-- **Cross-Platform Gaming** - iOS, Android, and PC players together
-- **24/7 Always-On Server** - Join anytime, no need for host to be online
-- **Easy Setup** - One command deployment with Docker Compose
-- **Low Resource Usage** - Runs smoothly on just 2GB RAM
-
-## Key Features
-
-- **One-Command Deploy** - Deploy in 3 minutes with a single command
-- **Cross-Platform Support** - PC, Mac, Linux, iOS, Android all supported
-- **24/7 Dedicated Server** ⚡ - Runs independently without requiring the host to be online
-- **Docker Compose** - Easy deployment and management
-- **Resource Efficient** - Runs smoothly on servers with only 2GB RAM
-- **Auto-Save Loading** - Automatically loads your save on server restart
-- **VNC Remote Access** 🖥️ - Built-in VNC for easy first-time setup
-- **Instant Sleep** - Bonus feature: Players can sleep at any time without waiting
-- **Hidden Host** - Host player is automatically hidden for seamless gameplay
-- **Skill Protection** 🛡️ - NEW: Prevents level anomalies, maintains natural progression
-- **Crash Auto-Restart** 🔄 - Automatic recovery from game crashes
-- **Prometheus Metrics** 📊 - Real-time server health monitoring
-- **Custom Mods Support** 🔧 - Easy mod installation via volume mount
-- **Web Management Panel** 🌐 - Browser-based server control and monitoring
+- **One-command bootstrap** for first-time deployment on Docker hosts
+- **Manual Compose deployment** for operators who prefer explicit infrastructure control
+- **Persistent runtime state** for saves, logs, backups, panel authentication, and uploaded mods
+- **Integrated web panel** for status, logs, saves, config changes, and operational actions
+- **Automatic save loading** through the bundled server automation stack
+- **Headless operation** with optional VNC only when interactive setup is needed
+- **Backup and restore workflows** including archive download and uploaded save import
+- **Mod management workflows** for custom mod upload, installation, and cleanup
+- **Monitoring and recovery hooks** including Prometheus metrics and crash restart controls
 
 <div align="center">
 
 ![Instant Sleep Demo](https://raw.githubusercontent.com/truman-world/puppy-stardew-server/main/screenshots/game/instant-sleep-demo.gif)
 
-*Bonus Feature: Instant sleep - Click bed → Sleep instantly → New day begins!*
+*Included automation allows the server to progress without waiting on a visible host client.*
 
 </div>
 
@@ -134,23 +126,26 @@ Setting up a **Stardew Valley dedicated server** has never been easier! With **o
 
 ![Web Panel Dashboard](screenshots/panel/Dashboard.png)
 
+Operational overview with server status, join details, runtime metrics, and health signals.
+
 ### Saves and Backups
 
 ![Web Panel Saves](screenshots/panel/Saves.png)
 
-## What's New in Latest Version
+Save archive upload, default save selection, backup execution, and downloadable restore points.
+
+## Release Highlights
 
 ### v1.0.77 (March 2026)
 
-**Web Panel, One-Click Setup, and Runtime Improvements:**
-- **🌐 First-Run Setup Flow** - The web panel now prompts for an admin password on first visit instead of relying on a shared default password
-- **🎨 Light/Dark Theme Support** - Theme preference persists across the login page and the main dashboard
-- **💾 Save Upload & Default Selection** - Upload Stardew Valley save archives from the panel, extract them on the server, and set a default auto-load save
-- **📦 Backup UX Improvements** - Background backup jobs, persistent progress state, downloadable backup archives, and lower default compression for reduced CPU spikes
-- **🧩 Better Mod and Config Workflows** - Custom mod upload/delete is fixed, Steam credentials can be updated safely, and runtime config changes can trigger a real container rebuild from the panel
-- **📋 Better Logs & Dashboard Status** - Improved categorized logs, richer server details, better join IP handling, more accurate player/runtime status reporting, and a GitHub shortcut in the top bar
-- **🚀 Cleaner One-Click Bootstrap** - Quick-start output now matches the panel-first workflow, prefers IPv4 in its connection hint, and no longer points users at a shared default password
-- **🔇 Headless Audio Fixes** - Default headless audio/OpenAL settings now avoid noisy ALSA startup errors in clean Docker environments
+This release focused on closing the gap between a working prototype and an operator-friendly server distribution.
+
+- **First-run panel setup** replaces shared default credentials with an explicit password initialization flow.
+- **Theme and UI polish** adds light/dark mode support and improves navigation consistency across login and panel pages.
+- **Save management** now includes uploaded save import, default save selection, background backup jobs, and downloadable backup archives.
+- **Config workflows** support runtime updates for Steam credentials and container-affecting settings from the web panel.
+- **Logs and status reporting** provide better categorization, richer dashboard metadata, improved join IP handling, and more accurate player state reporting.
+- **Bootstrap and runtime fixes** clean up quick-start output, reduce headless audio noise, and improve behavior in non-interactive server environments.
 
 ## Quick Start
 
