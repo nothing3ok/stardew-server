@@ -5,8 +5,10 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const zlib = require('zlib');
 const { spawn, spawnSync } = require('child_process');
 const config = require('../server');
+const saveEditor = require('../lib/save-editor');
 
 const BACKUP_STATUS_FILE = path.join(config.DATA_DIR, 'backup-status.json');
 let activeBackup = null;
@@ -22,7 +24,11 @@ function ensureDir(dirPath) {
 }
 
 function runCommand(command, args, options = {}) {
-  const result = spawnSync(command, args, {
+  const actualCommand = process.platform === 'win32' && command === 'tar'
+    ? 'tar.exe'
+    : command;
+
+  const result = spawnSync(actualCommand, args, {
     encoding: 'utf-8',
     ...options,
   });
@@ -64,6 +70,98 @@ function getTarGzipArgs(outputPath, sourceBaseDir, sourceNames, verbose) {
 
   args.push(outputPath, '-C', sourceBaseDir);
   return args.concat(sourceNames);
+}
+
+function writeTarString(buffer, offset, length, value) {
+  const input = Buffer.from(String(value || ''), 'utf8');
+  input.copy(buffer, offset, 0, Math.min(input.length, length));
+}
+
+function writeTarOctal(buffer, offset, length, value) {
+  const octal = value.toString(8);
+  const padded = octal.padStart(length - 1, '0');
+  writeTarString(buffer, offset, length - 1, padded);
+  buffer[offset + length - 1] = 0;
+}
+
+function createTarHeader(name, stat, typeFlag) {
+  const header = Buffer.alloc(512, 0);
+  const normalizedName = name.replace(/\\/g, '/');
+
+  writeTarString(header, 0, 100, normalizedName);
+  writeTarOctal(header, 100, 8, stat.mode & 0o7777);
+  writeTarOctal(header, 108, 8, 0);
+  writeTarOctal(header, 116, 8, 0);
+  writeTarOctal(header, 124, 12, typeFlag === '5' ? 0 : stat.size);
+  writeTarOctal(header, 136, 12, Math.floor(stat.mtimeMs / 1000));
+
+  for (let i = 148; i < 156; i += 1) {
+    header[i] = 0x20;
+  }
+
+  header[156] = typeFlag.charCodeAt(0);
+  writeTarString(header, 257, 6, 'ustar');
+  writeTarString(header, 263, 2, '00');
+
+  let checksum = 0;
+  for (let i = 0; i < 512; i += 1) {
+    checksum += header[i];
+  }
+
+  const checksumText = checksum.toString(8).padStart(6, '0');
+  writeTarString(header, 148, 6, checksumText);
+  header[154] = 0;
+  header[155] = 0x20;
+
+  return header;
+}
+
+function addPathToTarChunks(chunks, absolutePath, archivePath) {
+  const stat = fs.statSync(absolutePath);
+  const normalizedPath = archivePath.replace(/\\/g, '/');
+
+  if (stat.isDirectory()) {
+    const dirName = normalizedPath.endsWith('/') ? normalizedPath : `${normalizedPath}/`;
+    chunks.push(createTarHeader(dirName, stat, '5'));
+
+    const entries = fs.readdirSync(absolutePath).sort();
+    entries.forEach(entry => {
+      addPathToTarChunks(
+        chunks,
+        path.join(absolutePath, entry),
+        path.posix.join(dirName.replace(/\/$/, ''), entry)
+      );
+    });
+    return;
+  }
+
+  chunks.push(createTarHeader(normalizedPath, stat, '0'));
+  const content = fs.readFileSync(absolutePath);
+  chunks.push(content);
+
+  const remainder = content.length % 512;
+  if (remainder !== 0) {
+    chunks.push(Buffer.alloc(512 - remainder, 0));
+  }
+}
+
+function createTarGzipArchive(outputPath, sourceBaseDir, sourceNames) {
+  const chunks = [];
+
+  sourceNames.forEach(sourceName => {
+    addPathToTarChunks(
+      chunks,
+      path.join(sourceBaseDir, sourceName),
+      sourceName
+    );
+  });
+
+  chunks.push(Buffer.alloc(1024, 0));
+  const tarBuffer = Buffer.concat(chunks);
+  const gzipped = zlib.gzipSync(tarBuffer, {
+    level: getBackupCompressionLevel(),
+  });
+  fs.writeFileSync(outputPath, gzipped);
 }
 
 function parseEnvFile() {
@@ -180,6 +278,15 @@ function setSelectedSaveName(saveName) {
   fs.writeFileSync(path.join(config.SAVES_DIR, '.selected_save'), `${saveName}\n`, 'utf-8');
 }
 
+function clearSelectedSaveName() {
+  writeEnvFile({ SAVE_NAME: '' });
+
+  const markerPath = path.join(config.SAVES_DIR, '.selected_save');
+  if (fs.existsSync(markerPath)) {
+    fs.unlinkSync(markerPath);
+  }
+}
+
 function isValidSaveDirectory(saveDir) {
   if (!fs.existsSync(saveDir)) {
     return false;
@@ -229,9 +336,13 @@ function createOverwriteBackup(saveNames) {
     return '';
   }
 
-  runCommand('tar', getTarGzipArgs(backupPath, config.SAVES_DIR, existingNames, false), {
-    timeout: 30000,
-  });
+  if (process.platform === 'win32') {
+    createTarGzipArchive(backupPath, config.SAVES_DIR, existingNames);
+  } else {
+    runCommand('tar', getTarGzipArgs(backupPath, config.SAVES_DIR, existingNames, false), {
+      timeout: 30000,
+    });
+  }
 
   return backupName;
 }
@@ -805,6 +916,113 @@ function downloadBackup(req, res) {
   res.download(filePath, filename);
 }
 
+function deleteBackup(req, res) {
+  try {
+    const filename = req.params.filename;
+
+    if (!filename || filename.includes('..') || filename.includes('/')) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
+
+    const filePath = path.join(config.BACKUPS_DIR, filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Backup not found' });
+    }
+
+    const currentStatus = getBackupStatusSnapshot();
+    if (currentStatus.state === 'running' && currentStatus.backupName === filename) {
+      return res.status(409).json({ error: 'Backup is currently being created' });
+    }
+
+    fs.unlinkSync(filePath);
+
+    res.json({
+      success: true,
+      message: `Deleted backup ${filename}`,
+      filename,
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to delete backup', details: e.message });
+  }
+}
+
+function getSaveEditor(req, res) {
+  try {
+    const data = saveEditor.loadSaveForEditor(config, req.params.saveName);
+    res.json({
+      success: true,
+      save: data,
+    });
+  } catch (e) {
+    const status = /invalid save name/i.test(e.message) ? 400 : 500;
+    res.status(status).json({ error: 'Failed to load save editor data', details: e.message });
+  }
+}
+
+function deleteSave(req, res) {
+  try {
+    const saveName = saveEditor.validateSaveName(req.params.saveName);
+    const saveDir = path.join(config.SAVES_DIR, saveName);
+
+    if (!fs.existsSync(saveDir) || !fs.statSync(saveDir).isDirectory()) {
+      return res.status(404).json({ error: 'Save not found' });
+    }
+
+    const overwriteBackup = createOverwriteBackup([saveName]);
+    removePath(saveDir);
+
+    const wasDefault = getSelectedSaveName() === saveName;
+    if (wasDefault) {
+      clearSelectedSaveName();
+    }
+
+    res.json({
+      success: true,
+      message: `Deleted save ${saveName}`,
+      saveName,
+      overwriteBackup,
+      defaultCleared: wasDefault,
+      needsRestart: true,
+    });
+  } catch (e) {
+    const status = /invalid save name/i.test(e.message) ? 400 : 500;
+    res.status(status).json({ error: 'Failed to delete save', details: e.message });
+  }
+}
+
+function migrateSaveHost(req, res) {
+  try {
+    const body = req.body || {};
+    const saveName = body.saveName;
+    const farmhandIndex = body.farmhandIndex;
+
+    const validatedSaveName = saveEditor.validateSaveName(saveName);
+    const preview = saveEditor.loadSaveForEditor(config, validatedSaveName);
+    const parsedIndex = parseInt(farmhandIndex, 10);
+    if (Number.isNaN(parsedIndex) || parsedIndex < 0 || parsedIndex >= preview.players.farmhands.length) {
+      return res.status(400).json({ error: 'Failed to migrate host', details: 'Invalid farmhand index' });
+    }
+
+    const overwriteBackup = createOverwriteBackup([validatedSaveName]);
+    const result = saveEditor.migrateSaveHost(config, validatedSaveName, parsedIndex);
+
+    res.json({
+      success: true,
+      message: `Host migrated from ${result.oldHostName} to ${result.newHostName}`,
+      overwriteBackup,
+      updatedSaveGameInfo: result.updatedSaveGameInfo,
+      save: {
+        saveName: result.saveName,
+        players: result.players,
+      },
+      needsRestart: true,
+    });
+  } catch (e) {
+    const status = /invalid save name|invalid farmhand index/i.test(e.message) ? 400 : 500;
+    res.status(status).json({ error: 'Failed to migrate host', details: e.message });
+  }
+}
+
 module.exports = {
   getSaves,
   getBackups,
@@ -812,5 +1030,9 @@ module.exports = {
   createBackup,
   uploadSave,
   setDefaultSave,
+  deleteSave,
   downloadBackup,
+  deleteBackup,
+  getSaveEditor,
+  migrateSaveHost,
 };

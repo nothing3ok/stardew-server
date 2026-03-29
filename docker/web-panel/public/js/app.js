@@ -29,6 +29,7 @@ let statusInterval = null;
 let lastStatusData = null;
 let backupStatusPoll = null;
 let lastBackupStatus = null;
+let currentHostMigrationSave = '';
 
 function detectTheme() {
   const saved = localStorage.getItem('panel_theme');
@@ -77,8 +78,11 @@ const translations = {
     'saves.title': '存档文件', 'saves.backups': '备份列表', 'saves.noFiles': '未找到存档文件', 'saves.noBackups': '未找到备份',
     'saves.backupNow': '立即备份', 'saves.unknown': '未知',
     'saves.upload': '上传存档', 'saves.uploading': '上传中...', 'saves.uploadHint': '上传星露谷存档 zip。面板会校验并解压到服务器存档目录，重启容器后可自动加载。',
-    'saves.setDefaultAfterUpload': '上传后设为默认存档', 'saves.setDefault': '设为默认', 'saves.defaultBadge': '默认自动载入',
-    'saves.restartHint': '重启 Docker 容器后生效。', 'saves.overwriteBackup': '已为同名旧存档创建备份：{name}',
+    'saves.setDefaultAfterUpload': '上传后设为默认存档', 'saves.setDefault': '设为默认', 'saves.delete': '删除存档', 'saves.defaultBadge': '默认自动载入',
+    'saves.hostMigration': '主机迁移', 'saves.hostMigrationHint': '选择一个存档，查看当前 host 和 farmhand，然后把任意 farmhand 提升为新的 host。系统会原地更新主存档和 SaveGameInfo。', 'saves.chooseSave': '选择存档',
+    'saves.chooseSaveHint': '先选择一个存档，再加载可迁移玩家列表。', 'saves.refreshMigration': '刷新', 'saves.currentHost': '当前 Host', 'saves.farmhands': '可提升的 Farmhands',
+    'saves.noFarmhands': '这个存档没有可迁移的 farmhand。', 'saves.migrateHost': '迁移为 Host', 'saves.migrationNote': '迁移前会自动为该存档创建一个覆盖前备份。修改完成后建议重启容器再进入游戏。', 'saves.saveGameInfoUpdated': 'SaveGameInfo 已同步更新。',
+    'saves.restartHint': '重启 Docker 容器后生效。', 'saves.overwriteBackup': '已为同名旧存档创建备份：{name}', 'saves.deleteConfirm': '确定要删除存档 {name} 吗？系统会先自动创建一份删除前备份。', 'saves.deleteDefaultCleared': '该存档原本是默认自动载入存档，已同时清空默认选择。',
     'saves.multipleImported': '压缩包包含多个存档，已导入但未自动设置默认存档。',
     'saves.backupRunning': '备份进行中，请勿重复点击或反复刷新页面。',
     'saves.backupCompleted': '最近一次备份已完成。',
@@ -121,7 +125,8 @@ const translations = {
     'logs.notFound': '日志文件尚未生成，服务器可能仍在启动中...',
     'toast.backupOk': '备份创建成功！', 'toast.backupFail': '备份失败',
     'toast.saveUploadOk': '存档上传成功。', 'toast.saveUploadDefaultOk': '存档上传成功，已设为默认自动载入存档。', 'toast.saveUploadFail': '存档上传失败',
-    'toast.saveDefaultOk': '默认存档已更新。', 'toast.saveDefaultFail': '设置默认存档失败',
+    'toast.saveDefaultOk': '默认存档已更新。', 'toast.saveDefaultFail': '设置默认存档失败', 'toast.saveDeleteOk': '存档已删除。', 'toast.saveDeleteFail': '删除存档失败',
+    'toast.hostMigrationOk': '主机迁移完成。', 'toast.hostMigrationFail': '主机迁移失败', 'toast.hostMigrationLoading': '正在加载存档详情...', 'toast.hostMigrationBackup': '已创建迁移前备份。',
     'toast.backupStarted': '备份任务已在后台开始，可以离开当前页面。',
     'toast.backupRunning': '已有备份任务正在进行中。',
     'toast.restartOk': '重启指令已发送', 'toast.restartFail': '重启失败',
@@ -136,6 +141,7 @@ const translations = {
     'github.open': '打开项目 GitHub 仓库',
     'lang.toggle': '切换语言', 'logout.title': '退出登录',
     'theme.light': '切换到亮色模式', 'theme.dark': '切换到暗色模式',
+    'saves.saveLocal': '保存到本地', 'saves.deleteBackup': '删除备份', 'saves.deleteBackupConfirm': '确定要删除备份 {name} 吗？删除后将不再有任何记录。', 'toast.backupDeleteOk': '备份已删除。', 'toast.backupDeleteFail': '删除备份失败',
   },
   en: {
     'nav.dashboard': 'Dashboard', 'nav.logs': 'Logs', 'nav.terminal': 'Terminal',
@@ -158,8 +164,11 @@ const translations = {
     'saves.title': 'Save Files', 'saves.backups': 'Backups', 'saves.noFiles': 'No save files found', 'saves.noBackups': 'No backups found',
     'saves.backupNow': 'Backup Now', 'saves.unknown': 'unknown',
     'saves.upload': 'Upload Save', 'saves.uploading': 'Uploading...', 'saves.uploadHint': 'Upload a Stardew Valley save zip. The panel will validate it, extract it into the server save directory, and it can auto-load after a container restart.',
-    'saves.setDefaultAfterUpload': 'Set imported save as default', 'saves.setDefault': 'Set Default', 'saves.defaultBadge': 'Auto-load Default',
-    'saves.restartHint': 'Takes effect after restarting the Docker container.', 'saves.overwriteBackup': 'Created a backup for overwritten saves: {name}',
+    'saves.setDefaultAfterUpload': 'Set imported save as default', 'saves.setDefault': 'Set Default', 'saves.delete': 'Delete Save', 'saves.defaultBadge': 'Auto-load Default',
+    'saves.hostMigration': 'Host Migration', 'saves.hostMigrationHint': 'Pick a save, review the current host and farmhands, then promote a farmhand to host. The panel updates the main save file and SaveGameInfo in place.', 'saves.chooseSave': 'Choose a save',
+    'saves.chooseSaveHint': 'Select a save to load its host migration details.', 'saves.refreshMigration': 'Refresh', 'saves.currentHost': 'Current Host', 'saves.farmhands': 'Farmhands',
+    'saves.noFarmhands': 'This save has no eligible farmhands to promote.', 'saves.migrateHost': 'Promote To Host', 'saves.migrationNote': 'A pre-migration backup is created automatically for this save. Restart the container before rejoining the world.', 'saves.saveGameInfoUpdated': 'SaveGameInfo was updated too.',
+    'saves.restartHint': 'Takes effect after restarting the Docker container.', 'saves.overwriteBackup': 'Created a backup for overwritten saves: {name}', 'saves.deleteConfirm': 'Delete save {name}? A pre-delete backup will be created automatically.', 'saves.deleteDefaultCleared': 'This save was the default auto-load save, so the default selection was cleared too.',
     'saves.multipleImported': 'The archive contained multiple saves, so the default save was not changed automatically.',
     'saves.backupRunning': 'Backup is in progress. Avoid repeated clicks or refreshes.',
     'saves.backupCompleted': 'The latest backup completed successfully.',
@@ -202,7 +211,8 @@ const translations = {
     'logs.notFound': 'Log file not found yet. Server may still be starting...',
     'toast.backupOk': 'Backup created!', 'toast.backupFail': 'Backup failed',
     'toast.saveUploadOk': 'Save uploaded.', 'toast.saveUploadDefaultOk': 'Save uploaded and set as the default auto-load save.', 'toast.saveUploadFail': 'Save upload failed',
-    'toast.saveDefaultOk': 'Default save updated.', 'toast.saveDefaultFail': 'Failed to set default save',
+    'toast.saveDefaultOk': 'Default save updated.', 'toast.saveDefaultFail': 'Failed to set default save', 'toast.saveDeleteOk': 'Save deleted.', 'toast.saveDeleteFail': 'Failed to delete save',
+    'toast.hostMigrationOk': 'Host migration completed.', 'toast.hostMigrationFail': 'Host migration failed', 'toast.hostMigrationLoading': 'Loading save details...', 'toast.hostMigrationBackup': 'Created a pre-migration backup.',
     'toast.backupStarted': 'Backup started in the background. You can leave this page.',
     'toast.backupRunning': 'A backup is already in progress.',
     'toast.restartOk': 'Restart initiated', 'toast.restartFail': 'Restart failed',
@@ -215,6 +225,7 @@ const translations = {
     'config.restartTitle': 'Container Restart Required', 'config.restartMessage': 'Configuration has been saved. You can restart the Docker container now to apply these changes; the dashboard "Restart Server" button still only restarts the game process.', 'config.restartNow': 'Restart Container Now', 'config.restartLater': 'Later',
     'config.showPassword': 'Show password', 'config.hidePassword': 'Hide password',
     'github.open': 'Open project GitHub repository',
+    'saves.saveLocal': 'Save Local', 'saves.deleteBackup': 'Delete Backup', 'saves.deleteBackupConfirm': 'Delete backup {name}? After deletion there will be no remaining record.', 'toast.backupDeleteOk': 'Backup deleted.', 'toast.backupDeleteFail': 'Failed to delete backup',
     'lang.toggle': 'Switch language', 'logout.title': 'Log out',
     'theme.light': 'Switch to light mode', 'theme.dark': 'Switch to dark mode',
   },
@@ -342,7 +353,7 @@ function init() {
   document.getElementById('logSearch').oninput = (e) => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-      const activeFilter = document.querySelector('.log-filter.active')?.dataset.filter || 'all';
+      const activeFilter = queryActiveLogFilter();
       loadLogs(activeFilter, e.target.value);
     }, 300);
   };
@@ -362,8 +373,8 @@ function reloadCurrentPage() {
       break;
     case 'logs':
       loadLogs(
-        document.querySelector('.log-filter.active')?.dataset.filter || 'all',
-        document.getElementById('logSearch')?.value || ''
+        queryActiveLogFilter(),
+        getInputValue('logSearch', '')
       );
       break;
     case 'players':
@@ -401,12 +412,15 @@ function navigateTo(page) {
   // Update sidebar active
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('active'));
-  document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
-  document.querySelector(`.mob-nav-item[data-page="${page}"]`)?.classList.add('active');
+  var navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navItem) navItem.classList.add('active');
+  var mobileNavItem = document.querySelector(`.mob-nav-item[data-page="${page}"]`);
+  if (mobileNavItem) mobileNavItem.classList.add('active');
 
   // Show page
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${page}`)?.classList.add('active');
+  var pageEl = document.getElementById(`page-${page}`);
+  if (pageEl) pageEl.classList.add('active');
 
   // Update title
   const titleMap = {
@@ -448,7 +462,7 @@ function setupWebSocket() {
     } catch (err) {
       console.error('[WS] Parse error:', err);
     }
-  };
+};
 
   ws.onclose = () => {
     console.log('[WS] Disconnected, reconnecting in 5s...');
@@ -528,7 +542,7 @@ function updateDashboardUI(data) {
 
   // Players
   document.getElementById('stat-players').textContent =
-    `${data.players?.online || 0}/${data.players?.max || 4}`;
+    `${(data.players && data.players.online) || 0}/${(data.players && data.players.max) || 4}`;
 
   // Uptime
   document.getElementById('stat-uptime').textContent = formatUptime(data.uptime || 0);
@@ -548,8 +562,8 @@ function updateDashboardUI(data) {
   cpuBar.className = 'progress-fill' + (cpu > 80 ? ' danger' : cpu > 60 ? ' warn' : '');
 
   // RAM
-  const memUsed = Math.round(data.memory?.used || 0);
-  const memLimit = data.memory?.limit || 2048;
+  const memUsed = Math.round((data.memory && data.memory.used) || 0);
+  const memLimit = (data.memory && data.memory.limit) || 2048;
   const memPct = Math.round((memUsed / memLimit) * 100);
   document.getElementById('ram-value').textContent = `${memUsed} / ${memLimit} MB`;
   const ramBar = document.getElementById('ram-bar');
@@ -563,9 +577,9 @@ function updateDashboardUI(data) {
   setText('detail-version', data.version || '--');
   setText('detail-script-health', data.scriptsHealthy ? t('dash.healthy') : t('dash.unhealthy'));
   setText('detail-metrics-port', network.metricsPort ? String(network.metricsPort) : '--');
-  setText('detail-event-passout', String(data.events?.passout || 0));
-  setText('detail-event-readycheck', String(data.events?.readycheck || 0));
-  setText('detail-event-offline', String(data.events?.offline || 0));
+  setText('detail-event-passout', String((data.events && data.events.passout) || 0));
+  setText('detail-event-readycheck', String((data.events && data.events.readycheck) || 0));
+  setText('detail-event-offline', String((data.events && data.events.offline) || 0));
 }
 
 function formatUptime(seconds) {
@@ -697,6 +711,7 @@ async function loadSaves() {
           </div>
           <div class="save-actions">
             ${s.isDefault ? '' : `<button class="btn btn-sm save-default-btn" data-save-name="${escapeHtml(s.name)}">${t('saves.setDefault')}</button>`}
+            <button class="btn btn-sm btn-danger save-delete-btn" data-save-name="${escapeHtml(s.name)}">${t('saves.delete')}</button>
           </div>
         </div>
       `).join('');
@@ -706,7 +721,15 @@ async function loadSaves() {
           setDefaultSave(btn.dataset.saveName);
         });
       });
+
+      list.querySelectorAll('.save-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          deleteSave(btn.dataset.saveName);
+        });
+      });
     }
+
+    populateHostMigrationSaveOptions(savesData.saves || []);
   }
 
   if (backupsData) {
@@ -720,11 +743,164 @@ async function loadSaves() {
             <div class="save-name">${icon('package', 'icon save-name-icon')}<span>${escapeHtml(b.filename)}</span></div>
             <div class="save-meta">${formatSize(b.size)} · ${new Date(b.date).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US')}</div>
           </div>
-          <a href="/api/saves/download/${encodeURIComponent(b.filename)}" class="btn btn-sm btn-primary"
-             onclick="this.href=this.href.split('?')[0]+'?token='+API.token; return true;">${icon('download', 'icon')}</a>
+          <div class="save-actions">
+            <a href="/api/saves/download/${encodeURIComponent(b.filename)}" class="btn btn-sm btn-primary"
+               onclick="this.href=this.href.split('?')[0]+'?token='+API.token; return true;">${icon('download', 'icon')} ${t('saves.saveLocal')}</a>
+            <button class="btn btn-sm btn-danger backup-delete-btn" data-backup-name="${escapeHtml(b.filename)}">${t('saves.deleteBackup')}</button>
+          </div>
         </div>
       `).join('');
+
+      list.querySelectorAll('.backup-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          deleteBackup(btn.dataset.backupName);
+        });
+      });
     }
+  }
+}
+
+function populateHostMigrationSaveOptions(saves) {
+  const select = document.getElementById('hostMigrationSaveSelect');
+  if (!select) return;
+
+  const previousValue = currentHostMigrationSave || select.value || '';
+  const options = ['<option value="">' + escapeHtml(t('saves.chooseSave')) + '</option>']
+    .concat((saves || []).map(function(save) {
+      const label = save.isDefault
+        ? `${save.farm || save.name} (${t('saves.defaultBadge')})`
+        : (save.farm || save.name);
+      const selected = save.name === previousValue ? ' selected' : '';
+      return `<option value="${escapeHtml(save.name)}"${selected}>${escapeHtml(label)}</option>`;
+    }));
+
+  select.innerHTML = options.join('');
+
+  if (previousValue && (saves || []).some(function(save) { return save.name === previousValue; })) {
+    select.value = previousValue;
+  } else {
+    currentHostMigrationSave = '';
+    renderHostMigrationEmpty();
+  }
+}
+
+function renderHostMigrationEmpty() {
+  const panel = document.getElementById('hostMigrationPanel');
+  const status = document.getElementById('hostMigrationStatus');
+  if (panel) {
+    panel.innerHTML = `<div class="empty-state">${escapeHtml(t('saves.chooseSaveHint'))}</div>`;
+  }
+  if (status) {
+    status.textContent = '';
+  }
+}
+
+function buildPlayerMeta(player) {
+  const segments = [];
+  if (player.farmName) segments.push(player.farmName);
+  if (player.money != null) segments.push(`Money: ${escapeHtml(String(player.money))}`);
+  if (player.uniqueMultiplayerID) segments.push(`ID: ${escapeHtml(String(player.uniqueMultiplayerID))}`);
+  return segments.join(' · ');
+}
+
+function renderHostMigrationPanel(save) {
+  const panel = document.getElementById('hostMigrationPanel');
+  const status = document.getElementById('hostMigrationStatus');
+  if (!panel || !save || !save.players) return;
+
+  const host = save.players.host;
+  const farmhands = save.players.farmhands || [];
+  const noteBits = [t('saves.migrationNote')];
+  if (save.hasSaveGameInfo) {
+    noteBits.push(t('saves.saveGameInfoUpdated'));
+  }
+
+  panel.innerHTML = `
+    <div class="host-migration-grid">
+      <div class="host-migration-card">
+        <div class="host-migration-title">${escapeHtml(t('saves.currentHost'))}</div>
+        <div class="host-player-card host">
+          <div class="host-player-name">${icon('player', 'icon')}<span>${escapeHtml(host.name || 'Host')}</span></div>
+          <div class="host-player-meta">${buildPlayerMeta(host)}</div>
+        </div>
+      </div>
+      <div class="host-migration-card">
+        <div class="host-migration-title">${escapeHtml(t('saves.farmhands'))}</div>
+        ${farmhands.length === 0 ? `<div class="empty-state compact">${escapeHtml(t('saves.noFarmhands'))}</div>` : farmhands.map(function(player) {
+          return `
+            <div class="host-player-card">
+              <div class="host-player-summary">
+                <div class="host-player-name">${icon('players', 'icon')}<span>${escapeHtml(player.name || 'Farmhand')}</span></div>
+                <div class="host-player-meta">${buildPlayerMeta(player)}</div>
+              </div>
+              <button class="btn btn-sm btn-primary host-migrate-btn" type="button" data-farmhand-index="${player.index}">${escapeHtml(t('saves.migrateHost'))}</button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+    <div class="host-migration-note">${escapeHtml(noteBits.join(' '))}</div>
+  `;
+
+  panel.querySelectorAll('.host-migrate-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      migrateHostSave(save.saveName, btn.dataset.farmhandIndex);
+    });
+  });
+
+  if (status) {
+    status.textContent = save.lastModified
+      ? `${save.saveName} · ${new Date(save.lastModified).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US')}`
+      : save.saveName;
+  }
+}
+
+async function loadHostMigrationSave(saveName) {
+  currentHostMigrationSave = saveName || '';
+  if (!saveName) {
+    renderHostMigrationEmpty();
+    return;
+  }
+
+  const status = document.getElementById('hostMigrationStatus');
+  if (status) {
+    status.textContent = t('toast.hostMigrationLoading');
+  }
+
+  const data = await API.get('/api/saves/editor/' + encodeURIComponent(saveName));
+  if (data && data.success && data.save) {
+    renderHostMigrationPanel(data.save);
+  } else {
+    if (status) {
+      status.textContent = '';
+    }
+    showToast(((data && data.error) || t('toast.hostMigrationFail')) + ((data && data.details) ? (': ' + data.details) : ''), 'error');
+  }
+}
+
+function refreshHostMigrationCurrent() {
+  if (currentHostMigrationSave) {
+    loadHostMigrationSave(currentHostMigrationSave);
+  }
+}
+
+async function migrateHostSave(saveName, farmhandIndex) {
+  const data = await API.post('/api/saves/editor/migrate', {
+    saveName: saveName,
+    farmhandIndex: Number(farmhandIndex),
+  });
+
+  if (data && data.success) {
+    const parts = [t('toast.hostMigrationOk')];
+    if (data.overwriteBackup) {
+      parts.push(tf('saves.overwriteBackup', { name: data.overwriteBackup }));
+    }
+    parts.push(t('saves.restartHint'));
+    showToast(parts.join(' '), 'success');
+    await loadSaves();
+    await loadHostMigrationSave(saveName);
+  } else {
+    showToast(((data && data.error) || t('toast.hostMigrationFail')) + ((data && data.details) ? (': ' + data.details) : ''), 'error');
   }
 }
 
@@ -795,6 +971,40 @@ async function setDefaultSave(saveName) {
     loadConfig();
   } else {
     showToast(((data && data.error) || t('toast.saveDefaultFail')) + ((data && data.details) ? (': ' + data.details) : ''), 'error');
+  }
+}
+
+async function deleteSave(saveName) {
+  if (!confirm(tf('saves.deleteConfirm', { name: saveName }))) return;
+
+  var data = await API.del('/api/saves/' + encodeURIComponent(saveName));
+  if (data && data.success) {
+    var message = t('toast.saveDeleteOk');
+    if (data.overwriteBackup) {
+      message += ' ' + tf('saves.overwriteBackup', { name: data.overwriteBackup });
+    }
+    if (data.defaultCleared) {
+      message += ' ' + t('saves.deleteDefaultCleared');
+    }
+    message += ' ' + t('saves.restartHint');
+    showToast(message, 'success');
+    loadSaves();
+    loadConfig();
+  } else {
+    showToast(((data && data.error) || t('toast.saveDeleteFail')) + ((data && data.details) ? (': ' + data.details) : ''), 'error');
+  }
+}
+
+async function deleteBackup(filename) {
+  if (!confirm(tf('saves.deleteBackupConfirm', { name: filename }))) return;
+
+  var data = await API.del('/api/saves/backups/' + encodeURIComponent(filename));
+  if (data && data.success) {
+    showToast(t('toast.backupDeleteOk'), 'success');
+    loadSaves();
+    loadDashboard();
+  } else {
+    showToast(((data && data.error) || t('toast.backupDeleteFail')) + ((data && data.details) ? (': ' + data.details) : ''), 'error');
   }
 }
 
@@ -1268,7 +1478,7 @@ async function restartServer() {
   if (data && data.success) {
     showToast(t('toast.restartOk'), 'success');
   } else {
-    showToast(data?.error || t('toast.restartFail'), 'error');
+    showToast((data && data.error) || t('toast.restartFail'), 'error');
   }
 }
 
@@ -1288,7 +1498,7 @@ async function createBackup() {
       showToast(t('toast.backupRunning'), 'warn');
     }
   } else {
-    showToast(data?.error || t('toast.backupFail'), 'error');
+    showToast((data && data.error) || t('toast.backupFail'), 'error');
   }
 }
 
@@ -1312,7 +1522,7 @@ async function changePassword() {
     document.getElementById('oldPassword').value = '';
     document.getElementById('newPassword').value = '';
   } else {
-    showToast(data?.error || t('toast.pwdFail'), 'error');
+    showToast((data && data.error) || t('toast.pwdFail'), 'error');
   }
 }
 
@@ -1323,6 +1533,16 @@ function showToast(message, type = 'info') {
   toast.textContent = message;
   toast.className = `toast show ${type}`;
   setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function queryActiveLogFilter() {
+  var active = document.querySelector('.log-filter.active');
+  return active && active.dataset ? active.dataset.filter : 'all';
+}
+
+function getInputValue(id, fallback) {
+  var el = document.getElementById(id);
+  return el ? el.value : fallback;
 }
 
 function escapeHtml(str) {

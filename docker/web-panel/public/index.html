@@ -268,9 +268,6 @@
             <span class="status-dot checking" aria-hidden="true"></span>
             <span data-i18n="status.checking">Checking...</span>
           </span>
-          <a class="btn-icon" href="https://github.com/truman-world/puppy-stardew-server" target="_blank" rel="noopener noreferrer" data-i18n-title="github.open" aria-label="GitHub">
-            <svg class="icon"><use href="#icon-github"></use></svg>
-          </a>
         </div>
       </header>
 
@@ -487,6 +484,24 @@
             <div id="savesBackupStatus" class="backup-status" style="display:none"></div>
             <div id="savesList" class="saves-list">
               <div class="empty-state" data-i18n="players.loading">Loading...</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h3 data-i18n="saves.hostMigration">Host Migration</h3>
+            </div>
+            <div class="save-upload-panel">
+              <div class="save-upload-hint" data-i18n="saves.hostMigrationHint">Pick a save, review the current host and farmhands, then promote a farmhand to host. The panel will update the main save file and SaveGameInfo in place.</div>
+              <div class="host-migration-toolbar">
+                <select id="hostMigrationSaveSelect" class="input" onchange="loadHostMigrationSave(this.value)">
+                  <option value="" data-i18n="saves.chooseSave">Choose a save</option>
+                </select>
+                <button class="btn btn-sm" type="button" onclick="refreshHostMigrationCurrent()" data-i18n="saves.refreshMigration">Refresh</button>
+              </div>
+            </div>
+            <div id="hostMigrationStatus" class="save-upload-status"></div>
+            <div id="hostMigrationPanel" class="host-migration-panel">
+              <div class="empty-state" data-i18n="saves.chooseSaveHint">Select a save to load its host migration details.</div>
             </div>
           </div>
           <div class="card">

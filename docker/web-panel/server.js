@@ -72,7 +72,11 @@ app.get('/api/saves/backup/status', auth.verifyMiddleware, savesAPI.getBackupSta
 app.post('/api/saves/backup', auth.verifyMiddleware, savesAPI.createBackup);
 app.post('/api/saves/upload', auth.verifyMiddleware, savesAPI.uploadSave);
 app.post('/api/saves/default', auth.verifyMiddleware, savesAPI.setDefaultSave);
+app.delete('/api/saves/:saveName', auth.verifyMiddleware, savesAPI.deleteSave);
 app.get('/api/saves/download/:filename', auth.verifyMiddleware, savesAPI.downloadBackup);
+app.delete('/api/saves/backups/:filename', auth.verifyMiddleware, savesAPI.deleteBackup);
+app.get('/api/saves/editor/:saveName', auth.verifyMiddleware, savesAPI.getSaveEditor);
+app.post('/api/saves/editor/migrate', auth.verifyMiddleware, savesAPI.migrateSaveHost);
 
 // Config API
 const configAPI = require('./api/config');
