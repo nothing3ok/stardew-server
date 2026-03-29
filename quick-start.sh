@@ -163,8 +163,8 @@ download_files() {
     # Try to clone the repository
     if command -v git &> /dev/null; then
         print_info "Cloning repository..."
-        git clone https://github.com/truman-world/puppy-stardew-server.git
-        cd puppy-stardew-server
+        git clone https://github.com/nothing3ok/stardew-server.git
+        cd stardew-server
         print_success "Repository cloned!"
     else
         # Download files individually
@@ -176,10 +176,10 @@ download_files() {
             exit 1
         fi
 
-        mkdir -p puppy-stardew-server
-        cd puppy-stardew-server
+        mkdir -p stardew-server
+        cd stardew-server
 
-        BASE_URL="https://raw.githubusercontent.com/truman-world/puppy-stardew-server/main"
+        BASE_URL="https://raw.githubusercontent.com/nothing3ok/stardew-server/main"
 
         if command -v curl &> /dev/null; then
             curl -fsSL "$BASE_URL/docker-compose.yml" -o docker-compose.yml
