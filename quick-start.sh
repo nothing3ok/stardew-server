@@ -1,10 +1,8 @@
 #!/bin/bash
 # =============================================================================
 # Nothing Stardew Server - Quick Start Script
-# 灏忕嫍鏄熻胺鏈嶅姟鍣?- 蹇€熷惎鍔ㄨ剼鏈?
 # =============================================================================
 # This script will help you set up a Stardew Valley dedicated server in minutes!
-# 姝よ剼鏈皢甯姪鎮ㄥ湪鍑犲垎閽熷唴璁剧疆鏄熼湶璋风墿璇笓鐢ㄦ湇鍔″櫒锛?
 # =============================================================================
 
 # Don't exit on error - we handle errors manually
@@ -25,26 +23,26 @@ BOLD='\033[1m'
 
 print_header() {
     echo ""
-    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
-echo -e "${CYAN}${BOLD}  馃惗 Nothing Stardew Server - Quick Start${NC}"
-    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
+    echo -e "${CYAN}${BOLD}==================================================================${NC}"
+    echo -e "${CYAN}${BOLD}  Nothing Stardew Server - Quick Start${NC}"
+    echo -e "${CYAN}${BOLD}==================================================================${NC}"
     echo ""
 }
 
 print_success() {
-    echo -e "${GREEN}鉁?$1${NC}"
+    echo -e "${GREEN}[OK] $1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}鉂?$1${NC}"
+    echo -e "${RED}[ERROR] $1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}鈿狅笍  $1${NC}"
+    echo -e "${YELLOW}[WARN] $1${NC}"
 }
 
 print_info() {
-    echo -e "${BLUE}鈩癸笍  $1${NC}"
+    echo -e "${BLUE}[INFO] $1${NC}"
 }
 
 print_step() {
@@ -53,7 +51,7 @@ print_step() {
 }
 
 ask_question() {
-    echo -e "${CYAN}鉂?$1${NC}"
+    echo -e "${CYAN}[?] $1${NC}"
 }
 
 # Docker Compose command (global variable, set in check_docker)
@@ -131,7 +129,6 @@ check_docker() {
             COMPOSE_CMD="docker compose"
             print_success "Docker Compose auto-installed successfully!"
         else
-            # Auto-install failed, provide specific manual install command
             print_error "Docker Compose auto-install failed!"
             echo ""
             print_info "Please run the following command to install manually:"
@@ -154,20 +151,17 @@ check_docker() {
 download_files() {
     print_step "Step 2: Downloading configuration files..."
 
-    # Check if we're already in the repo
     if [ -f "docker-compose.yml" ] && [ -f ".env.example" ]; then
         print_success "Configuration files found!"
         return
     fi
 
-    # Try to clone the repository
     if command -v git &> /dev/null; then
         print_info "Cloning repository..."
         git clone https://github.com/nothing3ok/stardew-server.git
         cd stardew-server
         print_success "Repository cloned!"
     else
-        # Download files individually
         print_info "Git not found, downloading files individually..."
 
         if ! command -v wget &> /dev/null && ! command -v curl &> /dev/null; then
@@ -201,7 +195,6 @@ configure_steam() {
     print_info "Game files will be downloaded via your Steam account."
     echo ""
 
-    # Check if .env already exists
     if [ -f ".env" ]; then
         ask_question ".env file already exists. Do you want to reconfigure? (y/n)"
         read -r reconfigure </dev/tty
@@ -211,13 +204,12 @@ configure_steam() {
         fi
     fi
 
-    # Copy .env.example to .env
     cp .env.example .env
 
     echo ""
-    print_info "鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    print_info "==================================================="
     print_info "  Configuration Method"
-    print_info "鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    print_info "==================================================="
     echo ""
     ask_question "Do you want to manually input configuration in terminal? (y/n)"
     echo -e "${CYAN}  y${NC} - Input Steam username, password and VNC password now"
@@ -226,7 +218,6 @@ configure_steam() {
     read -r manual_input </dev/tty
 
     if [[ $manual_input =~ ^[Yy]$ ]]; then
-        # Manual input mode
         echo ""
         ask_question "Enter your Steam username:"
         read -r steam_username </dev/tty
@@ -236,7 +227,6 @@ configure_steam() {
         read -rs steam_password </dev/tty
         echo ""
 
-        # Validate inputs
         if [ -z "$steam_username" ] || [ -z "$steam_password" ]; then
             print_error "Steam username and password cannot be empty!"
             exit 1
@@ -253,21 +243,17 @@ configure_steam() {
             vnc_password="stardew1"
         fi
 
-        # Validate and truncate VNC password to 8 characters
         if [ ${#vnc_password} -gt 8 ]; then
             print_warning "VNC password is longer than 8 characters!"
             print_warning "VNC protocol will truncate it to: ${vnc_password:0:8}"
             vnc_password="${vnc_password:0:8}"
         fi
 
-        # Update .env file
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
             sed -i '' "s/STEAM_USERNAME=.*/STEAM_USERNAME=$steam_username/" .env
             sed -i '' "s/STEAM_PASSWORD=.*/STEAM_PASSWORD=$steam_password/" .env
             sed -i '' "s/VNC_PASSWORD=.*/VNC_PASSWORD=$vnc_password/" .env
         else
-            # Linux
             sed -i "s/STEAM_USERNAME=.*/STEAM_USERNAME=$steam_username/" .env
             sed -i "s/STEAM_PASSWORD=.*/STEAM_PASSWORD=$steam_password/" .env
             sed -i "s/VNC_PASSWORD=.*/VNC_PASSWORD=$vnc_password/" .env
@@ -275,7 +261,6 @@ configure_steam() {
 
         print_success "Steam credentials configured!"
     else
-        # Manual .env editing mode
         echo ""
         print_info "Please manually edit the .env file to configure your credentials:"
         echo -e "  ${CYAN}nano .env${NC}  or  ${CYAN}vim .env${NC}"
@@ -293,13 +278,10 @@ configure_steam() {
 setup_directories() {
     print_step "Step 4: Setting up data directories..."
 
-    # Create directories (including logs for log monitoring)
     mkdir -p data/{saves,game,steam,logs,backups,custom-mods,panel}
 
-    # Fix permissions (UID 1000 is the steam user in the container)
     print_info "Setting correct permissions (UID 1000)..."
 
-    # Check if we need sudo
     if [ -w "data" ]; then
         chown -R 1000:1000 data/
     else
@@ -307,7 +289,6 @@ setup_directories() {
         sudo chown -R 1000:1000 data/
     fi
 
-    # Verify permissions were set correctly
     if [ "$(stat -c '%u' data/game 2>/dev/null || stat -f '%u' data/game 2>/dev/null)" != "1000" ]; then
         print_error "Failed to set correct permissions!"
         print_error "This will cause 'Disk write failure' when downloading game files."
@@ -333,7 +314,6 @@ start_server() {
 
     print_success "Server started!"
 
-    # Wait for init container to complete
     print_info "Waiting for init container to complete..."
     for i in {1..30}; do
         INIT_STATUS=$(docker inspect --format='{{.State.Status}}' nothing-stardew-init 2>/dev/null)
@@ -355,7 +335,6 @@ start_server() {
     print_info "Waiting for server to initialize (5 seconds)..."
     sleep 5
 
-    # Check if container is running
     if ! docker ps | grep -q nothing-stardew; then
         print_error "Container failed to start!"
         echo ""
@@ -367,7 +346,7 @@ start_server() {
 }
 
 show_next_steps() {
-    print_step "馃帀 Setup Complete! Here's what to do next:"
+    print_step "Setup Complete! Here's what to do next:"
 
     echo ""
     echo -e "${BOLD}1. Monitor the download progress:${NC}"
@@ -387,7 +366,7 @@ show_next_steps() {
     echo -e "   - Then press ${YELLOW}Ctrl+P Ctrl+Q${NC} to detach (${RED}NOT Ctrl+C!${NC})"
     echo ""
 
-    echo -e "${BOLD}3. 馃寪 Web Management Panel (Recommended):${NC}"
+    echo -e "${BOLD}3. Web Management Panel (Recommended):${NC}"
     echo -e "   - Browser access: ${CYAN}http://$(get_server_ip):18642${NC}"
     echo "   - First visit: create your admin password in the setup page"
     echo "   - Features: real-time status, logs, terminal, config, saves, mods"
@@ -403,9 +382,9 @@ show_next_steps() {
 
     echo -e "${BOLD}5. Players can connect:${NC}"
     echo "   - Open Stardew Valley"
-    echo "   - Click \"Co-op\" 鈫?\"Join LAN Game\""
+    echo "   - Click \"Co-op\" -> \"Join LAN Game\""
     echo "   - Server will appear automatically, or enter server IP manually"
-    echo -e "   ${YELLOW}鈿狅笍  Note: Only IP needed, port 24642 is used by default${NC}"
+    echo -e "   ${YELLOW}[WARN] Only IP needed, port 24642 is used by default${NC}"
     echo ""
 
     echo -e "${BOLD}Useful commands:${NC}"
@@ -415,13 +394,12 @@ show_next_steps() {
     echo -e "   Check health:     ${CYAN}./health-check.sh${NC}"
     echo -e "   Backup saves:     ${CYAN}./backup.sh${NC}"
     echo ""
-    echo -e "${YELLOW}   鈿狅笍  Note: After modifying .env, you must restart for changes to take effect!${NC}"
+    echo -e "${YELLOW}   [WARN] After modifying .env, you must restart for changes to take effect!${NC}"
     echo ""
 
-    echo -e "${GREEN}${BOLD}馃専 Enjoy your instant-sleep Stardew Valley server!${NC}"
+    echo -e "${GREEN}${BOLD}Enjoy your instant-sleep Stardew Valley server!${NC}"
     echo ""
 
-    # Smart detection of Steam Guard requirement
     echo ""
     print_info "Detecting server status..."
     sleep 2
@@ -434,9 +412,9 @@ show_next_steps() {
 
     if [ "$NEEDS_STEAM_GUARD" = "true" ]; then
         echo ""
-        print_warning "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+        print_warning "======================================================="
         print_warning "  Steam Guard verification code required!"
-        print_warning "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+        print_warning "======================================================="
         echo ""
         print_info "You need to attach to the container to enter the Steam Guard code."
         print_info "Follow these steps:"
@@ -457,7 +435,6 @@ show_next_steps() {
 }
 
 get_server_ip() {
-    # Try to get public IP
     if command -v curl &> /dev/null; then
         public_ip=$(curl -4 -s ifconfig.me 2>/dev/null || curl -4 -s ip.sb 2>/dev/null || echo "")
         if [ -n "$public_ip" ]; then
@@ -466,7 +443,6 @@ get_server_ip() {
         fi
     fi
 
-    # Fall back to local IP
     if command -v hostname &> /dev/null; then
         hostname -I 2>/dev/null | awk '{print $1}' || echo "your-server-ip"
     else
@@ -489,5 +465,4 @@ main() {
     show_next_steps
 }
 
-# Run main function
 main
