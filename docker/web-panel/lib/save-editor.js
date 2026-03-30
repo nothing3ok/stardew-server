@@ -146,6 +146,53 @@ function toArray(value) {
   return [value];
 }
 
+function toSafeString(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
+function toSafeNumber(value) {
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function hasMeaningfulPlayerActivity(player) {
+  const activityFields = [
+    'millisecondsPlayed',
+    'totalMoneyEarned',
+    'money',
+    'daysPlayed',
+    'stepsTaken',
+    'itemsShipped',
+    'fishCaught',
+    'cropsShipped',
+    'monstersKilled',
+    'questsCompleted',
+    'timesFished',
+    'itemsCrafted',
+    'itemsCooked',
+  ];
+
+  return activityFields.some(field => toSafeNumber(player && player[field]) > 0);
+}
+
+function isEligibleFarmhand(farmhand) {
+  if (!farmhand) {
+    return false;
+  }
+
+  const name = toSafeString(farmhand.name);
+  const multiplayerId = toSafeString(farmhand.UniqueMultiplayerID);
+  const userId = toSafeString(farmhand.userID || farmhand.UserID);
+
+  if (!name) {
+    return false;
+  }
+
+  // Only show farmhands that look like real players instead of empty cabin slots.
+  return Boolean(userId || multiplayerId || hasMeaningfulPlayerActivity(farmhand));
+}
+
 function extractPlayersInfo(saveData) {
   const gameSave = saveData && saveData.SaveGame;
   const hostPlayer = gameSave && gameSave.player;
@@ -170,7 +217,7 @@ function extractPlayersInfo(saveData) {
 
   const farmhands = toArray(gameSave.farmhands && gameSave.farmhands.Farmer)
     .map((farmhand, index) => {
-      if (!farmhand || farmhand.name == null) {
+      if (!isEligibleFarmhand(farmhand)) {
         return null;
       }
 
