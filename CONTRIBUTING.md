@@ -1,61 +1,85 @@
 # Contributing to Nothing Stardew Server
 
-鎰熻阿鎮ㄥPuppy Stardew Server椤圭洰鐨勫叧娉紒
+感谢你关注 Nothing Stardew Server。
 
-## 濡備綍璐＄尞
+这份文档介绍如何提交问题、准备修复、运行测试，以及向项目提交 Pull Request。
 
-### 鎶ュ憡Bug
+## 提交问题
 
-鍦ㄦ彁浜ug鍓嶏紝璇凤細
+### 报告 Bug
 
-1. **鎼滅储鐜版湁Issue** - 纭闂鏈鎶ュ憡
-2. **鏀堕泦淇℃伅**锛?
-   - 瀹屾暣鐨勯敊璇棩蹇楋細`docker logs nothing-stardew > logs.txt`
-   - Docker鐗堟湰锛歚docker --version`
-   - 鎿嶄綔绯荤粺淇℃伅
-   - docker-compose.yml閰嶇疆锛堝垹闄ゆ晱鎰熶俊鎭級
-3. **鍒涘缓Issue** - 浣跨敤Bug妯℃澘
+如果你发现 Bug，建议按下面的顺序整理信息：
 
-### 鎻愪氦鍔熻兘璇锋眰
+1. 先搜索现有 Issue，确认是否已经有人报告过同样的问题。
+2. 尽量提供可复现步骤。
+3. 附上关键日志、配置片段和运行环境信息。
 
-璇疯鏄庯細
-- 鍔熻兘鐨勫叿浣撶敤閫?
-- 涓轰粈涔堥渶瑕佽繖涓姛鑳?
-- 鍙兘鐨勫疄鐜版柟妗堬紙鍙€夛級
+建议附带的信息：
 
-### 鎻愪氦Pull Request
+- 容器日志：`docker logs nothing-stardew > logs.txt`
+- Docker 版本：`docker --version`
+- 使用的部署方式和系统版本
+- 相关的 `docker-compose.yml` 或 `.env` 配置差异
 
-1. **Fork椤圭洰**
-2. **鍒涘缓鍔熻兘鍒嗘敮**锛歚git checkout -b feature/my-feature`
-3. **寮€鍙戝苟娴嬭瘯**
-4. **鎻愪氦鍙樻洿**锛氶伒寰彁浜よ鑼冿紙瑙佷笅鏂囷級
-5. **鎺ㄩ€佸埌Fork**锛歚git push origin feature/my-feature`
-6. **鍒涘缓Pull Request**
+### 功能建议
 
-## 寮€鍙戠幆澧冭缃?
+如果你想提交功能建议，请尽量说明：
+
+- 想解决什么具体问题
+- 你期待的使用方式
+- 是否会影响现有部署或兼容性
+
+## Pull Request 流程
+
+1. Fork 仓库
+2. 从 `main` 创建新分支，例如：`git checkout -b feature/my-feature`
+3. 完成修改并自测
+4. 提交清晰的 commit message
+5. 推送分支到你的 Fork
+6. 发起 Pull Request
+
+提交 PR 前，建议确认：
+
+- 改动范围尽量聚焦
+- 说明清楚改了什么、为什么改
+- 如果修复了 Issue，描述中带上对应编号
+- 如果改动影响部署、配置或文档，同时更新相关说明
+
+## 本地开发与测试
 
 ```bash
-# 1. Clone浠撳簱
+# 1. 克隆仓库
 git clone https://github.com/nothing3ok/stardew-server.git
 cd stardew-server
 
-# 2. 璁剧疆Steam鍑瘉锛堢敤浜庢祴璇曪級
+# 2. 配置测试用 Steam 账号
 export STEAM_USERNAME="your_test_account"
 export STEAM_PASSWORD="your_password"
 
-# 3. 鏋勫缓娴嬭瘯闀滃儚
+# 3. 构建测试镜像
 docker build -t test-stardew:dev -f docker/Dockerfile docker/
 
-# 4. 杩愯娴嬭瘯
+# 4. 运行测试脚本
 ./tests/test-steam-guard.sh
 ```
 
-## 浠ｇ爜瑙勮寖
-
-### Shell鑴氭湰
+你也可以使用下面这些辅助脚本：
 
 ```bash
-# 鉁?濂界殑瀹炶返
+# 验证部署
+./verify-deployment.sh
+
+# 清理测试环境
+./tests/cleanup-tests.sh
+```
+
+## 代码风格
+
+### Shell 脚本
+
+推荐风格：
+
+```bash
 function_name() {
     local variable="$1"
 
@@ -66,111 +90,87 @@ function_name() {
 
     echo "$variable"
 }
-
-# 鉂?閬垮厤
-# - 涓嶅姞寮曞彿鐨勫彉閲忥細echo $variable
-# - 浣跨敤set -e鑰屼笉鏄樉寮忛敊璇鐞?
-# - 娌℃湁鍑芥暟灏佽鐨勯暱鑴氭湰
-# - 缂哄皯娉ㄩ噴鐨勫鏉傞€昏緫
 ```
+
+建议：
+
+- 优先保持脚本简单、可读、易排查
+- 变量尽量加引号
+- 错误提示尽量明确
+- 修改用户可见输出时，注意终端兼容性和编码问题
 
 ### Dockerfile
 
+推荐风格：
+
 ```dockerfile
-# 鉁?濂界殑瀹炶返
 RUN apt-get update && \
     apt-get install -y package && \
     rm -rf /var/lib/apt/lists/*
-
-# 鉂?閬垮厤
-# - 鍒嗗紑鐨凴UN鍛戒护锛堝鍔犲眰鏁帮級
-# - 涓嶆竻鐞哸pt缂撳瓨
-# - 浣跨敤latest鏍囩锛堟棤鐗堟湰鎺у埗锛?
 ```
 
-### 鎻愪氦瑙勮寖
+建议：
 
+- 尽量减少无用层
+- 安装后清理缓存
+- 避免不必要地使用 `latest`
+
+## Commit Message 建议
+
+推荐格式：
+
+```text
+type(scope): short summary
 ```
-绫诲瀷(鑼冨洿): 绠€鐭弿杩?
 
-璇︾粏鎻忚堪锛堝彲閫夛級
+常见类型：
 
-鍏宠仈Issue: #123
+- `feat`: 新功能
+- `fix`: 修复问题
+- `docs`: 文档修改
+- `refactor`: 重构
+- `test`: 测试相关
+- `chore`: 杂项维护
+
+示例：
+
+```text
+fix(entrypoint): preserve stdin for Steam Guard input
 ```
 
-**绫诲瀷锛?*
-- `feat`: 鏂板姛鑳?
-- `fix`: Bug淇
-- `docs`: 鏂囨。鏇存柊
-- `refactor`: 閲嶆瀯
-- `test`: 娴嬭瘯鐩稿叧
-- `chore`: 鏋勫缓/宸ュ叿鐩稿叧
+如果需要，也可以在提交说明或 PR 描述里补充背景，例如：
 
-**绀轰緥锛?*
-```
-fix(entrypoint): remove pipe to fix stdin blocking
-
+```text
 Steam Guard input was blocked by pipe redirection.
-Removed '| tee' to preserve stdin for user input.
+Removed the pipe to preserve stdin for interactive input.
 
 Fixes: #42
 ```
 
-## 娴嬭瘯瑕佹眰
+## 提交前检查
 
-鎻愪氦PR鍓嶈纭繚锛?
+发起 PR 前建议至少确认：
 
-- [ ] 浠ｇ爜閫氳繃鍩烘湰娴嬭瘯
-- [ ] 娣诲姞浜嗗繀瑕佺殑娉ㄩ噴
-- [ ] 鏇存柊浜嗙浉鍏虫枃妗?
-- [ ] 娴嬭瘯浜哠team Guard娴佺▼锛堝鏋滀慨鏀逛簡entrypoint.sh锛?
-- [ ] 娴嬭瘯浜嗘ā缁勫姞杞斤紙濡傛灉淇敼浜嗘ā缁勯厤缃級
+- [ ] 相关脚本已自测
+- [ ] 文档和提示文本同步更新
+- [ ] 新增功能有对应说明
+- [ ] 修改不会明显破坏现有部署流程
+- [ ] 用户可见输出没有乱码
 
-### 杩愯娴嬭瘯
+## 相关文档
 
-```bash
-# Steam Guard娴嬭瘯
-./tests/test-steam-guard.sh
+- [README.md](README.md)
+- [README_CN.md](README_CN.md)
+- `DEVELOPMENT.md`（如果后续补充）
 
-# 閮ㄧ讲楠岃瘉
-./verify-deployment.sh
+## 获取帮助
 
-# 娓呯悊娴嬭瘯鐜
-./tests/cleanup-tests.sh
-```
+如果你在开发或部署时遇到问题，可以优先查看：
 
-## 鏂囨。瑕佹眰
+1. GitHub Issues
+2. 容器日志：`docker logs nothing-stardew`
+3. 项目 README 和部署脚本输出
 
-淇敼浠ｇ爜鏃讹紝璇峰悓鏃舵洿鏂帮細
+## License
 
-- **DEVELOPMENT.md** - 寮€鍙戞枃妗?
-- **README.md** - 鐢ㄦ埛鏂囨。
-- **浠ｇ爜娉ㄩ噴** - 澶嶆潅閫昏緫鐨勮鏄?
-
-## 闂鎺掓煡
-
-閬囧埌闂锛熸煡鐪嬶細
-
-1. **DEVELOPMENT.md** - 甯歌闂鎺掓煡
-2. **GitHub Issues** - 宸茬煡闂
-3. **Docker logs** - `docker logs nothing-stardew`
-
-## 琛屼负鍑嗗垯
-
-- 灏婇噸鎵€鏈夎础鐚€?
-- 淇濇寔璁ㄨ涓撲笟鍜屽缓璁炬€?
-- 鎺ュ彈寤鸿鎬ф壒璇?
-- 鍏虫敞椤圭洰鏈€浣冲埄鐩?
-
-## 璁稿彲璇?
-
-鎻愪氦璐＄尞琛ㄧず鎮ㄥ悓鎰忔寜鐓ч」鐩殑MIT璁稿彲璇佹巿鏉冩偍鐨勮础鐚€?
-
-## 鑱旂郴鏂瑰紡
-
-- **Issues**: https://github.com/nothing3ok/stardew-server/issues
-- **Docker Hub**: https://hub.docker.com/r/truemanlive/nothing-stardew-server
-
----
-
-鎰熻阿鎮ㄧ殑璐＄尞锛侌煄?
+向本项目提交代码、文档或脚本改动，即表示你同意这些贡献将遵循项目当前使用的 MIT License。
