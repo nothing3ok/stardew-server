@@ -101,6 +101,81 @@ The script will:
 
 Use manual setup when you want full control over files and deployment.
 
+#### Option A: Manual Setup Without GitHub
+
+Use this option when GitHub or GitHub Raw is slow, blocked, or unavailable, but Docker Hub is reachable.
+
+Create a working directory and a minimal compose setup:
+
+```bash
+mkdir -p ~/nothing-stardew && cd ~/nothing-stardew
+```
+
+```bash
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+services:
+  stardew-server:
+    image: nothing3ok/stardew-server:latest
+    container_name: nothing-stardew
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    environment:
+      - STEAM_USERNAME=${STEAM_USERNAME}
+      - STEAM_PASSWORD=${STEAM_PASSWORD}
+      - ENABLE_VNC=${ENABLE_VNC:-true}
+      - VNC_PASSWORD=${VNC_PASSWORD:-stardew1}
+    ports:
+      - "24642:24642/udp"
+      - "5900:5900/tcp"
+      - "18642:18642/tcp"
+    volumes:
+      - ./data/saves:/home/steam/.config/StardewValley:rw
+      - ./data/game:/home/steam/stardewvalley:rw
+      - ./data/steam:/home/steam/Steam:rw
+      - ./data/logs:/home/steam/.local/share/nothing-stardew/logs:rw
+      - ./data/backups:/home/steam/.local/share/nothing-stardew/backups:rw
+      - ./data/panel:/home/steam/web-panel/data:rw
+      - ./data/custom-mods:/home/steam/custom-mods:rw
+EOF
+```
+
+```bash
+cat > .env << 'EOF'
+STEAM_USERNAME=your_steam_username
+STEAM_PASSWORD=your_steam_password
+ENABLE_VNC=true
+VNC_PASSWORD=stardew1
+EOF
+```
+
+Edit `.env` and fill in your real Steam credentials.
+
+Create data directories and set ownership:
+
+```bash
+mkdir -p data/{saves,game,steam,logs,backups,panel,custom-mods}
+chown -R 1000:1000 data/
+```
+
+Then start the server:
+
+```bash
+docker compose up -d
+docker logs -f nothing-stardew
+```
+
+If Steam Guard prompts for a code:
+
+```bash
+docker attach nothing-stardew
+```
+
+Paste the code, wait a few seconds, then detach with `Ctrl+P Ctrl+Q`.
+
+#### Option B: Manual Setup From Source
+
 #### 1. Prerequisites
 
 - Docker
