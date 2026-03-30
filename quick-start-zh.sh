@@ -1,48 +1,48 @@
 #!/bin/bash
 # =============================================================================
-# Puppy Stardew Server - 蹇€熷惎鍔ㄨ剼鏈紙涓枃鐗堬級
+# Nothing Stardew Server - 快速启动脚本
 # =============================================================================
-# 姝よ剼鏈皢甯姪鎮ㄥ湪鍑犲垎閽熷唴璁剧疆鏄熼湶璋风墿璇笓鐢ㄦ湇鍔″櫒锛?
+# 此脚本将帮助您在几分钟内完成星露谷物语专用服务器的初始化。
 # =============================================================================
 
-# 涓嶅湪閿欒鏃堕€€鍑?- 鎴戜滑鎵嬪姩澶勭悊閿欒
+# 不在错误时自动退出，由脚本自行处理错误
 set +e
 
-# 杈撳嚭棰滆壊
+# 输出颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-NC='\033[0m' # 鏃犻鑹?
+NC='\033[0m'
 BOLD='\033[1m'
 
 # =============================================================================
-# 杈呭姪鍑芥暟
+# 辅助函数
 # =============================================================================
 
 print_header() {
     echo ""
-    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
-    echo -e "${CYAN}${BOLD}  馃惗 灏忕嫍鏄熻胺鏈嶅姟鍣?- 蹇€熷惎鍔?{NC}"
-    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
+    echo -e "${CYAN}${BOLD}==================================================================${NC}"
+    echo -e "${CYAN}${BOLD}  Nothing Stardew Server - 快速启动${NC}"
+    echo -e "${CYAN}${BOLD}==================================================================${NC}"
     echo ""
 }
 
 print_success() {
-    echo -e "${GREEN}鉁?$1${NC}"
+    echo -e "${GREEN}[成功] $1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}鉂?$1${NC}"
+    echo -e "${RED}[错误] $1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}鈿狅笍  $1${NC}"
+    echo -e "${YELLOW}[警告] $1${NC}"
 }
 
 print_info() {
-    echo -e "${BLUE}鈩癸笍  $1${NC}"
+    echo -e "${BLUE}[信息] $1${NC}"
 }
 
 print_step() {
@@ -51,88 +51,81 @@ print_step() {
 }
 
 ask_question() {
-    echo -e "${CYAN}鉂?$1${NC}"
+    echo -e "${CYAN}[?] $1${NC}"
 }
 
-# Docker Compose 鍛戒护锛堝叏灞€鍙橀噺锛屽湪 check_docker 涓缃級
+# Docker Compose 命令
 COMPOSE_CMD=""
 
 # =============================================================================
-# 涓昏璁剧疆鍑芥暟
+# 主要流程
 # =============================================================================
 
 check_docker() {
-    print_step "姝ラ 1: 妫€鏌?Docker 瀹夎..."
+    print_step "步骤 1: 检查 Docker 安装..."
 
     if ! command -v docker &> /dev/null; then
-        print_error "Docker 鏈畨瑁咃紒"
+        print_error "未检测到 Docker。"
         echo ""
-        echo "璇疯繍琛屼互涓嬪懡浠ゅ畨瑁?Docker锛?
+        echo "请先运行以下命令安装 Docker："
         echo -e "  ${CYAN}curl -fsSL https://get.docker.com | sh${NC}"
         echo ""
-        echo "鍏朵粬绯荤粺璇疯闂? https://docs.docker.com/get-docker/"
+        echo "其他系统请参考: https://docs.docker.com/get-docker/"
         echo ""
         exit 1
     fi
 
     if ! docker ps &> /dev/null; then
-        print_error "Docker 瀹堟姢杩涚▼鏈繍琛屾垨闇€瑕?sudo 鏉冮檺锛?
+        print_error "Docker 守护进程未运行，或当前用户没有权限。"
         echo ""
-        echo "灏濊瘯浠ヤ笅鏂规硶涔嬩竴锛?
-        echo -e "  1. 鍚姩 Docker: ${CYAN}sudo systemctl start docker${NC}"
-        echo -e "  2. 灏嗙敤鎴锋坊鍔犲埌 docker 缁? ${CYAN}sudo usermod -aG docker \$USER${NC}"
-        echo "     (鐒跺悗娉ㄩ攢骞堕噸鏂扮櫥褰?"
+        echo "您可以尝试以下方式："
+        echo -e "  1. 启动 Docker: ${CYAN}sudo systemctl start docker${NC}"
+        echo -e "  2. 将当前用户加入 docker 组: ${CYAN}sudo usermod -aG docker \$USER${NC}"
+        echo "     完成后请重新登录终端。"
         echo ""
         exit 1
     fi
 
-    # 妫€娴?Docker Compose 鍙敤鎬?
     if docker compose version &> /dev/null; then
         COMPOSE_CMD="docker compose"
-        print_success "Docker 宸插畨瑁呭苟姝ｅ湪杩愯锛侊紙Docker Compose v2锛?
+        print_success "Docker 已可用，检测到 Docker Compose v2。"
     elif command -v docker-compose &> /dev/null; then
         COMPOSE_CMD="docker-compose"
-        print_success "Docker 宸插畨瑁呭苟姝ｅ湪杩愯锛侊紙Docker Compose v1锛?
+        print_success "Docker 已可用，检测到 Docker Compose v1。"
     else
-        # 灏濊瘯鑷姩瀹夎 docker-compose-plugin
-        print_warning "Docker Compose 鏈畨瑁咃紝姝ｅ湪灏濊瘯鑷姩瀹夎..."
+        print_warning "未检测到 Docker Compose，尝试自动安装..."
         echo ""
 
         INSTALL_SUCCESS=false
 
-        # 鏂规硶 1: apt (Ubuntu/Debian)
         if command -v apt-get &> /dev/null; then
-            print_info "妫€娴嬪埌 apt 鍖呯鐞嗗櫒锛屾鍦ㄥ畨瑁?docker-compose-plugin..."
+            print_info "检测到 apt，正在安装 docker-compose-plugin..."
             if apt-get update -qq &> /dev/null && apt-get install -y -qq docker-compose-plugin &> /dev/null; then
                 INSTALL_SUCCESS=true
             fi
         fi
 
-        # 鏂规硶 2: yum (CentOS/RHEL)
         if [ "$INSTALL_SUCCESS" = "false" ] && command -v yum &> /dev/null; then
-            print_info "妫€娴嬪埌 yum 鍖呯鐞嗗櫒锛屾鍦ㄥ畨瑁?docker-compose-plugin..."
+            print_info "检测到 yum，正在安装 docker-compose-plugin..."
             if yum install -y docker-compose-plugin &> /dev/null; then
                 INSTALL_SUCCESS=true
             fi
         fi
 
-        # 鏂规硶 3: dnf (Fedora)
         if [ "$INSTALL_SUCCESS" = "false" ] && command -v dnf &> /dev/null; then
-            print_info "妫€娴嬪埌 dnf 鍖呯鐞嗗櫒锛屾鍦ㄥ畨瑁?docker-compose-plugin..."
+            print_info "检测到 dnf，正在安装 docker-compose-plugin..."
             if dnf install -y docker-compose-plugin &> /dev/null; then
                 INSTALL_SUCCESS=true
             fi
         fi
 
-        # 楠岃瘉瀹夎缁撴灉
         if [ "$INSTALL_SUCCESS" = "true" ] && docker compose version &> /dev/null; then
             COMPOSE_CMD="docker compose"
-            print_success "Docker Compose 宸茶嚜鍔ㄥ畨瑁呮垚鍔燂紒"
+            print_success "Docker Compose 自动安装成功。"
         else
-            # 鑷姩瀹夎澶辫触锛岀粰鍑哄叿浣撶殑鎵嬪姩瀹夎鍛戒护
-            print_error "Docker Compose 鑷姩瀹夎澶辫触锛?
+            print_error "Docker Compose 自动安装失败。"
             echo ""
-            print_info "璇锋墜鍔ㄨ繍琛屼互涓嬪懡浠ゅ畨瑁咃細"
+            print_info "请手动运行以下命令安装："
             echo ""
             if command -v apt-get &> /dev/null; then
                 echo -e "  ${CYAN}sudo apt-get update && sudo apt-get install -y docker-compose-plugin${NC}"
@@ -142,7 +135,7 @@ check_docker() {
                 echo -e "  ${CYAN}sudo apt-get update && sudo apt-get install -y docker-compose-plugin${NC}"
             fi
             echo ""
-            echo "瀹夎瀹屾垚鍚庯紝閲嶆柊杩愯姝よ剼鏈嵆鍙€?
+            echo "安装完成后，请重新运行本脚本。"
             echo ""
             exit 1
         fi
@@ -150,35 +143,57 @@ check_docker() {
 }
 
 download_files() {
-    print_step "姝ラ 2: 涓嬭浇閰嶇疆鏂囦欢..."
+    print_step "步骤 2: 下载配置文件..."
 
-    if [ ! -d "stardew-server" ]; then
-        print_info "鍏嬮殕浠撳簱..."
-        if git clone https://github.com/nothing3ok/stardew-server.git; then
-            print_success "浠撳簱宸插厠闅嗭紒"
-        else
-            print_error "鍏嬮殕澶辫触锛佽妫€鏌ョ綉缁滆繛鎺ャ€?
-            exit 1
-        fi
-    else
-        print_info "鐩綍宸插瓨鍦紝璺宠繃鍏嬮殕"
+    if [ -f "docker-compose.yml" ] && [ -f ".env.example" ]; then
+        print_success "当前目录已存在配置文件。"
+        return
     fi
 
-    cd stardew-server || exit 1
+    if command -v git &> /dev/null; then
+        print_info "正在克隆仓库..."
+        git clone https://github.com/nothing3ok/stardew-server.git
+        cd stardew-server
+        print_success "仓库克隆完成。"
+    else
+        print_info "未检测到 git，改为直接下载文件..."
+
+        if ! command -v wget &> /dev/null && ! command -v curl &> /dev/null; then
+            print_error "系统中既没有 wget，也没有 curl。"
+            echo "请先安装 git、wget 或 curl。"
+            exit 1
+        fi
+
+        mkdir -p stardew-server
+        cd stardew-server
+
+        BASE_URL="https://raw.githubusercontent.com/nothing3ok/stardew-server/main"
+
+        if command -v curl &> /dev/null; then
+            curl -fsSL "$BASE_URL/docker-compose.yml" -o docker-compose.yml
+            curl -fsSL "$BASE_URL/.env.example" -o .env.example
+        else
+            wget -q "$BASE_URL/docker-compose.yml" -O docker-compose.yml
+            wget -q "$BASE_URL/.env.example" -O .env.example
+        fi
+
+        print_success "配置文件下载完成。"
+    fi
 }
 
 configure_steam() {
-    print_step "姝ラ 3: Steam 閰嶇疆..."
+    print_step "步骤 3: 配置 Steam 账号..."
+
     echo ""
-    print_warning "閲嶈锛氭偍蹇呴』鍦?Steam 涓婃嫢鏈夋槦闇茶胺鐗╄锛?
-    print_info "娓告垙鏂囦欢灏嗛€氳繃鎮ㄧ殑 Steam 璐︽埛涓嬭浇銆?
+    print_warning "重要：您必须在 Steam 上拥有 Stardew Valley。"
+    print_info "游戏文件会通过您的 Steam 账号下载。"
     echo ""
 
     if [ -f ".env" ]; then
-        ask_question ".env 鏂囦欢宸插瓨鍦ㄣ€傛槸鍚﹁閲嶆柊閰嶇疆锛?y/n)"
+        ask_question ".env 文件已存在，是否重新配置？(y/n)"
         read -r reconfigure </dev/tty
         if [[ ! $reconfigure =~ ^[Yy]$ ]]; then
-            print_info "浣跨敤鐜版湁 .env 鏂囦欢"
+            print_info "继续使用现有 .env 文件。"
             return
         fi
     fi
@@ -186,155 +201,145 @@ configure_steam() {
     cp .env.example .env
 
     echo ""
-    print_info "鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
-    print_info "  閰嶇疆鏂瑰紡閫夋嫨"
-    print_info "鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+    print_info "==================================================="
+    print_info "  配置方式"
+    print_info "==================================================="
     echo ""
-    ask_question "鏄惁鍦ㄧ粓绔墜鍔ㄨ緭鍏ラ厤缃俊鎭紵(y/n)"
-    echo -e "${CYAN}  y${NC} - 鐜板湪鍦ㄧ粓绔緭鍏?Steam 鐢ㄦ埛鍚嶃€佸瘑鐮佸拰 VNC 瀵嗙爜"
-    echo -e "${CYAN}  n${NC} - 绋嶅悗鎵嬪姩缂栬緫 .env 鏂囦欢锛堟帹鑽愮啛鎮?Linux 鐢ㄦ埛锛?
+    ask_question "是否现在在终端中手动输入配置？(y/n)"
+    echo -e "${CYAN}  y${NC} - 立即输入 Steam 用户名、密码和 VNC 密码"
+    echo -e "${CYAN}  n${NC} - 稍后手动编辑 .env 文件"
     echo ""
     read -r manual_input </dev/tty
 
     if [[ $manual_input =~ ^[Yy]$ ]]; then
-        # 鎵嬪姩杈撳叆妯″紡
         echo ""
-        ask_question "璇疯緭鍏ユ偍鐨?Steam 鐢ㄦ埛鍚嶏細"
+        ask_question "请输入您的 Steam 用户名："
         read -r steam_username </dev/tty
 
         echo ""
-        ask_question "璇疯緭鍏ユ偍鐨?Steam 瀵嗙爜锛堣緭鍏ユ椂涓嶄細鏄剧ず锛岀洿鎺ヨ緭鍏ュ悗鎸夊洖杞︼級锛?
+        ask_question "请输入您的 Steam 密码（输入时不显示）："
         read -rs steam_password </dev/tty
         echo ""
 
+        if [ -z "$steam_username" ] || [ -z "$steam_password" ]; then
+            print_error "Steam 用户名和密码不能为空。"
+            exit 1
+        fi
+
         echo ""
-        ask_question "璇疯緭鍏?VNC 瀵嗙爜锛堟渶澶?涓瓧绗︼紝鎸夊洖杞︿娇鐢ㄩ粯璁?'stardew1'锛夛細"
+        print_info "如果您启用了 Steam Guard，稍后还需要输入一次验证码。"
+        print_info "建议准备好手机令牌或邮箱验证码。"
+
+        echo ""
+        ask_question "请输入 VNC 密码（最多 8 位，直接回车使用默认值 stardew1）："
         read -r vnc_password </dev/tty
         if [ -z "$vnc_password" ]; then
             vnc_password="stardew1"
         fi
 
-        # 楠岃瘉骞舵埅鏂?VNC 瀵嗙爜涓?8 涓瓧绗?
         if [ ${#vnc_password} -gt 8 ]; then
-            print_warning "VNC 瀵嗙爜瓒呰繃 8 涓瓧绗︼紒"
-            print_warning "VNC 鍗忚浼氳嚜鍔ㄦ埅鏂负锛?{vnc_password:0:8}"
+            print_warning "VNC 密码超过 8 位，将自动截断。"
+            print_warning "实际使用的密码为: ${vnc_password:0:8}"
             vnc_password="${vnc_password:0:8}"
         fi
 
-        # 鏇存柊 .env 鏂囦欢
-        sed -i "s/^STEAM_USERNAME=.*/STEAM_USERNAME=$steam_username/" .env
-        sed -i "s/^STEAM_PASSWORD=.*/STEAM_PASSWORD=$steam_password/" .env
-        sed -i "s/^VNC_PASSWORD=.*/VNC_PASSWORD=$vnc_password/" .env
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s/STEAM_USERNAME=.*/STEAM_USERNAME=$steam_username/" .env
+            sed -i '' "s/STEAM_PASSWORD=.*/STEAM_PASSWORD=$steam_password/" .env
+            sed -i '' "s/VNC_PASSWORD=.*/VNC_PASSWORD=$vnc_password/" .env
+        else
+            sed -i "s/STEAM_USERNAME=.*/STEAM_USERNAME=$steam_username/" .env
+            sed -i "s/STEAM_PASSWORD=.*/STEAM_PASSWORD=$steam_password/" .env
+            sed -i "s/VNC_PASSWORD=.*/VNC_PASSWORD=$vnc_password/" .env
+        fi
 
-        print_success "Steam 閰嶇疆宸蹭繚瀛橈紒"
+        print_success "Steam 凭据已写入 .env。"
     else
-        # 鎵嬪姩缂栬緫 .env 鏂囦欢妯″紡
         echo ""
-        print_info "璇锋墜鍔ㄧ紪杈?.env 鏂囦欢鏉ラ厤缃偍鐨勫嚟璇侊細"
-        echo -e "  ${CYAN}nano .env${NC}  鎴? ${CYAN}vim .env${NC}"
+        print_info "请手动编辑 .env 文件完成配置："
+        echo -e "  ${CYAN}nano .env${NC}  或  ${CYAN}vim .env${NC}"
         echo ""
-        print_info "闇€瑕侀厤缃互涓嬪瓧娈碉細"
-        echo -e "  ${YELLOW}STEAM_USERNAME${NC}  - 鎮ㄧ殑 Steam 鐢ㄦ埛鍚?
-        echo -e "  ${YELLOW}STEAM_PASSWORD${NC}  - 鎮ㄧ殑 Steam 瀵嗙爜"
-        echo -e "  ${YELLOW}VNC_PASSWORD${NC}    - VNC 璁块棶瀵嗙爜锛堟渶澶?涓瓧绗︼級"
+        print_info "至少需要填写以下字段："
+        echo -e "  ${YELLOW}STEAM_USERNAME${NC}  - Steam 用户名"
+        echo -e "  ${YELLOW}STEAM_PASSWORD${NC}  - Steam 密码"
+        echo -e "  ${YELLOW}VNC_PASSWORD${NC}    - VNC 密码（最多 8 位）"
         echo ""
-        ask_question "閰嶇疆瀹屾垚鍚庯紝鎸夊洖杞︾户缁?.."
+        ask_question "完成后按回车继续..."
         read -r </dev/tty
     fi
 }
 
 setup_directories() {
-    print_step "姝ラ 4: 璁剧疆鏁版嵁鐩綍..."
+    print_step "步骤 4: 创建数据目录..."
 
-    # 鍒涘缓鐩綍锛堝寘鎷棩蹇楃洃鎺ч渶瑕佺殑 logs 鐩綍锛?
     mkdir -p data/{saves,game,steam,logs,backups,custom-mods,panel}
 
-    print_info "璁剧疆姝ｇ‘鐨勬潈闄?(UID 1000)..."
-    if chown -R 1000:1000 data/ 2>/dev/null; then
-        # 楠岃瘉鏉冮檺鏄惁姝ｇ‘璁剧疆
-        if [ "$(stat -c '%u' data/game 2>/dev/null || stat -f '%u' data/game 2>/dev/null)" != "1000" ]; then
-            print_error "鏉冮檺璁剧疆澶辫触锛?
-            print_error "杩欏皢瀵艰嚧涓嬭浇娓告垙鏂囦欢鏃跺嚭鐜?纾佺洏鍐欏叆澶辫触'閿欒銆?
-            echo ""
-            echo "璇锋墜鍔ㄨ繍琛? sudo chown -R 1000:1000 data/"
-            echo ""
-            exit 1
-        fi
-        print_success "鐩綍宸插垱寤哄苟璁剧疆鏉冮檺锛?
-    else
-        print_warning "鏃犳硶璁剧疆鏉冮檺锛屽皾璇曚娇鐢?sudo..."
-        if sudo chown -R 1000:1000 data/; then
-            print_success "鐩綍宸插垱寤哄苟璁剧疆鏉冮檺锛?
-        else
-            print_error "璁剧疆鏉冮檺澶辫触锛?
-            print_error "杩欏皢瀵艰嚧涓嬭浇娓告垙鏂囦欢鏃跺嚭鐜?纾佺洏鍐欏叆澶辫触'閿欒銆?
-            echo ""
-            echo "璇锋墜鍔ㄨ繍琛? sudo chown -R 1000:1000 data/"
-            echo ""
-            exit 1
-        fi
-    fi
-}
+    print_info "正在设置目录权限（UID 1000）..."
 
-start_server() {
-    print_step "姝ラ 5: 鍚姩鏈嶅姟鍣?.."
-    echo ""
-
-    print_info "鎷夊彇 Docker 闀滃儚锛堝彲鑳介渶瑕佸嚑鍒嗛挓锛?.."
-    echo ""
-    # 鏄剧ず鎷夊彇杩涘害
-    if $COMPOSE_CMD pull; then
-        print_success "闀滃儚鎷夊彇瀹屾垚锛?
+    if [ -w "data" ]; then
+        chown -R 1000:1000 data/
     else
-        print_warning "鎷夊彇闀滃儚鏃跺嚭鐜伴敊璇紝灏濊瘯鍚姩..."
+        print_info "当前用户权限不足，尝试使用 sudo..."
+        sudo chown -R 1000:1000 data/
     fi
 
-    echo ""
-    print_info "鍚姩鏈嶅姟鍣?.."
-    if $COMPOSE_CMD up -d; then
-        print_success "鏈嶅姟鍣ㄥ凡鍚姩锛?
-    else
-        print_error "鍚姩澶辫触锛?
+    if [ "$(stat -c '%u' data/game 2>/dev/null || stat -f '%u' data/game 2>/dev/null)" != "1000" ]; then
+        print_error "目录权限设置失败。"
+        print_error "这会导致游戏下载时出现 Disk write failure。"
         echo ""
-        echo "鏌ョ湅鏃ュ織浠ヤ簡瑙ｈ鎯?"
-        echo -e "  ${CYAN}$COMPOSE_CMD logs${NC}"
+        echo "请手动执行: sudo chown -R 1000:1000 data/"
+        echo ""
         exit 1
     fi
 
-    # 绛夊緟鍒濆鍖栧鍣ㄥ畬鎴?
-    print_info "绛夊緟鍒濆鍖栧鍣ㄥ畬鎴?.."
+    print_success "目录创建完成，权限设置完成。"
+}
+
+start_server() {
+    print_step "步骤 5: 启动服务器..."
+
+    echo ""
+    print_info "正在拉取 Docker 镜像，这可能需要几分钟..."
+    $COMPOSE_CMD pull
+
+    echo ""
+    print_info "正在启动服务..."
+    $COMPOSE_CMD up -d
+
+    print_success "服务启动命令已执行。"
+
+    print_info "等待初始化容器完成..."
     for i in {1..30}; do
         INIT_STATUS=$(docker inspect --format='{{.State.Status}}' nothing-stardew-init 2>/dev/null)
         if [ "$INIT_STATUS" = "exited" ]; then
             INIT_EXIT=$(docker inspect --format='{{.State.ExitCode}}' nothing-stardew-init 2>/dev/null)
             if [ "$INIT_EXIT" = "0" ]; then
-                print_success "鍒濆鍖栧鍣ㄥ凡瀹屾垚锛?
+                print_success "初始化容器执行成功。"
                 break
             else
-                print_error "鍒濆鍖栧鍣ㄥけ璐ワ紙閫€鍑虹爜锛?INIT_EXIT锛夛紒"
-                echo "鏌ョ湅鏃ュ織: docker logs nothing-stardew-init"
+                print_error "初始化容器执行失败，退出码: $INIT_EXIT"
+                echo "请查看日志: docker logs nothing-stardew-init"
                 exit 1
             fi
         fi
         sleep 1
     done
 
-    print_info "绛夊緟鏈嶅姟鍣ㄥ垵濮嬪寲锛?绉掞級..."
+    echo ""
+    print_info "等待服务器完成初始化（5 秒）..."
     sleep 5
 
-    if docker ps | grep -q nothing-stardew; then
-        print_success "鏈嶅姟鍣ㄦ鍦ㄨ繍琛岋紒"
-    else
-        print_error "瀹瑰櫒鍚姩澶辫触锛?
+    if ! docker ps | grep -q nothing-stardew; then
+        print_error "容器未成功启动。"
         echo ""
-        echo "鏌ョ湅鏃ュ織:"
-        echo -e "  ${CYAN}docker logs nothing-stardew${NC}"
+        echo "请查看日志: docker logs nothing-stardew"
         exit 1
     fi
+
+    print_success "服务器正在运行。"
 }
 
 get_server_ip() {
-    # 灏濊瘯鑾峰彇鍏綉 IP
     if command -v curl &> /dev/null; then
         public_ip=$(curl -4 -s ifconfig.me 2>/dev/null || curl -4 -s ip.sb 2>/dev/null || echo "")
         if [ -n "$public_ip" ]; then
@@ -343,7 +348,6 @@ get_server_ip() {
         fi
     fi
 
-    # 鍥為€€鍒版湰鍦?IP
     if command -v hostname &> /dev/null; then
         hostname -I 2>/dev/null | awk '{print $1}' || echo "your-server-ip"
     else
@@ -353,63 +357,62 @@ get_server_ip() {
 
 print_next_steps() {
     echo ""
-    echo -e "${GREEN}${BOLD}馃帀 璁剧疆瀹屾垚锛佹帴涓嬫潵璇ュ仛浠€涔堬細${NC}"
+    echo -e "${GREEN}${BOLD}部署完成，接下来您可以这样做：${NC}"
     echo ""
 
-    echo -e "${BOLD}1. 鐩戞帶涓嬭浇杩涘害锛?{NC}"
+    echo -e "${BOLD}1. 查看下载进度：${NC}"
     echo "   docker logs -f nothing-stardew"
     echo ""
-    echo -e "${YELLOW}   棣栨鍚姩灏嗕笅杞界害 1.5GB 娓告垙鏂囦欢銆?{NC}"
-    echo -e "${YELLOW}   鏍规嵁鎮ㄧ殑缃戠粶閫熷害锛岄€氬父闇€瑕?5-15 鍒嗛挓銆?{NC}"
+    echo -e "${YELLOW}   首次启动会下载约 1.5GB 游戏文件。${NC}"
+    echo -e "${YELLOW}   一般需要 5 到 15 分钟，取决于网络速度。${NC}"
     echo ""
 
-    echo -e "${BOLD}2. 濡傛灉鍚敤浜?Steam 浠ょ墝锛?{NC}"
-    echo "   - 妫€鏌ユ棩蹇椾腑鏄惁鏈夎姹傝緭鍏ヤ护鐗屼唬鐮佺殑娑堟伅锛?
+    echo -e "${BOLD}2. 如果启用了 Steam Guard：${NC}"
+    echo "   - 先检查日志中是否出现验证码提示："
     echo -e "     ${CYAN}docker logs nothing-stardew | grep -i \"steam guard\"${NC}"
-    echo "   - 濡傛灉鐪嬪埌 \"Steam Guard code:\" 鎻愮ず锛岄檮鍔犲埌瀹瑰櫒锛?
+    echo "   - 如果出现 \"Steam Guard code:\"，请附加到容器："
     echo -e "     ${CYAN}docker attach nothing-stardew${NC}"
-    echo "   - 杈撳叆浠庨偖浠?鎵嬫満搴旂敤鑾峰彇鐨?Steam 浠ょ墝浠ｇ爜骞舵寜鍥炶溅"
-    echo -e "   - ${YELLOW}閲嶈锛?{NC}杈撳叆鍚庣瓑寰?-5绉掞紝纭寮€濮嬩笅杞芥父鎴?
-    echo -e "   - 鐒跺悗鎸?${YELLOW}Ctrl+P Ctrl+Q${NC} 鍒嗙锛?{RED}涓嶈鎸?Ctrl+C锛?{NC}锛?
+    echo "   - 输入您收到的验证码并回车"
+    echo -e "   - ${YELLOW}注意：${NC}输入后等待 3 到 5 秒，确认游戏下载开始"
+    echo -e "   - 然后按 ${YELLOW}Ctrl+P Ctrl+Q${NC} 分离，不要按 ${RED}Ctrl+C${NC}"
     echo ""
 
-    echo -e "${BOLD}3. 馃寪 Web 绠＄悊闈㈡澘锛堟帹鑽愶級锛?{NC}"
-    echo -e "   - 娴忚鍣ㄨ闂? ${CYAN}http://$(get_server_ip):18642${NC}"
-    echo "   - 棣栨璁块棶浼氬紩瀵间綘鍒涘缓绠＄悊瀵嗙爜"
-    echo "   - 鍔熻兘: 瀹炴椂鐘舵€併€佹棩蹇楁煡鐪嬨€佺粓绔帶鍒躲€侀厤缃€佸瓨妗ｃ€佹ā缁勭鐞?
+    echo -e "${BOLD}3. Web 管理面板：${NC}"
+    echo -e "   - 浏览器访问: ${CYAN}http://$(get_server_ip):18642${NC}"
+    echo "   - 首次访问会引导您设置管理员密码"
+    echo "   - 可用于查看状态、日志、终端、配置、存档和模组"
     echo ""
 
-    echo -e "${BOLD}4. 鍙€夌殑 VNC 鍒濆璁剧疆锛堜粎鍦ㄩ渶瑕佹墜鍔ㄨ繘娓告垙鏃朵娇鐢級锛?{NC}"
-    echo "   - 涓嬭浇 VNC 瀹㈡埛绔紙RealVNC銆乀ightVNC 绛夛級"
-    echo -e "   - 杩炴帴鍒? ${CYAN}$(get_server_ip):5900${NC}"
-    echo -e "   - 瀵嗙爜: ${CYAN}$(grep VNC_PASSWORD .env 2>/dev/null | cut -d'=' -f2 || echo 'stardew123')${NC}"
-    echo "   - 濡傛灉浣犳兂鎵嬪姩鍦ㄦ父鎴忓唴鍒涘缓鏂板瓨妗ｏ紝鍙互浣跨敤 VNC"
-    echo "   - 鎴栬€呯洿鎺ュ湪 Web 闈㈡澘涓婁紶鐜版湁瀛樻。骞惰涓洪粯璁よ嚜鍔ㄥ姞杞?
+    echo -e "${BOLD}4. 可选的 VNC 连接：${NC}"
+    echo "   - 安装一个 VNC 客户端，如 RealVNC 或 TightVNC"
+    echo -e "   - 连接地址: ${CYAN}$(get_server_ip):5900${NC}"
+    echo -e "   - 密码: ${CYAN}$(grep VNC_PASSWORD .env | cut -d'=' -f2)${NC}"
+    echo "   - 如果您想手动进游戏创建新存档，可以使用 VNC"
+    echo "   - 也可以直接通过 Web 面板上传已有存档"
     echo ""
 
-    echo -e "${BOLD}5. 鐜╁鍙互杩炴帴锛?{NC}"
-    echo "   - 鎵撳紑鏄熼湶璋风墿璇?
-    echo '   - 鐐瑰嚮 "鍚堜綔" 鈫?"鍔犲叆灞€鍩熺綉娓告垙"'
-    echo "   - 鏈嶅姟鍣ㄤ細鑷姩鏄剧ず锛屾垨鎵嬪姩杈撳叆鏈嶅姟鍣?IP"
-    echo -e "   ${YELLOW}鈿狅笍  娉ㄦ剰锛氬彧闇€杈撳叆 IP锛岀鍙?24642 鏄粯璁ょ殑鏃犻渶鎸囧畾${NC}"
+    echo -e "${BOLD}5. 玩家连接方式：${NC}"
+    echo "   - 打开 Stardew Valley"
+    echo "   - 进入 \"合作\" -> \"加入局域网游戏\""
+    echo "   - 游戏通常会自动发现服务器，也可以手动输入服务器 IP"
+    echo -e "   ${YELLOW}[提示] 默认使用 24642 端口，一般只填 IP 即可${NC}"
     echo ""
 
-    echo -e "${BOLD}甯哥敤鍛戒护锛?{NC}"
-    echo -e "   鏌ョ湅鏃ュ織:        ${CYAN}docker logs -f nothing-stardew${NC}"
-    echo -e "   閲嶅惎鏈嶅姟鍣?      ${CYAN}$COMPOSE_CMD down && $COMPOSE_CMD up -d${NC}"
-    echo -e "   鍋滄鏈嶅姟鍣?      ${CYAN}$COMPOSE_CMD down${NC}"
-    echo -e "   妫€鏌ュ仴搴?        ${CYAN}./health-check.sh${NC}"
-    echo -e "   澶囦唤瀛樻。:        ${CYAN}./backup.sh${NC}"
+    echo -e "${BOLD}常用命令：${NC}"
+    echo -e "   查看日志:      ${CYAN}docker logs -f nothing-stardew${NC}"
+    echo -e "   重启服务:      ${CYAN}$COMPOSE_CMD down && $COMPOSE_CMD up -d${NC}"
+    echo -e "   停止服务:      ${CYAN}$COMPOSE_CMD down${NC}"
+    echo -e "   健康检查:      ${CYAN}./health-check.sh${NC}"
+    echo -e "   备份存档:      ${CYAN}./backup.sh${NC}"
     echo ""
-    echo -e "${YELLOW}   鈿狅笍  娉ㄦ剰: 淇敼 .env 鍚庡繀椤婚噸鍚墠鑳界敓鏁堬紒${NC}"
-    echo ""
-
-    echo -e "${GREEN}${BOLD}馃専 浜彈鎮ㄧ殑鍗虫椂鐫＄湢鏄熼湶璋锋湇鍔″櫒锛?{NC}"
+    echo -e "${YELLOW}   [提示] 修改 .env 后需要重启服务才会生效${NC}"
     echo ""
 
-    # 鏅鸿兘妫€娴嬫槸鍚﹂渶瑕?Steam Guard 楠岃瘉鐮?
+    echo -e "${GREEN}${BOLD}祝您使用愉快，享受您的 Nothing Stardew Server。${NC}"
     echo ""
-    print_info "姝ｅ湪妫€娴嬫湇鍔″櫒鐘舵€?.."
+
+    echo ""
+    print_info "正在检测服务器状态..."
     sleep 2
 
     NEEDS_STEAM_GUARD=false
@@ -420,30 +423,28 @@ print_next_steps() {
 
     if [ "$NEEDS_STEAM_GUARD" = "true" ]; then
         echo ""
-        print_warning "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
-        print_warning "  妫€娴嬪埌 Steam 闇€瑕侀獙璇佺爜锛?
-        print_warning "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+        print_warning "======================================================="
+        print_warning "  检测到 Steam Guard 验证码流程"
+        print_warning "======================================================="
         echo ""
-        print_info "鎮ㄩ渶瑕侀檮鍔犲埌瀹瑰櫒鏉ヨ緭鍏?Steam Guard 楠岃瘉鐮併€?
-        print_info "璇锋寜浠ヤ笅姝ラ鎿嶄綔锛?
-        echo ""
-        echo -e "  ${CYAN}1.${NC} 杩愯: ${CYAN}docker attach nothing-stardew${NC}"
-        echo -e "  ${CYAN}2.${NC} 杈撳叆閭欢/鎵嬫満搴旂敤涓敹鍒扮殑楠岃瘉鐮侊紝鎸夊洖杞?
-        echo -e "  ${CYAN}3.${NC} 绛夊緟 3-5 绉掔‘璁ゆ父鎴忓紑濮嬩笅杞?
-        echo -e "  ${CYAN}4.${NC} 鎸?${YELLOW}Ctrl+P Ctrl+Q${NC} 鍒嗙瀹瑰櫒锛?{RED}涓嶈鎸?Ctrl+C锛?{NC}锛?
+        print_info "请按照以下步骤完成验证："
+        echo -e "  ${CYAN}1.${NC} 运行: ${CYAN}docker attach nothing-stardew${NC}"
+        echo -e "  ${CYAN}2.${NC} 输入收到的验证码并回车"
+        echo -e "  ${CYAN}3.${NC} 等待 3 到 5 秒确认下载开始"
+        echo -e "  ${CYAN}4.${NC} 按 ${YELLOW}Ctrl+P Ctrl+Q${NC} 分离容器，不要按 ${RED}Ctrl+C${NC}"
         echo ""
     else
         echo ""
-        ask_question "璇烽€夋嫨涓嬩竴姝ユ搷浣滐細"
-        echo -e "  ${CYAN}1${NC} - 鏌ョ湅瀹炴椂鏃ュ織: ${CYAN}docker logs -f nothing-stardew${NC}"
-        echo -e "  ${CYAN}2${NC} - 闄勫姞鍒板鍣紙鍙氦浜掕緭鍏ラ獙璇佺爜锛? ${CYAN}docker attach nothing-stardew${NC}"
+        ask_question "下一步您想执行什么？"
+        echo -e "  ${CYAN}1${NC} - 查看实时日志: ${CYAN}docker logs -f nothing-stardew${NC}"
+        echo -e "  ${CYAN}2${NC} - 附加到容器: ${CYAN}docker attach nothing-stardew${NC}"
         echo ""
-        print_info "鎮ㄥ彲浠ョ洿鎺ュ鍒朵笂鏂瑰懡浠ゅ湪缁堢鎵ц銆?
+        print_info "您可以直接复制上面的命令到终端执行。"
     fi
 }
 
 # =============================================================================
-# 涓绘祦绋?
+# 主入口
 # =============================================================================
 
 main() {
@@ -456,5 +457,4 @@ main() {
     print_next_steps
 }
 
-# 杩愯涓诲嚱鏁?
 main
