@@ -1,6 +1,6 @@
-# Puppy Stardew Server - Included Mods
+# Nothing Stardew Server - Included Mods
 
-This document lists all the mods included in the Puppy Stardew Server Docker image.
+This document lists all the mods included in the Nothing Stardew Server Docker image.
 
 ## Mod List
 

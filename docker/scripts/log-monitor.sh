@@ -1,5 +1,5 @@
 #!/bin/bash
-# Puppy Stardew Server Log Monitor
+# Nothing Stardew Server Log Monitor
 # 实时监控并分类游戏日志
 #
 # This script runs in the background and monitors game logs

@@ -1,4 +1,4 @@
-# Puppy Stardew Server
+# Nothing Stardew Server
 
 Dockerized Stardew Valley multiplayer server with persistent storage, bundled SMAPI mods, and a browser-based management panel.
 
@@ -6,7 +6,7 @@ Dockerized Stardew Valley multiplayer server with persistent storage, bundled SM
 
 ## Overview
 
-Puppy Stardew Server packages Stardew Valley, SMAPI, and a server-oriented mod stack into a Docker workflow that is easy to run on a VPS or home server.
+Nothing Stardew Server packages Stardew Valley, SMAPI, and a server-oriented mod stack into a Docker workflow that is easy to run on a VPS or home server.
 
 The current project includes:
 

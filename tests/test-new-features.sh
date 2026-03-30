@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Comprehensive Test Suite for Puppy Stardew Server New Scripts
+# Comprehensive Test Suite for Nothing Stardew Server New Scripts
 # 灏忕嫍鏄熻胺鏈嶅姟鍣ㄦ柊鑴氭湰缁煎悎娴嬭瘯濂椾欢
 #
 # Runs WITHOUT Docker or the game. Tests logic, syntax, and behavior of each
@@ -864,23 +864,23 @@ EOF
         script_health=1
 
         cat > "'"$metrics_file"'" << EOPROM
-# HELP puppy_stardew_game_running Whether the Stardew Valley game process is running.
-# TYPE puppy_stardew_game_running gauge
-puppy_stardew_game_running $game_running
+# HELP nothing_stardew_game_running Whether the Stardew Valley game process is running.
+# TYPE nothing_stardew_game_running gauge
+nothing_stardew_game_running $game_running
 
-# HELP puppy_stardew_players_online Number of players currently connected.
-# TYPE puppy_stardew_players_online gauge
-puppy_stardew_players_online $players
+# HELP nothing_stardew_players_online Number of players currently connected.
+# TYPE nothing_stardew_players_online gauge
+nothing_stardew_players_online $players
 
-# HELP puppy_stardew_memory_usage_mb Game process RSS memory usage in megabytes.
-# TYPE puppy_stardew_memory_usage_mb gauge
-puppy_stardew_memory_usage_mb $memory
+# HELP nothing_stardew_memory_usage_mb Game process RSS memory usage in megabytes.
+# TYPE nothing_stardew_memory_usage_mb gauge
+nothing_stardew_memory_usage_mb $memory
 EOPROM
     '
 
-    if grep -q "puppy_stardew_game_running 1" "$metrics_file" && \
-       grep -q "puppy_stardew_players_online 3" "$metrics_file" && \
-       grep -q "puppy_stardew_memory_usage_mb 512" "$metrics_file"; then
+    if grep -q "nothing_stardew_game_running 1" "$metrics_file" && \
+       grep -q "nothing_stardew_players_online 3" "$metrics_file" && \
+       grep -q "nothing_stardew_memory_usage_mb 512" "$metrics_file"; then
         pass "Prometheus metrics file has correct format and values"
     else
         fail "Prometheus metrics format validation failed"
@@ -1277,7 +1277,7 @@ test_auto_backup() {
 # =============================================================================
 main() {
     echo -e "${CYAN}鈺斺晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?{NC}"
-    echo -e "${CYAN}鈺? Puppy Stardew Server 鈥?New Features Test Suite                  鈺?{NC}"
+    echo -e "${CYAN}鈺? Nothing Stardew Server 鈥?New Features Test Suite                  鈺?{NC}"
     echo -e "${CYAN}鈺? 灏忕嫍鏄熻胺鏈嶅姟鍣?鈥?鏂板姛鑳芥祴璇曞浠?                                   鈺?{NC}"
     echo -e "${CYAN}鈺?                                                                  鈺?{NC}"
     echo -e "${CYAN}鈺? Tests run WITHOUT Docker or game 鈥?pure logic & syntax checks    鈺?{NC}"

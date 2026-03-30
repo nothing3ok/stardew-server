@@ -1,6 +1,6 @@
-# Puppy Stardew Web Panel
+# Nothing Stardew Web Panel
 
-Lightweight web management panel for Puppy Stardew Server.
+Lightweight web management panel for Nothing Stardew Server.
 
 ## Features
 

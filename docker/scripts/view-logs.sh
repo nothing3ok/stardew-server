@@ -1,5 +1,5 @@
 #!/bin/bash
-# Puppy Stardew Server - Log Viewer
+# Nothing Stardew Server - Log Viewer
 # 小狗星谷服务器 - 日志查看器
 #
 # Usage: docker exec -it nothing-stardew /home/steam/scripts/view-logs.sh [option]
@@ -19,7 +19,7 @@ CATEGORIZED_DIR="/home/steam/.local/share/nothing-stardew/logs/categorized"
 ARCHIVE_DIR="/home/steam/.local/share/nothing-stardew/logs/archive"
 
 show_menu() {
-    echo -e "${GREEN}=== Puppy Stardew Server Log Viewer ===${NC}"
+    echo -e "${GREEN}=== Nothing Stardew Server Log Viewer ===${NC}"
     echo ""
     echo "1) View all errors (错误日志)"
     echo "2) View mod logs (模组日志)"

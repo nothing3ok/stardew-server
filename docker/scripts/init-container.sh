@@ -17,7 +17,7 @@ log_info() { echo -e "${GREEN}[Init]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[Init]${NC} $1"; }
 
 log_info "================================================"
-log_info "  Puppy Stardew Server - Init Container"
+log_info "  Nothing Stardew Server - Init Container"
 log_info "  小狗星谷服务器 - 初始化容器"
 log_info "================================================"
 

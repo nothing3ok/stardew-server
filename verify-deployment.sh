@@ -29,7 +29,7 @@ check_warn() {
 }
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  Puppy Stardew Server Verification${NC}"
+echo -e "${BLUE}  Nothing Stardew Server Verification${NC}"
 echo -e "${BLUE}  閮ㄧ讲楠岃瘉妫€鏌?{NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""

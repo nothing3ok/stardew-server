@@ -1,4 +1,4 @@
-# Contributing to Puppy Stardew Server
+# Contributing to Nothing Stardew Server
 
 鎰熻阿鎮ㄥPuppy Stardew Server椤圭洰鐨勫叧娉紒
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Puppy Stardew Server - Initialization Script
+# Nothing Stardew Server - Initialization Script
 # 小狗星谷服务器 - 初始化脚本
 #
 # This script sets up the required data directories with correct permissions
@@ -8,7 +8,7 @@
 set -e
 
 echo "=========================================="
-echo "Puppy Stardew Server - Initialization"
+echo "Nothing Stardew Server - Initialization"
 echo "小狗星谷服务器 - 初始化"
 echo "=========================================="
 echo ""

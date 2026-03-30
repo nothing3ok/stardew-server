@@ -1,7 +1,7 @@
 {
   "name": "nothing-stardew-web-panel",
   "version": "1.0.0",
-  "description": "Lightweight web management panel for Puppy Stardew Server",
+  "description": "Lightweight web management panel for Nothing Stardew Server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

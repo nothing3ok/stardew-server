@@ -6,15 +6,15 @@
 # Also writes a JSON status file for local consumption.
 #
 # Metrics exposed:
-#   puppy_stardew_game_running         - Whether the game process is alive (1/0)
-#   puppy_stardew_uptime_seconds       - Game process uptime in seconds
-#   puppy_stardew_players_online       - Number of connected players
-#   puppy_stardew_memory_usage_mb      - Game process RSS memory in MB
-#   puppy_stardew_cpu_usage_percent    - Game process CPU usage percent
-#   puppy_stardew_events_passout_total - Total passout events detected
-#   puppy_stardew_events_readycheck_total  - Total ready-check events
-#   puppy_stardew_events_offline_total - Total offline-mode events
-#   puppy_stardew_script_healthy       - Whether background scripts are alive (1/0)
+#   nothing_stardew_game_running         - Whether the game process is alive (1/0)
+#   nothing_stardew_uptime_seconds       - Game process uptime in seconds
+#   nothing_stardew_players_online       - Number of connected players
+#   nothing_stardew_memory_usage_mb      - Game process RSS memory in MB
+#   nothing_stardew_cpu_usage_percent    - Game process CPU usage percent
+#   nothing_stardew_events_passout_total - Total passout events detected
+#   nothing_stardew_events_readycheck_total  - Total ready-check events
+#   nothing_stardew_events_offline_total - Total offline-mode events
+#   nothing_stardew_script_healthy       - Whether background scripts are alive (1/0)
 
 STATUS_FILE="/home/steam/.local/share/nothing-stardew/status.json"
 METRICS_FILE="/home/steam/.local/share/nothing-stardew/metrics.prom"
@@ -177,41 +177,41 @@ update_metrics() {
     # Write Prometheus metrics file (atomic write via temp file)
     local tmp_metrics="${METRICS_FILE}.tmp"
     cat > "$tmp_metrics" << EOPROM
-# HELP puppy_stardew_game_running Whether the Stardew Valley game process is running.
-# TYPE puppy_stardew_game_running gauge
-puppy_stardew_game_running $game_running
+# HELP nothing_stardew_game_running Whether the Stardew Valley game process is running.
+# TYPE nothing_stardew_game_running gauge
+nothing_stardew_game_running $game_running
 
-# HELP puppy_stardew_uptime_seconds Game process uptime in seconds.
-# TYPE puppy_stardew_uptime_seconds gauge
-puppy_stardew_uptime_seconds $uptime
+# HELP nothing_stardew_uptime_seconds Game process uptime in seconds.
+# TYPE nothing_stardew_uptime_seconds gauge
+nothing_stardew_uptime_seconds $uptime
 
-# HELP puppy_stardew_players_online Number of players currently connected.
-# TYPE puppy_stardew_players_online gauge
-puppy_stardew_players_online $players
+# HELP nothing_stardew_players_online Number of players currently connected.
+# TYPE nothing_stardew_players_online gauge
+nothing_stardew_players_online $players
 
-# HELP puppy_stardew_memory_usage_mb Game process RSS memory usage in megabytes.
-# TYPE puppy_stardew_memory_usage_mb gauge
-puppy_stardew_memory_usage_mb $memory
+# HELP nothing_stardew_memory_usage_mb Game process RSS memory usage in megabytes.
+# TYPE nothing_stardew_memory_usage_mb gauge
+nothing_stardew_memory_usage_mb $memory
 
-# HELP puppy_stardew_cpu_usage_percent Game process CPU usage percentage.
-# TYPE puppy_stardew_cpu_usage_percent gauge
-puppy_stardew_cpu_usage_percent $cpu
+# HELP nothing_stardew_cpu_usage_percent Game process CPU usage percentage.
+# TYPE nothing_stardew_cpu_usage_percent gauge
+nothing_stardew_cpu_usage_percent $cpu
 
-# HELP puppy_stardew_events_passout_total Total number of passout events detected.
-# TYPE puppy_stardew_events_passout_total counter
-puppy_stardew_events_passout_total $passout
+# HELP nothing_stardew_events_passout_total Total number of passout events detected.
+# TYPE nothing_stardew_events_passout_total counter
+nothing_stardew_events_passout_total $passout
 
-# HELP puppy_stardew_events_readycheck_total Total number of ready-check dialog events.
-# TYPE puppy_stardew_events_readycheck_total counter
-puppy_stardew_events_readycheck_total $readycheck
+# HELP nothing_stardew_events_readycheck_total Total number of ready-check dialog events.
+# TYPE nothing_stardew_events_readycheck_total counter
+nothing_stardew_events_readycheck_total $readycheck
 
-# HELP puppy_stardew_events_offline_total Total number of server-offline events.
-# TYPE puppy_stardew_events_offline_total counter
-puppy_stardew_events_offline_total $offline
+# HELP nothing_stardew_events_offline_total Total number of server-offline events.
+# TYPE nothing_stardew_events_offline_total counter
+nothing_stardew_events_offline_total $offline
 
-# HELP puppy_stardew_script_healthy Whether background scripts are running.
-# TYPE puppy_stardew_script_healthy gauge
-puppy_stardew_script_healthy $script_health
+# HELP nothing_stardew_script_healthy Whether background scripts are running.
+# TYPE nothing_stardew_script_healthy gauge
+nothing_stardew_script_healthy $script_health
 EOPROM
     mv "$tmp_metrics" "$METRICS_FILE"
 

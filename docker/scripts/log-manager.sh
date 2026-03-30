@@ -1,5 +1,5 @@
 #!/bin/bash
-# Puppy Stardew Server Log Manager
+# Nothing Stardew Server Log Manager
 # 小狗星谷服务器日志管理器
 #
 # Features:
@@ -98,7 +98,7 @@ generate_summary() {
     local summary_file="$ARCHIVE_DIR/summary_$(date +%Y%m%d).txt"
 
     {
-        echo "=== Puppy Stardew Server Log Summary ==="
+        echo "=== Nothing Stardew Server Log Summary ==="
         echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
         echo ""
         echo "Statistics:"

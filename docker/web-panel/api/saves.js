@@ -209,7 +209,7 @@ function writeEnvFile(envData) {
   ensureDir(envDir);
 
   if (!fs.existsSync(envPath)) {
-    fs.writeFileSync(envPath, '# Managed by Puppy Stardew Server web panel\n', 'utf-8');
+      fs.writeFileSync(envPath, '# Managed by Nothing Stardew Server web panel\n', 'utf-8');
   }
 
   const original = fs.readFileSync(envPath, 'utf-8');

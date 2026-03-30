@@ -160,7 +160,7 @@ function writeEnvFile(envData) {
 
   if (!fs.existsSync(envPath)) {
     const seed = parseEnvFile();
-    const lines = ['# Managed by Puppy Stardew Server web panel', ''];
+  const lines = ['# Managed by Nothing Stardew Server web panel', ''];
     for (const [key, value] of Object.entries(seed)) {
       lines.push(`${key}=${value}`);
     }

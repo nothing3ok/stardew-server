@@ -1,5 +1,5 @@
 #!/bin/bash
-# Puppy Stardew Server - One-Click Update Script
+# Nothing Stardew Server - One-Click Update Script
 # 灏忕嫍鏄熻胺鏈嶅姟鍣?- 涓€閿洿鏂拌剼鏈?
 #
 # Usage: ./update.sh [version]
@@ -25,7 +25,7 @@ log_error() { echo -e "${RED}[Update]${NC} $1"; }
 log_step() { echo -e "${BLUE}$1${NC}"; }
 
 log_step "========================================"
-log_step "  Puppy Stardew Server Updater"
+log_step "  Nothing Stardew Server Updater"
 log_step "  灏忕嫍鏄熻胺鏈嶅姟鍣ㄦ洿鏂板伐鍏?
 log_step "========================================"
 echo ""

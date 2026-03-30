@@ -1,5 +1,5 @@
 #!/bin/bash
-# Puppy Stardew Server Entrypoint Script - v1.0.77
+# Nothing Stardew Server Entrypoint Script - v1.0.77
 # 小狗星谷服务器启动脚本 - v1.0.77
 
 # DO NOT use set -e - we need manual error handling
@@ -342,7 +342,7 @@ fi
 # =============================================
 
 log_step "================================================"
-log_step "  Puppy Stardew Server v1.0.77 Starting..."
+log_step "  Nothing Stardew Server v1.0.77 Starting..."
 log_step "  小狗星谷服务器 v1.0.77 启动中..."
 log_step "================================================"
 

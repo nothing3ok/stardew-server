@@ -1,5 +1,5 @@
 /**
- * Puppy Stardew Server - Web Management Panel
+ * Nothing Stardew Server - Web Management Panel
  * Main server entry point
  */
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Puppy Stardew Server - Health Check Script
+# Nothing Stardew Server - Health Check Script
 # 灏忕嫍鏄熻胺鏈嶅姟鍣?- 鍋ュ悍妫€鏌ヨ剼鏈?
 # =============================================================================
 # This script checks if your Stardew Valley server is running correctly.
@@ -33,7 +33,7 @@ WARNINGS=0
 print_header() {
     echo ""
     echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
-    echo -e "${CYAN}${BOLD}  馃彞 Puppy Stardew Server - Health Check${NC}"
+echo -e "${CYAN}${BOLD}  馃彞 Nothing Stardew Server - Health Check${NC}"
     echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo ""
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Puppy Stardew Server - Quick Start Script
+# Nothing Stardew Server - Quick Start Script
 # 灏忕嫍鏄熻胺鏈嶅姟鍣?- 蹇€熷惎鍔ㄨ剼鏈?
 # =============================================================================
 # This script will help you set up a Stardew Valley dedicated server in minutes!
@@ -26,7 +26,7 @@ BOLD='\033[1m'
 print_header() {
     echo ""
     echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
-    echo -e "${CYAN}${BOLD}  馃惗 Puppy Stardew Server - Quick Start${NC}"
+echo -e "${CYAN}${BOLD}  馃惗 Nothing Stardew Server - Quick Start${NC}"
     echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo ""
 }

@@ -1,4 +1,4 @@
-# Puppy Stardew Server
+# Nothing Stardew Server
 
 涓€涓潰鍚戙€婃槦闇茶胺鐗╄銆嬪浜鸿仈鏈虹殑 Docker 鍖栨湇鍔″櫒椤圭洰锛屽甫鎸佷箙鍖栨暟鎹洰褰曘€佸唴缃?SMAPI 妯＄粍锛屼互鍙婂彲鐩存帴鍦ㄦ祻瑙堝櫒閲屾搷浣滅殑 Web 绠＄悊闈㈡澘銆?
 [English](README.md)

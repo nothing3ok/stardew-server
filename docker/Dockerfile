@@ -1,4 +1,4 @@
-# Puppy Stardew Server - Public Version
+# Nothing Stardew Server - Public Version
 # 小狗星谷服务器 - 公开版本
 #
 # This Docker image does NOT include the game files.
