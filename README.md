@@ -2,7 +2,7 @@
 
 Dockerized Stardew Valley multiplayer server with persistent storage, bundled SMAPI mods, and a browser-based management panel.
 
-[涓枃璇存槑](README_CN.md)
+[中文说明](README_CN.md)
 
 ## Overview
 
