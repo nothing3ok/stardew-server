@@ -64,6 +64,21 @@ Chinese:
 curl -fsSL https://raw.githubusercontent.com/nothing3ok/stardew-server/main/quick-start-zh.sh | bash
 ```
 
+If `raw.githubusercontent.com` is slow or unreachable, you can use one of these CDN-backed mirrors instead:
+
+```bash
+# jsDelivr CDN (recommended)
+curl -fsSL https://cdn.jsdelivr.net/gh/nothing3ok/stardew-server@main/quick-start-zh.sh | bash
+
+# Statically CDN
+curl -fsSL https://cdn.statically.io/gh/nothing3ok/stardew-server/main/quick-start-zh.sh | bash
+
+# GitHack
+curl -fsSL https://raw.githack.com/nothing3ok/stardew-server/main/quick-start-zh.sh | bash
+```
+
+These URLs proxy files from the public GitHub repository. You do not need to register a new account or push the code to another repository.
+
 If you already cloned the repository, you can also run:
 
 ```bash
