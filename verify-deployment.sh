@@ -1,6 +1,5 @@
 #!/bin/bash
-# 閮ㄧ讲楠岃瘉鑴氭湰 - 妫€鏌ユ墍鏈夊姛鑳芥槸鍚︽甯?
-# Deployment verification script
+# Nothing Stardew Server - Deployment Verification Script
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -14,27 +13,25 @@ FAIL=0
 WARN=0
 
 check_pass() {
-    echo -e "${GREEN}鉁?PASS${NC} - $1"
+    echo -e "${GREEN}[PASS]${NC} $1"
     PASS=$((PASS + 1))
 }
 
 check_fail() {
-    echo -e "${RED}鉁?FAIL${NC} - $1"
+    echo -e "${RED}[FAIL]${NC} $1"
     FAIL=$((FAIL + 1))
 }
 
 check_warn() {
-    echo -e "${YELLOW}鈿?WARN${NC} - $1"
+    echo -e "${YELLOW}[WARN]${NC} $1"
     WARN=$((WARN + 1))
 }
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Nothing Stardew Server Verification${NC}"
-echo -e "${BLUE}  閮ㄧ讲楠岃瘉妫€鏌?{NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# 鑾峰彇鏃ュ織
 LOG=$(docker logs nothing-stardew 2>&1)
 
 echo -e "${CYAN}[1/10] Container Status${NC}"
@@ -52,9 +49,9 @@ if echo "$LOG" | grep -q "Game downloaded successfully"; then
 elif echo "$LOG" | grep -q "Game files found"; then
     check_pass "Game files already present"
 elif echo "$LOG" | grep -q "downloading"; then
-    check_warn "Game is currently downloading (check logs)"
+    check_warn "Game is currently downloading"
 else
-    check_fail "Game download status unclear"
+    check_fail "Game download status is unclear"
 fi
 echo ""
 
@@ -64,7 +61,7 @@ if echo "$LOG" | grep -q "SMAPI installed successfully"; then
 elif echo "$LOG" | grep -q "SMAPI already installed"; then
     check_pass "SMAPI already installed"
 else
-    check_warn "SMAPI installation status unclear"
+    check_warn "SMAPI installation status is unclear"
 fi
 echo ""
 
@@ -74,7 +71,7 @@ if echo "$LOG" | grep -q "Mods installed successfully"; then
 elif echo "$LOG" | grep -q "Mods already installed"; then
     check_pass "Mods already installed"
 else
-    check_warn "Mods installation status unclear"
+    check_warn "Mods installation status is unclear"
 fi
 echo ""
 
@@ -104,9 +101,9 @@ echo ""
 
 echo -e "${CYAN}[8/10] Virtual Display${NC}"
 if echo "$LOG" | grep -q "Virtual display started"; then
-    check_pass "Xvfb virtual display running"
+    check_pass "Virtual display started"
 else
-    check_fail "Virtual display not started"
+    check_fail "Virtual display did not start"
 fi
 echo ""
 
@@ -114,54 +111,47 @@ echo -e "${CYAN}[9/10] VNC Server${NC}"
 if echo "$LOG" | grep -q "VNC server started"; then
     check_pass "VNC server running on port 5900"
 elif echo "$LOG" | grep -q "VNC disabled"; then
-    check_warn "VNC is disabled (ENABLE_VNC=false)"
+    check_warn "VNC is disabled"
 else
-    check_warn "VNC status unclear"
+    check_warn "VNC status is unclear"
 fi
 echo ""
 
 echo -e "${CYAN}[10/10] Game Server${NC}"
 if echo "$LOG" | grep -q "Server is starting" || echo "$LOG" | grep -q "StardewModdingAPI"; then
-    check_pass "Game server is starting/running"
+    check_pass "Game server is starting or already running"
 else
-    check_warn "Game server status unclear (may still be initializing)"
+    check_warn "Game server status is unclear"
 fi
 echo ""
 
-# 妫€鏌ラ敊璇?
-echo -e "${CYAN}[Error Check] Searching for errors...${NC}"
-if echo "$LOG" | grep -iq "error" | grep -v "ERROR (Rate Limit)" | head -5; then
-    ERROR_LINES=$(echo "$LOG" | grep -i "error" | grep -v "Rate Limit" | tail -3)
-    if [ -n "$ERROR_LINES" ]; then
-        check_warn "Found error messages in logs (review recommended)"
-        echo -e "${YELLOW}Recent errors:${NC}"
-        echo "$ERROR_LINES"
-    else
-        check_pass "No critical errors found"
-    fi
+echo -e "${CYAN}[Error Check] Searching logs for errors...${NC}"
+ERROR_LINES=$(echo "$LOG" | grep -i "error" | grep -v "Rate Limit" | tail -3 || true)
+if [ -n "$ERROR_LINES" ]; then
+    check_warn "Found error messages in logs"
+    echo -e "${YELLOW}Recent errors:${NC}"
+    echo "$ERROR_LINES"
 else
-    check_pass "No errors found in logs"
+    check_pass "No obvious errors found in logs"
 fi
 echo ""
 
-# 绔彛妫€鏌?
 echo -e "${CYAN}[Port Check] Checking open ports...${NC}"
 if netstat -tuln 2>/dev/null | grep -q ":24642"; then
-    check_pass "Game port 24642/udp is listening"
+    check_pass "Game port 24642 is listening"
 else
-    check_warn "Port 24642 not detected (netstat may not be available)"
+    check_warn "Port 24642 not detected (netstat may be unavailable)"
 fi
 
 if netstat -tuln 2>/dev/null | grep -q ":5900"; then
-    check_pass "VNC port 5900/tcp is listening"
+    check_pass "VNC port 5900 is listening"
 else
     check_warn "Port 5900 not detected (VNC may be disabled)"
 fi
 echo ""
 
-# 鎬荤粨
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  Summary / 鎬荤粨${NC}"
+echo -e "${BLUE}  Summary${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo -e "${GREEN}Passed: $PASS${NC}"
 echo -e "${YELLOW}Warnings: $WARN${NC}"
@@ -169,18 +159,16 @@ echo -e "${RED}Failed: $FAIL${NC}"
 echo ""
 
 if [ $FAIL -eq 0 ]; then
-    echo -e "${GREEN}鉁?Deployment looks good!${NC}"
-    echo -e "${GREEN}鉁?閮ㄧ讲鐪嬭捣鏉ユ甯革紒${NC}"
+    echo -e "${GREEN}[OK] Deployment looks good.${NC}"
     echo ""
-    echo -e "Next steps:"
-    echo -e "  1. Connect via VNC: localhost:5900 or server-ip:5900"
-    echo -e "  2. Click CO-OP 鈫?Start new co-op farm"
-    echo -e "  3. Players can connect via invite code"
+    echo "Suggested next steps:"
+    echo "  1. Connect via VNC if needed: localhost:5900 or server-ip:5900"
+    echo "  2. Create or load your co-op save"
+    echo "  3. Let players join using the server IP"
     exit 0
 else
-    echo -e "${RED}鉁?Deployment has issues${NC}"
-    echo -e "${RED}鉁?閮ㄧ讲瀛樺湪闂${NC}"
+    echo -e "${RED}[FAIL] Deployment still has issues.${NC}"
     echo ""
-    echo -e "Review full logs with: docker logs nothing-stardew"
+    echo "Review full logs with: docker logs nothing-stardew"
     exit 1
 fi

@@ -1,9 +1,7 @@
-#!/bin/bash
+﻿#!/bin/bash
 # Nothing Stardew Server Entrypoint Script - v1.0.77
-# 小狗星谷服务器启动脚本 - v1.0.77
 
 # DO NOT use set -e - we need manual error handling
-# 不使用 set -e - 需要手动错误处理
 
 # Color codes for pretty logging
 GREEN='\033[0;32m'
@@ -90,13 +88,11 @@ configure_audio_driver() {
     else
         export SDL_AUDIODRIVER=dummy
         log_info "No explicit audio driver configured; defaulting SDL_AUDIODRIVER=dummy"
-        log_info "未显式配置音频驱动，默认使用 SDL_AUDIODRIVER=dummy"
     fi
 
     if [ -z "${ALSOFT_DRIVERS:-}" ]; then
         export ALSOFT_DRIVERS=null
         log_info "No explicit OpenAL driver configured; defaulting ALSOFT_DRIVERS=null"
-        log_info "未显式配置 OpenAL 驱动，默认使用 ALSOFT_DRIVERS=null"
     fi
 }
 
@@ -132,7 +128,6 @@ configure_performance_mode() {
     fi
 
     log_info "Low performance mode enabled"
-    log_info "低性能模式已启用"
     log_info "  Render target: ${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT} @ ${REFRESH_RATE}fps"
     log_info "  Xvfb color depth: ${XVFB_COLOR_DEPTH}bit"
     log_info "  SDL_VIDEODRIVER=${SDL_VIDEODRIVER}"
@@ -167,41 +162,30 @@ apply_startup_preferences_tuning() {
 }
 
 # Function to download game via steamcmd
-# 下载游戏函数
 download_game_via_steam() {
     log_info "========================================="
     log_info "  Starting Steam download process"
-    log_info "  开始 Steam 下载流程"
     log_info "========================================="
     log_info ""
     log_info "If Steam Guard is required, you will see a prompt."
-    log_info "如果需要 Steam Guard，您会看到提示。"
     log_info ""
     log_info "To input Steam Guard code:"
-    log_info "输入 Steam Guard 验证码："
     log_info "  1. You should already have run: docker attach nothing-stardew"
-    log_info "  1. 您应该已经运行了：docker attach nothing-stardew"
     log_info "  2. Enter the code when prompted below"
-    log_info "  2. 在下面提示时输入验证码"
     log_info "  3. Press ENTER"
-    log_info "  3. 按回车"
     log_info ""
     log_info "After successful authentication, game will download (~708MB)"
-    log_info "验证成功后，游戏将开始下载（约708MB）"
     log_info "========================================="
     log_info ""
 
     # Support STEAM_GUARD_CODE environment variable for easier auth
-    # 支持 STEAM_GUARD_CODE 环境变量以简化验证
     STEAM_GUARD_ARGS=""
     if [ -n "$STEAM_GUARD_CODE" ]; then
         log_info "Using Steam Guard code from environment variable"
-        log_info "使用环境变量中的 Steam Guard 验证码"
         STEAM_GUARD_ARGS="+set_steam_guard_code $STEAM_GUARD_CODE"
     fi
 
     # Run steamcmd WITHOUT pipe - this preserves stdin!
-    # 运行 steamcmd 不使用管道 - 保留stdin！
     /home/steam/steamcmd/steamcmd.sh \
         +force_install_dir /home/steam/stardewvalley \
         $STEAM_GUARD_ARGS \
@@ -213,41 +197,30 @@ download_game_via_steam() {
 
     # Check result
     if [ -f "/home/steam/stardewvalley/StardewValley" ]; then
-        log_info "✅ Game downloaded successfully!"
-        log_info "✅ 游戏下载完成！"
+        log_info "[OK] Game downloaded successfully!"
         return 0
     else
-        log_error "❌ Game download failed (exit code: $DOWNLOAD_EXIT_CODE)"
-        log_error "❌ 游戏下载失败（退出码：$DOWNLOAD_EXIT_CODE）"
+        log_error "[ERROR] Game download failed (exit code: $DOWNLOAD_EXIT_CODE)"
         log_error ""
-        log_error "Common causes / 常见原因："
-        log_error "  1. Steam Guard code incorrect / Steam Guard 验证码错误"
-        log_error "  2. Network timeout / 网络超时"
-        log_error "  3. Insufficient disk space / 磁盘空间不足"
-        log_error "  4. Steam API rate limit / Steam API 速率限制"
         return 1
     fi
 }
 
 # =============================================
 # GPU-related helper function
-# GPU 加速相关辅助函数
 # =============================================
 start_gpu_xorg() {
     local context=${1:-"unknown"}
     if [ "$USE_GPU" != "true" ]; then
         log_warn "USE_GPU != true, skipping GPU startup (context: $context)"
-        log_warn "USE_GPU != true，跳过 GPU 启动逻辑（context: $context）"
         return 3
     fi
 
     log_info "USE_GPU=true -> Attempting to start Xorg :99 for GPU rendering (context: $context)"
-    log_info "USE_GPU=true -> 在 ${context} 阶段尝试启动 Xorg :99 以使用 GPU 渲染"
     rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
 
     if [ -e /dev/dri/renderD128 ] || ls /dev/dri 2>/dev/null | grep -q .; then
         log_info "Detected /dev/dri, starting Xorg :99 (context: $context)"
-        log_info "检测到 /dev/dri，准备启动 Xorg :99 (context: $context)"
 
         # Ensure X socket directory exists with correct permissions
         mkdir -p /tmp/.X11-unix
@@ -266,14 +239,12 @@ start_gpu_xorg() {
         # Set resolution via set-resolution.sh
         DISPLAY=:99 /home/steam/scripts/set-resolution.sh "${RESOLUTION_WIDTH}" "${RESOLUTION_HEIGHT}" "${REFRESH_RATE}" || {
             log_warn "Failed to set resolution (context: $context), continuing with default"
-            log_warn "设置分辨率失败（context: $context），将继续使用默认分辨率"
         }
         sleep 1
 
         if pgrep -x Xorg >/dev/null 2>&1; then
             export DISPLAY=${DISPLAY:-:99}
-            log_info "✓ Xorg started on :99 (context: $context)"
-            log_info "✓ Xorg 已在 :99 启动（context: $context）"
+            log_info "[OK] Xorg started on :99 (context: $context)"
             if command -v glxinfo >/dev/null 2>&1; then
                 log_info "OpenGL renderer:"
                 glxinfo | grep -i "OpenGL renderer" | head -n 1 || true
@@ -281,24 +252,19 @@ start_gpu_xorg() {
             return 0
         else
             log_warn "Xorg failed to start (context: $context)"
-            log_warn "Xorg 未能在 ${context} 阶段启动"
             return 2
         fi
     else
         log_warn "/dev/dri not detected, skipping Xorg startup (context: $context)"
-        log_warn "/dev/dri 未检测到或不可访问，跳过 Xorg 启动（context: $context）"
         return 1
     fi
 }
 
 # =============================================
 # Phase 1: Root Initialization
-# 阶段1：Root 初始化
 #
 # Permission fixes are handled by the init container (init-container.sh).
 # This phase only handles GPU Xorg startup (requires root) and user switch.
-# 权限修复由初始化容器 (init-container.sh) 处理。
-# 此阶段仅处理 GPU Xorg 启动（需要 root）和用户切换。
 # =============================================
 
 configure_audio_driver
@@ -307,13 +273,12 @@ configure_performance_mode
 if [ "$(id -u)" = "0" ]; then
     log_step "================================================"
     log_step "  Phase 1: Root Initialization"
-    log_step "  阶段1：Root 初始化"
     log_step "================================================"
 
     # Fix libcurl compatibility for SteamCMD (idempotent, fast)
     if [ ! -e "/usr/lib/x86_64-linux-gnu/libcurl.so.4" ]; then
         ln -sf /usr/lib/i386-linux-gnu/libcurl.so.4 /usr/lib/x86_64-linux-gnu/libcurl.so.4
-        log_info "✅ libcurl symlink created"
+        log_info "[OK] libcurl symlink created"
     fi
 
     # Try to start Xorg in root phase if USE_GPU=true
@@ -338,27 +303,22 @@ fi
 
 # =============================================
 # Phase 2: Steam User Operations
-# 阶段2：Steam 用户操作
 # =============================================
 
 log_step "================================================"
 log_step "  Nothing Stardew Server v1.0.77 Starting..."
-log_step "  小狗星谷服务器 v1.0.77 启动中..."
 log_step "================================================"
 
 # Verify we're running as steam user
 if [ "$(id -u)" != "1000" ]; then
     log_error "ERROR: Script must run as steam user (UID 1000)"
-    log_error "错误：脚本必须以 steam 用户（UID 1000）运行"
     exit 1
 fi
 
 # Step 1: Validate Steam credentials (supports Docker Secrets)
-# 步骤 1：验证 Steam 凭证（支持 Docker Secrets）
 log_step "Step 1: Validating configuration..."
 
 # Docker Secrets support: read from /run/secrets/ if env vars are empty
-# Docker Secrets 支持：如果环境变量为空，从 /run/secrets/ 读取
 if [ -z "$STEAM_USERNAME" ] && [ -f "/run/secrets/steam_username" ]; then
     STEAM_USERNAME=$(cat /run/secrets/steam_username | tr -d '\n')
     log_info "Steam username loaded from Docker Secret"
@@ -370,9 +330,7 @@ fi
 
 if [ -z "$STEAM_USERNAME" ] || [ -z "$STEAM_PASSWORD" ]; then
     log_error "STEAM_USERNAME or STEAM_PASSWORD not set!"
-    log_error "STEAM_USERNAME 或 STEAM_PASSWORD 未设置！"
     log_error "Set via .env file or Docker Secrets."
-    log_error "通过 .env 文件或 Docker Secrets 设置。"
     exit 1
 fi
 
@@ -382,9 +340,7 @@ log_info "Steam username: $STEAM_USERNAME"
 if [ ! -f "/home/steam/stardewvalley/StardewValley" ]; then
     log_step "Step 2: Downloading Stardew Valley..."
     log_warn "Game files not found. Downloading from Steam..."
-    log_warn "未找到游戏文件。正在从 Steam 下载..."
     log_warn "This will take 5-10 minutes depending on your connection."
-    log_warn "根据网络情况，此过程需要 5-10 分钟。"
     log_warn ""
 
     # Clean up any existing Steam cache
@@ -396,13 +352,11 @@ if [ ! -f "/home/steam/stardewvalley/StardewValley" ]; then
     # Download game (handles Steam Guard automatically)
     if ! download_game_via_steam; then
         log_error "Failed to download game. Container will exit."
-        log_error "游戏下载失败。容器将退出。"
         exit 1
     fi
 else
     log_step "Step 2: Game files found, skipping download"
-    log_info "✓ Stardew Valley already downloaded"
-    log_info "✓ 星露谷物语已下载"
+    log_info "[OK] Stardew Valley already downloaded"
 fi
 
 # Step 3: Install SMAPI
@@ -415,13 +369,12 @@ if [ ! -f "/home/steam/stardewvalley/StardewModdingAPI" ]; then
 
     if [ $? -ne 0 ]; then
         log_error "Failed to install SMAPI!"
-        log_error "SMAPI 安装失败！"
         exit 1
     fi
 
-    log_info "✓ SMAPI installed successfully!"
+    log_info "[OK] SMAPI installed successfully!"
 else
-    log_info "✓ SMAPI already installed"
+    log_info "[OK] SMAPI already installed"
 fi
 
 # Step 4: Install mods
@@ -431,21 +384,20 @@ mkdir -p /home/steam/stardewvalley/Mods
 
 if [ -d "/home/steam/preinstalled-mods" ]; then
     if [ -d "/home/steam/stardewvalley/Mods/AutoHideHost" ]; then
-        log_info "✓ Mods already installed"
+        log_info "[OK] Mods already installed"
     else
         log_info "Installing mods..."
         cp -r /home/steam/preinstalled-mods/* /home/steam/stardewvalley/Mods/
-        log_info "✓ Mods installed successfully!"
+        log_info "[OK] Mods installed successfully!"
     fi
 
     log_info "Installed mods:"
     ls -1 /home/steam/stardewvalley/Mods/ | while read mod; do
-        log_info "  ✓ $mod"
+        log_info "  [OK] $mod"
     done
 fi
 
 # Step 4.5: Install user-provided mods from custom-mods volume
-# 步骤 4.5：从 custom-mods 卷安装用户提供的模组
 CUSTOM_MODS_DIR="/home/steam/custom-mods"
 if [ -d "$CUSTOM_MODS_DIR" ] && [ "$(ls -A "$CUSTOM_MODS_DIR" 2>/dev/null)" ]; then
     log_step "Step 4.5: Installing custom mods..."
@@ -465,11 +417,11 @@ if [ -d "$CUSTOM_MODS_DIR" ] && [ "$(ls -A "$CUSTOM_MODS_DIR" 2>/dev/null)" ]; t
             # It's a zip file - extract to Mods/
             log_info "  Extracting mod: $mod_name"
             unzip -q -o "$mod_entry" -d "/home/steam/stardewvalley/Mods/" 2>/dev/null || {
-                log_warn "  ⚠ Failed to extract: $mod_name"
+                log_warn "  [WARN] Failed to extract: $mod_name"
             }
         fi
     done
-    log_info "✓ Custom mods installed"
+    log_info "[OK] Custom mods installed"
 fi
 
 # Step 5: Setup virtual display
@@ -481,7 +433,6 @@ START_XVFB_FALLBACK=false
 if pgrep -x Xorg >/dev/null 2>&1; then
     export DISPLAY=${DISPLAY:-:99}
     log_info "Detected Xorg process, using DISPLAY=${DISPLAY}"
-    log_info "检测到 Xorg 进程，使用 DISPLAY=${DISPLAY}"
     if command -v glxinfo >/dev/null 2>&1; then
         log_info "OpenGL renderer:"
         glxinfo | grep -i "OpenGL renderer" | head -n 1 || true
@@ -490,7 +441,6 @@ else
     # Fallback to Xvfb if GPU not enabled or failed
     if [ "$USE_GPU" = "true" ]; then
         log_warn "Xorg not running in steam phase, falling back to Xvfb"
-        log_warn "steam 阶段 Xorg 未运行，回退到 Xvfb（软件渲染）"
     fi
     START_XVFB_FALLBACK=true
 fi
@@ -498,13 +448,11 @@ fi
 # Start Xvfb as fallback
 if [ "$START_XVFB_FALLBACK" = "true" ]; then
     log_info "Starting Xvfb (software rendering fallback)..."
-    log_info "启动 Xvfb（软件渲染后备）..."
     rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 2>/dev/null || true
     Xvfb :99 -screen 0 "${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x${XVFB_COLOR_DEPTH}" -ac +extension GLX +render -noreset "${XVFB_FB_ARGS[@]}" &
     export DISPLAY=${DISPLAY:-:99}
     sleep 3
-    log_info "✓ Virtual display started on ${DISPLAY} (${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x${XVFB_COLOR_DEPTH})"
-    log_info "✓ 虚拟显示已启动 ${DISPLAY} (${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x${XVFB_COLOR_DEPTH})"
+    log_info "[OK] Virtual display started on ${DISPLAY} (${RESOLUTION_WIDTH}x${RESOLUTION_HEIGHT}x${XVFB_COLOR_DEPTH})"
 fi
 
 # Step 6: Start VNC server (optional)
@@ -530,19 +478,18 @@ if [ "$ENABLE_VNC" = "true" ]; then
 
     # Verify VNC is running
     if pgrep -x "x11vnc" >/dev/null; then
-        log_info "✓ VNC server started successfully on port 5900"
+        log_info "[OK] VNC server started successfully on port 5900"
         log_info "  Password: $VNC_PASSWORD"
         log_info "  Connect to: your-server-ip:5900"
 
         # Start VNC monitor to keep it alive
-        # 启动 VNC 监控，保持服务存活
         if [ -f "/home/steam/scripts/vnc-monitor.sh" ]; then
             log_info "Starting VNC health monitor..."
             /home/steam/scripts/vnc-monitor.sh &
-            log_info "✓ VNC monitor started (30s check interval)"
+            log_info "[OK] VNC monitor started (30s check interval)"
         fi
     else
-        log_error "✗ VNC server failed to start"
+        log_error "[OK] VNC server failed to start"
         log_error "Check logs above for errors"
     fi
 else
@@ -560,23 +507,20 @@ TEMPLATE="/home/steam/startup_preferences.template"
 mkdir -p "$CONFIG_DIR"
 
 # Copy optimized config template if startup_preferences doesn't exist yet
-# 如果startup_preferences还不存在，复制优化的配置模板
 if [ ! -f "$CONFIG_FILE" ]; then
     if [ -f "$TEMPLATE" ]; then
         cp "$TEMPLATE" "$CONFIG_FILE"
-        log_info "✓ Applied optimized display config (fullscreen mode for VNC)"
-        log_info "✓ 已应用优化的显示配置（VNC全屏模式）"
+        log_info "[OK] Applied optimized display config (fullscreen mode for VNC)"
     else
-        log_warn "⚠ Template not found, game will use default settings"
+        log_warn "[WARN] Template not found, game will use default settings"
     fi
 else
-    log_info "✓ Game config already exists, keeping user settings"
+    log_info "[OK] Game config already exists, keeping user settings"
 fi
 
 apply_startup_preferences_tuning "$CONFIG_FILE"
 if [ "$LOW_PERF_MODE" = "true" ]; then
-    log_info "✓ Applied low performance startup preferences"
-    log_info "✓ 已应用低性能启动偏好设置"
+    log_info "[OK] Applied low performance startup preferences"
 fi
 
 # Step 7.5: Select save if specified
@@ -591,7 +535,7 @@ if [ "$ENABLE_LOG_MONITOR" = "true" ]; then
 
     if [ -f "/home/steam/scripts/log-monitor.sh" ]; then
         /home/steam/scripts/log-monitor.sh &
-        log_info "✓ Log monitoring started"
+        log_info "[OK] Log monitoring started"
     fi
 else
     log_step "Step 8: Log monitoring disabled"
@@ -601,26 +545,17 @@ fi
 log_step "Step 9: Starting game server..."
 log_info "================================================"
 log_info "  Server is starting!"
-log_info "  服务器启动中！"
 log_info "================================================"
 log_info ""
 log_info "Save setup options:"
-log_info "存档初始化方式："
 log_info "  1. Web panel: http://localhost:18642 (set admin password on first visit)"
-log_info "  1. Web 面板：http://localhost:18642（首次访问先设置管理密码）"
 log_info "  2. Upload an existing save in the panel and set it as the default auto-load save"
-log_info "  2. 在面板上传现有存档，并设为默认自动加载存档"
 log_info "  3. Optional: use VNC only if you want to create a new save manually in-game"
-log_info "  3. 可选：只有想手动进游戏创建新存档时才使用 VNC"
 log_info ""
 log_info "Players connect via:"
-log_info "玩家连接方式："
-log_info "  1. Open Stardew Valley → CO-OP → Join LAN Game"
-log_info "  1. 打开星露谷物语 → CO-OP → 加入局域网游戏"
+log_info "  1. Open Stardew Valley ->CO-OP ->Join LAN Game"
 log_info "  2. Server will appear automatically, or enter server IP directly"
-log_info "  2. 服务器会自动出现，或直接输入服务器IP"
 log_info "  3. No port number needed (default: 24642/UDP)"
-log_info "  3. 无需输入端口号（默认：24642/UDP）"
 log_info "================================================"
 log_info ""
 
@@ -645,7 +580,7 @@ log_info "Starting web management panel (port: 18642)..."
 cd /home/steam/web-panel
 node server.js &
 WEB_PANEL_PID=$!
-log_info "✓ Web panel started (PID: $WEB_PANEL_PID)"
+log_info "[OK] Web panel started (PID: $WEB_PANEL_PID)"
 log_info "  Access at: http://localhost:18642"
 cd /home/steam/stardewvalley
 
@@ -658,7 +593,6 @@ fi
 # Start crash monitor if enabled
 if [ "$ENABLE_CRASH_RESTART" = "true" ]; then
     log_info "Starting game with crash auto-restart..."
-    log_info "启动游戏（崩溃自动重启模式）..."
 
     # Use crash-monitor.sh which wraps game in restart loop
     exec /home/steam/scripts/crash-monitor.sh

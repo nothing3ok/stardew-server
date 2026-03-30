@@ -1,15 +1,11 @@
 #!/bin/bash
-# Unified Event Handler - Monitors SMAPI logs and handles all game events
-# 统一事件处理器 - 监控 SMAPI 日志并处理所有游戏事件
+# Unified event handler for SMAPI log events.
 #
-# Replaces individual polling scripts with a single tail -F stream processor.
-# 用单一的 tail -F 流式处理器替代多个独立轮询脚本。
-#
-# Handles:
-#   - Passout (2AM)        : Escape + Enter confirmations
-#   - ReadyCheckDialog     : Enter confirmations (earthquake etc.)
-#   - ServerOfflineMode    : F9 to re-enable server
-#   - Save loaded          : F9 to enable AlwaysOnServer auto mode
+# Replaces separate polling scripts with a single tail -F processor and handles:
+#   - Passout (2AM): Escape + Enter confirmations
+#   - ReadyCheckDialog: Enter confirmations
+#   - ServerOfflineMode: F9 toggle to re-enable server
+#   - Save loaded: F9 toggle to enable AlwaysOnServer auto mode
 
 SMAPI_LOG="/home/steam/.config/StardewValley/ErrorLogs/SMAPI-latest.txt"
 LOCK_FILE="/tmp/stardew-key-lock"
@@ -25,7 +21,9 @@ PASSOUT_COOLDOWN=30
 READYCHECK_COOLDOWN=10
 OFFLINE_COOLDOWN=60
 
-# Color codes for each event type
+# Flag: has AlwaysOnServer been enabled this session?
+AOS_ENABLED=false
+
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 PURPLE='\033[0;35m'
@@ -38,76 +36,64 @@ log_reconnect()  { echo -e "${CYAN}[Event-Reconnect]${NC} $1"; }
 log_enable()     { echo -e "${CYAN}[Event-AutoEnable]${NC} $1"; }
 log_info()       { echo -e "${GREEN}[Event-Handler]${NC} $1"; }
 
-# Set DISPLAY for xdotool
 export DISPLAY=:99
 
-# ============================================
-# Send key with mutex lock
-# 使用互斥锁发送按键
-# ============================================
 send_key_locked() {
     local key="$1"
+
     (
         if flock -w "$LOCK_TIMEOUT" 200; then
             xdotool key "$key" 2>/dev/null
         else
-            log_info "⚠��� 无法获取按键锁 (key: $key)"
+            log_info "Could not acquire key lock for: $key"
             return 1
         fi
     ) 200>"$LOCK_FILE"
 }
 
-# ============================================
-# Check cooldown
-# 检查冷却时间
-# ============================================
 check_cooldown() {
     local last_time="$1"
     local cooldown="$2"
     local current_time
+
     current_time=$(date +%s)
     if [ $((current_time - last_time)) -lt "$cooldown" ]; then
-        return 1  # Still in cooldown
+        return 1
     fi
-    return 0  # Cooldown expired
-}
 
-# ============================================
-# Event handlers
-# 事件处理函数
-# ============================================
+    return 0
+}
 
 handle_passout() {
     if ! check_cooldown "$LAST_PASSOUT_TIME" "$PASSOUT_COOLDOWN"; then
         return
     fi
 
-    log_passout "⚠️ 检测到晕倒事件（凌晨2点）"
+    log_passout "Detected passout event (2AM)."
     LAST_PASSOUT_TIME=$(date +%s)
 
     if ! command -v xdotool >/dev/null 2>&1; then
-        log_passout "❌ xdotool 未安装"
+        log_passout "xdotool is not installed."
         return
     fi
 
     sleep 3
 
-    log_passout "  步骤 1: 关闭可能的菜单..."
+    log_passout "Step 1: Close open menus."
     send_key_locked Escape
     sleep 0.5
 
-    log_passout "  步骤 2: 连续确认对话框..."
+    log_passout "Step 2: Confirm dialog prompts."
     for i in 1 2 3 4 5; do
         send_key_locked Return
         sleep 1
     done
 
-    log_passout "✅ 已尝试确认晕倒对话框"
+    log_passout "Passout confirmation sequence sent."
 
-    # Verify if new day started
     sleep 5
     if tail -20 "$SMAPI_LOG" 2>/dev/null | grep -qiE "Saving|woke up|Day [0-9]"; then
-        log_passout "✅ 确认：新的一天已开始"
+        log_passout "New day activity detected after passout handling."
     fi
 }
 
@@ -116,22 +102,23 @@ handle_readycheck() {
         return
     fi
 
-    log_readycheck "⚠️ 检测到 ReadyCheckDialog（特殊事件确认对话框）"
+    log_readycheck "Detected ReadyCheckDialog event."
     LAST_READYCHECK_TIME=$(date +%s)
 
     if ! command -v xdotool >/dev/null 2>&1; then
-        log_readycheck "❌ xdotool 未安装"
+        log_readycheck "xdotool is not installed."
         return
     fi
 
     sleep 2
 
-    log_readycheck "模拟按 Enter 键自动确认..."
+    log_readycheck "Sending Enter to confirm the dialog."
     for i in 1 2 3; do
         send_key_locked Return
         sleep 0.5
     done
-    log_readycheck "✅ 已发送确认按键"
+
+    log_readycheck "Confirmation key sent."
 }
 
 handle_offline() {
@@ -139,68 +126,59 @@ handle_offline() {
         return
     fi
 
-    log_reconnect "⚠️ 检测到 ServerOfflineMode"
+    log_reconnect "Detected ServerOfflineMode."
     LAST_OFFLINE_TIME=$(date +%s)
 
     if ! command -v xdotool >/dev/null 2>&1; then
-        log_reconnect "❌ xdotool 未安装"
+        log_reconnect "xdotool is not installed."
         return
     fi
 
     sleep 5
+    log_reconnect "Attempting to re-enable the server."
 
-    log_reconnect "尝试重新启用服务器..."
-
-    # Close menus
     for i in 1 2 3; do
         send_key_locked Escape
         sleep 0.2
     done
     sleep 1
 
-    # Press F9 twice (off then on)
     send_key_locked F9
     sleep 2
     send_key_locked F9
 
-    log_reconnect "✅ F9 按键已发送，等待验证..."
+    log_reconnect "F9 toggle sequence sent."
 }
-
-# Flag: has AlwaysOnServer been enabled this session?
-AOS_ENABLED=false
 
 handle_save_loaded() {
     if [ "$AOS_ENABLED" = "true" ]; then
         return
     fi
 
-    log_enable "✓ 检测到存档已加载"
+    log_enable "Detected save load completion."
 
     if ! command -v xdotool >/dev/null 2>&1; then
-        log_enable "❌ xdotool 未安装"
+        log_enable "xdotool is not installed."
         return
     fi
 
-    # Wait for mods to initialize
-    log_enable "等待模组初始化..."
+    log_enable "Waiting for mods to finish initializing."
     sleep 5
 
-    # Check if AlwaysOnServer is already enabled
     local on_count off_count
     on_count=$(grep -o "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null | wc -l)
     off_count=$(grep -o "Auto mode off" "$SMAPI_LOG" 2>/dev/null | wc -l)
 
-    log_enable "  状态: ON=$on_count, OFF=$off_count"
+    log_enable "Current state counters: ON=$on_count, OFF=$off_count"
 
     if [ "$on_count" -gt "$off_count" ]; then
-        log_enable "✅ Always On Server 已经处于启用状态"
+        log_enable "Always On Server already appears to be enabled."
         AOS_ENABLED=true
         return
     fi
 
-    # Try to enable with F9 (up to 3 attempts)
     for attempt in 1 2 3; do
-        log_enable "  尝试 #$attempt: 关闭菜单并按 F9..."
+        log_enable "Attempt #$attempt: closing menus and sending F9."
 
         for i in 1 2 3; do
             send_key_locked Escape
@@ -209,87 +187,71 @@ handle_save_loaded() {
         sleep 1
 
         send_key_locked F9
-        log_enable "  ✓ F9 按键已发送（尝试 #$attempt）"
+        log_enable "F9 sent for attempt #$attempt."
         sleep 5
 
-        # Check status
         on_count=$(grep -o "Auto [Mm]ode [Oo]n" "$SMAPI_LOG" 2>/dev/null | wc -l)
         off_count=$(grep -o "Auto mode off" "$SMAPI_LOG" 2>/dev/null | wc -l)
 
         if [ "$on_count" -gt "$off_count" ]; then
-            log_enable "✅ Always On Server 已成功启用！"
+            log_enable "Always On Server enabled successfully."
             AOS_ENABLED=true
             return
         fi
 
         if [ "$attempt" -lt 3 ]; then
-            log_enable "  未检测到启用，10秒后重试..."
+            log_enable "Enable state not detected yet. Retrying in 10 seconds."
             sleep 10
         fi
     done
 
-    log_enable "⚠️ 3次尝试后仍未确认启用，建议通过 VNC 手动检查"
-    AOS_ENABLED=true  # Prevent repeated attempts
+    log_enable "Could not confirm Always On Server after 3 attempts. Check via VNC if needed."
+    AOS_ENABLED=true
 }
-
-# ============================================
-# Main: Wait for game initialization
-# 主程序：等待游戏初始化
-# ============================================
 
 log_info "========================================"
 log_info "  Unified Event Handler Starting..."
-log_info "  统一事件处理器启动中..."
 log_info "========================================"
 log_info ""
-log_info "Monitoring events / 监控事件:"
-log_info "  - Passout (2AM) / 凌晨2点晕倒"
-log_info "  - ReadyCheckDialog / 特殊事件确认"
-log_info "  - ServerOfflineMode / 服务器离线"
-log_info "  - Save Loaded / 存档加载"
+log_info "Monitoring events:"
+log_info "  - Passout (2AM)"
+log_info "  - ReadyCheckDialog"
+log_info "  - ServerOfflineMode"
+log_info "  - Save Loaded"
 log_info ""
 
-log_info "等待游戏初始化..."
+log_info "Waiting for game initialization..."
 sleep 20
 
-# Wait for log file to exist
 WAIT_COUNT=0
 while [ ! -f "$SMAPI_LOG" ]; do
     if [ $((WAIT_COUNT % 12)) -eq 0 ]; then
-        log_info "等待 SMAPI 日志文件创建..."
+        log_info "Waiting for SMAPI log file to appear..."
     fi
+
     sleep 5
     WAIT_COUNT=$((WAIT_COUNT + 1))
+
     if [ "$WAIT_COUNT" -gt 60 ]; then
-        log_info "⚠️ 等待日志文件超时（5分钟），继续等待..."
+        log_info "Still waiting for the log file after 5 minutes. Continuing to wait..."
         WAIT_COUNT=0
     fi
 done
 
-log_info "✓ SMAPI 日志文件就绪: $SMAPI_LOG"
+log_info "SMAPI log detected: $SMAPI_LOG"
 
-# Heartbeat counter
 LINE_COUNT=0
-HEARTBEAT_INTERVAL=3600  # Log heartbeat every ~1 hour worth of lines
+HEARTBEAT_INTERVAL=3600
 
-# ============================================
-# Stream processing with tail -F
-# 使用 tail -F 流式处理
-# ============================================
-# -n 0: Start from end of file (ignore old content)
-# -F: Follow file even if rotated/replaced
-
-log_info "开始实时日志监控 (tail -F)..."
+log_info "Starting live log monitor (tail -F)..."
 
 tail -n 0 -F "$SMAPI_LOG" 2>/dev/null | while IFS= read -r line; do
     LINE_COUNT=$((LINE_COUNT + 1))
 
-    # Heartbeat log
-    if [ $((LINE_COUNT % $HEARTBEAT_INTERVAL)) -eq 0 ]; then
-        log_info "💓 事件处理器运行正常（已处理 $LINE_COUNT 行日志）"
+    if [ $((LINE_COUNT % HEARTBEAT_INTERVAL)) -eq 0 ]; then
+        log_info "Event handler still running normally. Processed $LINE_COUNT log lines."
     fi
 
-    # Match events by priority (most critical first)
     case "$line" in
         *"ServerOfflineMode"*|*"[ServerOfflineMode]"*)
             handle_offline
@@ -306,7 +268,6 @@ tail -n 0 -F "$SMAPI_LOG" 2>/dev/null | while IFS= read -r line; do
     esac
 done
 
-# If tail -F exits (shouldn't normally happen), restart
-log_info "⚠️ tail -F 意外退出，10秒后重启..."
+log_info "tail -F exited unexpectedly. Restarting in 10 seconds..."
 sleep 10
 exec "$0" "$@"

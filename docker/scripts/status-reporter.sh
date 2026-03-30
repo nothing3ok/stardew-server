@@ -1,20 +1,8 @@
 #!/bin/bash
 # Status Reporter - Prometheus metrics endpoint + JSON status file
-# 状态报告器 - Prometheus 指标端点 + JSON 状态文件
 #
 # Serves Prometheus-format metrics on port 9090 via a lightweight HTTP handler.
-# Also writes a JSON status file for local consumption.
-#
-# Metrics exposed:
-#   nothing_stardew_game_running         - Whether the game process is alive (1/0)
-#   nothing_stardew_uptime_seconds       - Game process uptime in seconds
-#   nothing_stardew_players_online       - Number of connected players
-#   nothing_stardew_memory_usage_mb      - Game process RSS memory in MB
-#   nothing_stardew_cpu_usage_percent    - Game process CPU usage percent
-#   nothing_stardew_events_passout_total - Total passout events detected
-#   nothing_stardew_events_readycheck_total  - Total ready-check events
-#   nothing_stardew_events_offline_total - Total offline-mode events
-#   nothing_stardew_script_healthy       - Whether background scripts are alive (1/0)
+# Also writes a JSON status file for local tools.
 
 STATUS_FILE="/home/steam/.local/share/nothing-stardew/status.json"
 METRICS_FILE="/home/steam/.local/share/nothing-stardew/metrics.prom"
@@ -29,14 +17,12 @@ log() { echo -e "${GREEN}[Status-Reporter]${NC} $1"; }
 mkdir -p "$(dirname "$STATUS_FILE")"
 mkdir -p "$(dirname "$METRICS_FILE")"
 
-# =============================================
-# Metric collection functions
-# =============================================
-
 get_uptime_seconds() {
-    local pid=$(pgrep -f StardewModdingAPI 2>/dev/null | head -1)
+    local pid
+    pid=$(pgrep -f StardewModdingAPI 2>/dev/null | head -1)
     if [ -n "$pid" ] && [ -d "/proc/$pid" ]; then
-        local start_time=$(stat -c %Y "/proc/$pid" 2>/dev/null)
+        local start_time
+        start_time=$(stat -c %Y "/proc/$pid" 2>/dev/null)
         if [ -n "$start_time" ]; then
             echo $(($(date +%s) - start_time))
             return
@@ -109,9 +95,11 @@ get_game_paused() {
 }
 
 get_memory_usage_mb() {
-    local pid=$(pgrep -f StardewModdingAPI 2>/dev/null | head -1)
+    local pid
+    pid=$(pgrep -f StardewModdingAPI 2>/dev/null | head -1)
     if [ -n "$pid" ] && [ -f "/proc/$pid/status" ]; then
-        local rss=$(grep "VmRSS" "/proc/$pid/status" 2>/dev/null | awk '{print $2}')
+        local rss
+        rss=$(grep "VmRSS" "/proc/$pid/status" 2>/dev/null | awk '{print $2}')
         if [ -n "$rss" ]; then
             echo "$((rss / 1024))"
             return
@@ -121,9 +109,11 @@ get_memory_usage_mb() {
 }
 
 get_cpu_usage() {
-    local pid=$(pgrep -f StardewModdingAPI 2>/dev/null | head -1)
+    local pid
+    pid=$(pgrep -f StardewModdingAPI 2>/dev/null | head -1)
     if [ -n "$pid" ]; then
-        local cpu=$(ps -p "$pid" -o %cpu= 2>/dev/null | tr -d ' ')
+        local cpu
+        cpu=$(ps -p "$pid" -o %cpu= 2>/dev/null | tr -d ' ')
         echo "${cpu:-0.0}"
     else
         echo "0.0"
@@ -141,7 +131,6 @@ get_event_counts() {
 }
 
 check_script_health() {
-    # Check that key background scripts are running
     local healthy=1
     if ! pgrep -f "event-handler.sh" >/dev/null 2>&1; then
         healthy=0
@@ -149,33 +138,42 @@ check_script_health() {
     echo "$healthy"
 }
 
-# =============================================
-# Generate Prometheus-format metrics
-# =============================================
 update_metrics() {
     local game_running=0
     pgrep -f StardewModdingAPI >/dev/null 2>&1 && game_running=1
 
-    local uptime=$(get_uptime_seconds)
-    local players=$(get_player_count)
-    case "$players" in
-        ''|*[!0-9]*)
-            players=0
-            ;;
-    esac
-    local game_day=$(get_game_day)
-    local game_paused=$(get_game_paused)
-    local memory=$(get_memory_usage_mb)
-    local cpu=$(get_cpu_usage)
-    local events=($(get_event_counts))
-    local passout=${events[0]:-0}
-    local readycheck=${events[1]:-0}
-    local offline=${events[2]:-0}
-    local script_health=$(check_script_health)
-    local timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    local uptime
+    local players
+    local game_day
+    local game_paused
+    local memory
+    local cpu
+    local events
+    local passout
+    local readycheck
+    local offline
+    local script_health
+    local timestamp
+    local tmp_metrics
+    local tmp_status
 
-    # Write Prometheus metrics file (atomic write via temp file)
-    local tmp_metrics="${METRICS_FILE}.tmp"
+    uptime=$(get_uptime_seconds)
+    players=$(get_player_count)
+    case "$players" in
+        ''|*[!0-9]*) players=0 ;;
+    esac
+    game_day=$(get_game_day)
+    game_paused=$(get_game_paused)
+    memory=$(get_memory_usage_mb)
+    cpu=$(get_cpu_usage)
+    events=($(get_event_counts))
+    passout=${events[0]:-0}
+    readycheck=${events[1]:-0}
+    offline=${events[2]:-0}
+    script_health=$(check_script_health)
+    timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+    tmp_metrics="${METRICS_FILE}.tmp"
     cat > "$tmp_metrics" << EOPROM
 # HELP nothing_stardew_game_running Whether the Stardew Valley game process is running.
 # TYPE nothing_stardew_game_running gauge
@@ -215,8 +213,7 @@ nothing_stardew_script_healthy $script_health
 EOPROM
     mv "$tmp_metrics" "$METRICS_FILE"
 
-    # Write JSON status file for local tools
-    local tmp_status="${STATUS_FILE}.tmp"
+    tmp_status="${STATUS_FILE}.tmp"
     cat > "$tmp_status" << EOJSON
 {
   "timestamp": "$timestamp",
@@ -245,16 +242,10 @@ EOJSON
     mv "$tmp_status" "$STATUS_FILE"
 }
 
-# =============================================
-# HTTP server using bash + nc (netcat)
-# Serves /metrics endpoint on METRICS_PORT
-# =============================================
 serve_metrics() {
     log "Starting Prometheus metrics HTTP server on port $METRICS_PORT..."
-    log "Prometheus 指标 HTTP 服务启动于端口 $METRICS_PORT..."
 
     while true; do
-        # Read metrics file content
         local body=""
         if [ -f "$METRICS_FILE" ]; then
             body=$(cat "$METRICS_FILE" 2>/dev/null)
@@ -264,9 +255,6 @@ serve_metrics() {
 
         local content_length=${#body}
 
-        # Serve one request via nc (netcat-openbsd)
-        # netcat-openbsd: -l PORT (no -p flag with -l)
-        # -q 1: quit 1 second after EOF, -w 5: timeout 5s
         {
             echo -e "HTTP/1.1 200 OK\r"
             echo -e "Content-Type: text/plain; version=0.0.4; charset=utf-8\r"
@@ -278,24 +266,17 @@ serve_metrics() {
     done
 }
 
-# =============================================
-# Main
-# =============================================
 log "Status reporter starting..."
-log "状态报告器启动..."
 log "  Metrics port: $METRICS_PORT"
 log "  Update interval: ${UPDATE_INTERVAL}s"
 log "  Status file: $STATUS_FILE"
 
-# Wait for game to start
 sleep 30
 
-# Start HTTP server in background
 serve_metrics &
 SERVE_PID=$!
-log "✓ HTTP metrics server started (PID: $SERVE_PID)"
+log "[OK] HTTP metrics server started (PID: $SERVE_PID)"
 
-# Metrics collection loop
 while true; do
     update_metrics
     sleep $UPDATE_INTERVAL
