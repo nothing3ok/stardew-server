@@ -36,8 +36,8 @@
 
 ```bash
 # 1. Clone仓库
-git clone https://github.com/truman-world/puppy-stardew-server.git
-cd puppy-stardew-server
+git clone https://github.com/nothing3ok/stardew-server.git
+cd stardew-server
 
 # 2. 设置Steam凭证（用于测试）
 export STEAM_USERNAME="your_test_account"
@@ -168,7 +168,7 @@ Fixes: #42
 
 ## 联系方式
 
-- **Issues**: https://github.com/truman-world/puppy-stardew-server/issues
+- **Issues**: https://github.com/nothing3ok/stardew-server/issues
 - **Docker Hub**: https://hub.docker.com/r/truemanlive/puppy-stardew-server
 
 ---

@@ -50,17 +50,25 @@ The project stores runtime data under `./data`:
 
 ### Automatic Setup
 
-Use the included bootstrap scripts when you want guided setup.
+Use one of these one-command bootstrap entries when you want guided setup on a fresh server.
 
 English:
 
 ```bash
-./quick-start.sh
+curl -fsSL https://raw.githubusercontent.com/nothing3ok/stardew-server/main/quick-start.sh | bash
 ```
 
 Chinese:
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/nothing3ok/stardew-server/main/quick-start-zh.sh | bash
+```
+
+If you already cloned the repository, you can also run:
+
+```bash
+./quick-start.sh
+# or
 ./quick-start-zh.sh
 ```
 
