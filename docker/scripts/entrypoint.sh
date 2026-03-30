@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Nothing Stardew Server Entrypoint Script - v1.0.77
 
 # DO NOT use set -e - we need manual error handling
