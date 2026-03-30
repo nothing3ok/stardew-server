@@ -1,6 +1,6 @@
 # ============================================
 # IMPORTANT: Run init.sh before first start!
-# 閲嶈锛氶娆″惎鍔ㄥ墠璇疯繍琛?init.sh锛?
+# 重要：首次启动前请运行 init.sh！
 #
 # ./init.sh
 #
@@ -8,9 +8,9 @@
 # permissions (UID 1000:1000) to avoid disk
 # write failures during game download.
 #
-# 姝よ剼鏈垱寤烘暟鎹洰褰曞苟璁剧疆姝ｇ‘鐨勬潈闄?
-# (UID 1000:1000)锛岄伩鍏嶆父鎴忎笅杞芥椂鐨勭鐩?
-# 鍐欏叆澶辫触銆?
+# 此脚本创建数据目录并设置正确的权限
+# (UID 1000:1000)，避免游戏下载时的磁盘
+# 写入失败。
 # ============================================
 
 services:
@@ -27,7 +27,7 @@ services:
       - ${PWD}:${PWD}:ro
 
   # Init container: fixes permissions before main server starts
-  # 鍒濆鍖栧鍣細鍦ㄤ富鏈嶅姟鍣ㄥ惎鍔ㄥ墠淇鏉冮檺
+  # 初始化容器：在主服务器启动前修复权限
   stardew-init:
     build: ./docker
     image: nothing-stardew-server:local
@@ -55,94 +55,94 @@ services:
       stardew-init:
         condition: service_completed_successfully
     # Interactive mode for Steam Guard
-    # Steam Guard 浜や簰妯″紡
+    # Steam Guard 交互模式
     stdin_open: true
     tty: true
 
     # Environment variables (configured in .env file)
-    # 鐜鍙橀噺锛堝湪 .env 鏂囦欢涓厤缃級
+    # 环境变量（在 .env 文件中配置）
     environment:
       # Steam credentials - REQUIRED
-      # Steam 鍑瘉 - 蹇呴渶
+      # Steam 凭证 - 必需
       - STEAM_USERNAME=${STEAM_USERNAME}
       - STEAM_PASSWORD=${STEAM_PASSWORD}
 
       # Steam Guard code - OPTIONAL (for easier first-time auth)
-      # Steam Guard 楠岃瘉鐮?- 鍙€夛紙绠€鍖栭娆￠獙璇侊級
+      # Steam Guard 验证码 - 可选（简化首次验证）
       - STEAM_GUARD_CODE=${STEAM_GUARD_CODE:-}
 
       # VNC settings - OPTIONAL (for first-time setup)
-      # VNC 璁剧疆 - 鍙€夛紙鐢ㄤ簬棣栨璁剧疆锛?
+      # VNC 设置 - 可选（用于首次设置）
       - ENABLE_VNC=${ENABLE_VNC:-true}
       - VNC_PASSWORD=${VNC_PASSWORD:-stardew1}
 
       # Log monitoring - OPTIONAL (default: enabled)
-      # 鏃ュ織鐩戞帶 - 鍙€夛紙榛樿锛氬惎鐢級
+      # 日志监控 - 可选（默认：启用）
       - ENABLE_LOG_MONITOR=${ENABLE_LOG_MONITOR:-true}
 
       # GPU rendering - OPTIONAL (default: false)
-      # GPU 娓叉煋 - 鍙€夛紙榛樿锛氱鐢級
+      # GPU 渲染 - 可选（默认：禁用）
       - USE_GPU=${USE_GPU:-false}
 
       # Display resolution - OPTIONAL (default: 1280x720@60Hz)
-      # 鏄剧ず鍒嗚鲸鐜?- 鍙€夛紙榛樿锛?280x720@60Hz锛?
+      # 显示分辨率 - 可选（默认：1280x720@60Hz）
       - RESOLUTION_WIDTH=${RESOLUTION_WIDTH:-1280}
       - RESOLUTION_HEIGHT=${RESOLUTION_HEIGHT:-720}
       - REFRESH_RATE=${REFRESH_RATE:-60}
 
       # Performance optimization - OPTIONAL (default: disabled)
-      # 鎬ц兘浼樺寲 - 鍙€夛紙榛樿锛氱鐢級
+      # 性能优化 - 可选（默认：禁用）
       - LOW_PERF_MODE=${LOW_PERF_MODE:-false}
       - TARGET_FPS=${TARGET_FPS:-}
 
       # Auto-backup - OPTIONAL (default: disabled)
-      # 鑷姩澶囦唤 - 鍙€夛紙榛樿锛氱鐢級
+      # 自动备份 - 可选（默认：禁用）
       - ENABLE_AUTO_BACKUP=${ENABLE_AUTO_BACKUP:-false}
       - MAX_BACKUPS=${MAX_BACKUPS:-7}
       - BACKUP_HOUR=${BACKUP_HOUR:-4}
       - BACKUP_COMPRESSION_LEVEL=${BACKUP_COMPRESSION_LEVEL:-1}
 
       # Crash auto-restart - OPTIONAL (default: disabled)
-      # 宕╂簝鑷姩閲嶅惎 - 鍙€夛紙榛樿锛氱鐢級
+      # 崩溃自动重启 - 可选（默认：禁用）
       - ENABLE_CRASH_RESTART=${ENABLE_CRASH_RESTART:-false}
       - MAX_CRASH_RESTARTS=${MAX_CRASH_RESTARTS:-5}
 
       # Save selection - OPTIONAL (default: auto-detect)
-      # 瀛樻。閫夋嫨 - 鍙€夛紙榛樿锛氳嚜鍔ㄦ娴嬶級
+      # 存档选择 - 可选（默认：自动检测）
       - SAVE_NAME=${SAVE_NAME:-}
 
       # Public join IP shown in dashboard - OPTIONAL
-      # 浠〃鐩樻樉绀虹殑鍏綉鑱旀満 IP - 鍙€?
+      # 仪表盘显示的公网联机 IP - 可选
       - PUBLIC_IP=${PUBLIC_IP:-}
       - MANAGER_URL=${MANAGER_URL:-http://stardew-manager:18700}
 
     # Port mappings
-    # 绔彛鏄犲皠
+    # 端口映射
     ports:
       # Game server port (REQUIRED)
-      # 娓告垙鏈嶅姟鍣ㄧ鍙ｏ紙蹇呴渶锛?
+      # 游戏服务器端口（必需）
       - "24642:24642/udp"
 
       # VNC port (OPTIONAL - only needed for initial setup)
-      # VNC 绔彛锛堝彲閫?- 浠呴娆¤缃渶瑕侊級
+      # VNC 端口（可选 - 仅首次设置需要）
       - "${VNC_BIND_HOST:-0.0.0.0}:5900:5900/tcp"
 
       # Prometheus metrics port (OPTIONAL - for monitoring)
-      # Prometheus 鎸囨爣绔彛锛堝彲閫?- 鐢ㄤ簬鐩戞帶锛?
+      # Prometheus 指标端口（可选 - 用于监控）
       - "9090:9090/tcp"
 
       # Web management panel (OPTIONAL - for web-based control)
-      # Web 绠＄悊闈㈡澘锛堝彲閫?- 鐢ㄤ簬缃戦〉鎺у埗锛?
+      # Web 管理面板（可选 - 用于网页控制）
       - "18642:18642/tcp"
 
     # Persistent data volumes (bind mounts)
-    # 鎸佷箙鍖栨暟鎹嵎锛堢粦瀹氭寕杞斤級
+    # 持久化数据卷（绑定挂载）
     #
     # IMPORTANT: Data directories must be owned by UID 1000
-    # 閲嶈锛氭暟鎹洰褰曞繀椤诲綊 UID 1000 鎵€鏈?
+    # 重要：数据目录必须归 UID 1000 所有
     #
     # Run this before starting: mkdir -p data/{saves,game,steam,logs} && chown -R 1000:1000 data/
-    # 鍚姩鍓嶈繍琛岋細mkdir -p data/{saves,game,steam,logs} && chown -R 1000:1000 data/
+    # 启动前运行：mkdir -p data/{saves,game,steam,logs} && chown -R 1000:1000 data/
     volumes:
       - ./data/saves:/home/steam/.config/StardewValley:rw
       - ./data/game:/home/steam/stardewvalley:rw
@@ -151,31 +151,31 @@ services:
       - ./data/backups:/home/steam/.local/share/nothing-stardew/backups:rw
       - ./data/panel:/home/steam/web-panel/data:rw
       # Custom mods volume (OPTIONAL - place your mods here)
-      # 鑷畾涔夋ā缁勫嵎锛堝彲閫?- 灏嗘偍鐨勬ā缁勬斁鍦ㄨ繖閲岋級
+      # 自定义模组卷（可选 - 将您的模组放在这里）
       # Supports: mod directories or .zip files
-      # 鏀寔锛氭ā缁勭洰褰曟垨 .zip 鏂囦欢
+      # 支持：模组目录或 .zip 文件
       - ./data/custom-mods:/home/steam/custom-mods:rw
 
     # GPU device mapping (OPTIONAL - only needed if USE_GPU=true)
-    # GPU 璁惧鏄犲皠锛堝彲閫?- 浠呭綋 USE_GPU=true 鏃堕渶瑕侊級
+    # GPU 设备映射（可选 - 仅当 USE_GPU=true 时需要）
     #
     # Uncomment to enable GPU hardware acceleration:
-    # 鍙栨秷娉ㄩ噴浠ュ惎鐢?GPU 纭欢鍔犻€燂細
+    # 取消注释以启用 GPU 硬件加速：
     # devices:
     #   - /dev/dri:/dev/dri
 
     # Resource limits
-    # 璧勬簮闄愬埗
+    # 资源限制
     #
     # Adjust based on your server specs:
-    # 鏍规嵁鏈嶅姟鍣ㄨ鏍艰皟鏁达細
+    # 根据服务器规格调整：
     # - 2GB RAM server: Set memory to 1.5G
     # - 4GB RAM server: Keep at 2G
     # - 8GB+ RAM server: Can increase to 4G for 8+ players
     #
-    # - 2GB 鍐呭瓨鏈嶅姟鍣細璁剧疆鍐呭瓨涓?1.5G
-    # - 4GB 鍐呭瓨鏈嶅姟鍣細淇濇寔 2G
-    # - 8GB+ 鍐呭瓨鏈嶅姟鍣細8+ 鐜╁鏃跺彲澧炲姞鍒?4G
+    # - 2GB 内存服务器：设置内存为 1.5G
+    # - 4GB 内存服务器：保持 2G
+    # - 8GB+ 内存服务器：8+ 玩家时可增加到 4G
     deploy:
       resources:
         limits:
@@ -185,10 +185,10 @@ services:
           memory: 1G
 
     # Health check
-    # 鍋ュ悍妫€鏌?
+    # 健康检查
     #
     # Checks if SMAPI is running every 30 seconds
-    # 姣?30 绉掓鏌?SMAPI 鏄惁杩愯
+    # 每 30 秒检查 SMAPI 是否运行
     healthcheck:
       test: ["CMD", "pgrep", "-f", "StardewModdingAPI"]
       interval: 30s
@@ -197,17 +197,17 @@ services:
       start_period: 180s  # Give 3 minutes for startup
 
     # Security options - reduce container privileges
-    # 瀹夊叏閫夐」 - 鍑忓皯瀹瑰櫒鏉冮檺
+    # 安全选项 - 减少容器权限
     #
     # Drop unnecessary Linux capabilities
-    # 涓㈠純涓嶅繀瑕佺殑 Linux 鍔熻兘
+    # 丢弃不必要的 Linux 功能
     cap_drop:
       - NET_RAW
       - SYS_ADMIN
       - MKNOD
 
     # Logging configuration (prevents log files from growing too large)
-    # 鏃ュ織閰嶇疆锛堥槻姝㈡棩蹇楁枃浠惰繃澶э級
+    # 日志配置（防止日志文件过大）
     logging:
       driver: "json-file"
       options:
@@ -215,14 +215,14 @@ services:
         max-file: "3"
 
 # No named volumes - using bind mounts for easier backup and management
-# 涓嶄娇鐢ㄥ懡鍚嶅嵎 - 浣跨敤缁戝畾鎸傝浇浠ヤ究浜庡浠藉拰绠＄悊
+# 不使用命名卷 - 使用绑定挂载以便于备份和管理
 
 # ============================================
 # Docker Secrets (OPTIONAL - more secure alternative to .env)
-# Docker Secrets锛堝彲閫?- 姣?.env 鏇村畨鍏ㄧ殑鏇夸唬鏂规锛?
+# Docker Secrets（可选 - 比 .env 更安全的替代方案）
 #
 # To use secrets instead of .env:
-# 浣跨敤 secrets 浠ｆ浛 .env锛?
+# 使用 secrets 代替 .env：
 #
 # 1. Create secret files:
 #    echo "your_username" > secrets/steam_username.txt
