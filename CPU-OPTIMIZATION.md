@@ -10,7 +10,7 @@ This pass adds an opt-in `LOW_PERF_MODE` for the containerized server. Default b
 
 ### 1. Xvfb render cost reduction
 
-Implemented in [docker/scripts/entrypoint.sh](/root/puppy-stardew-server/docker/scripts/entrypoint.sh):
+Implemented in [docker/scripts/entrypoint.sh](/root/nothing-stardew-server/docker/scripts/entrypoint.sh):
 
 - low-perf resolution: `800x600`
 - low-perf Xvfb depth: `16-bit`
@@ -33,8 +33,8 @@ In low-perf mode the script now exports:
 - `LIBGL_ALWAYS_SOFTWARE=1` when `USE_GPU != true`
 
 Why:
-- SDL’s official driver hint docs list `x11` as the Linux default/backend selection path.
-- I intentionally did **not** switch to `SDL_VIDEODRIVER=dummy`. That would likely remove the visible X11 surface and conflicts with the project requirement that VNC must still show the game when enabled. This is an inference from the SDL docs plus the project’s VNC requirement.
+- SDL鈥檚 official driver hint docs list `x11` as the Linux default/backend selection path.
+- I intentionally did **not** switch to `SDL_VIDEODRIVER=dummy`. That would likely remove the visible X11 surface and conflicts with the project requirement that VNC must still show the game when enabled. This is an inference from the SDL docs plus the project鈥檚 VNC requirement.
 - `SDL_AUDIODRIVER=dummy` is enabled only in low-perf mode because the server is unattended and audio output is unnecessary.
 - `LIBGL_ALWAYS_SOFTWARE=1` is only applied on non-GPU paths so it does not sabotage explicit `USE_GPU=true` deployments.
 
@@ -50,8 +50,8 @@ In low-perf mode the script now exports:
 - `DOTNET_GCHeapHardLimit=0x30000000` (`768 MiB`)
 
 Why:
-- Mono’s SGen docs explicitly document `MONO_GC_PARAMS` and `nursery-size`.
-- Microsoft’s .NET runtime docs document `DOTNET_GCHeapHardLimit` as a hex byte limit.
+- Mono鈥檚 SGen docs explicitly document `MONO_GC_PARAMS` and `nursery-size`.
+- Microsoft鈥檚 .NET runtime docs document `DOTNET_GCHeapHardLimit` as a hex byte limit.
 
 Expected CPU savings:
 - GC tuning: `~0-5%` CPU reduction, mainly fewer minor collections at the cost of a modest memory tradeoff
@@ -75,8 +75,8 @@ Expected CPU savings:
 ## Always On Server Mod Review
 
 Reviewed:
-- [docker/mods/AlwaysOnServer/config.json](/root/puppy-stardew-server/docker/mods/AlwaysOnServer/config.json)
-- [docker/mods/AlwaysOnServer/manifest.json](/root/puppy-stardew-server/docker/mods/AlwaysOnServer/manifest.json)
+- [docker/mods/AlwaysOnServer/config.json](/root/nothing-stardew-server/docker/mods/AlwaysOnServer/config.json)
+- [docker/mods/AlwaysOnServer/manifest.json](/root/nothing-stardew-server/docker/mods/AlwaysOnServer/manifest.json)
 
 Result:
 - no exposed config key for target FPS

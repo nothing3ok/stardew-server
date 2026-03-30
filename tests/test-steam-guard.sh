@@ -1,5 +1,5 @@
 #!/bin/bash
-# Steam Guard 流程测试脚本
+# Steam Guard 娴佺▼娴嬭瘯鑴氭湰
 # Test script for Steam Guard authentication flow
 
 set -e
@@ -12,11 +12,11 @@ NC='\033[0m'
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Steam Guard Flow Test${NC}"
-echo -e "${BLUE}  Steam Guard 流程测试${NC}"
+echo -e "${BLUE}  Steam Guard 娴佺▼娴嬭瘯${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# 检查环境变量
+# 妫€鏌ョ幆澧冨彉閲?
 if [ -z "$STEAM_USERNAME" ] || [ -z "$STEAM_PASSWORD" ]; then
     echo -e "${RED}ERROR: STEAM_USERNAME or STEAM_PASSWORD not set${NC}"
     echo "Please set environment variables:"
@@ -25,25 +25,25 @@ if [ -z "$STEAM_USERNAME" ] || [ -z "$STEAM_PASSWORD" ]; then
     exit 1
 fi
 
-echo -e "${GREEN}✓ Steam credentials found${NC}"
+echo -e "${GREEN}鉁?Steam credentials found${NC}"
 echo -e "  Username: $STEAM_USERNAME"
 echo ""
 
-# 清理旧的测试容器
+# 娓呯悊鏃х殑娴嬭瘯瀹瑰櫒
 echo -e "${YELLOW}[1/5] Cleaning up old test containers...${NC}"
 docker stop test-steam-guard 2>/dev/null || true
 docker rm test-steam-guard 2>/dev/null || true
-echo -e "${GREEN}✓ Cleanup complete${NC}"
+echo -e "${GREEN}鉁?Cleanup complete${NC}"
 echo ""
 
-# 创建测试数据目录
+# 鍒涘缓娴嬭瘯鏁版嵁鐩綍
 echo -e "${YELLOW}[2/5] Setting up test directories...${NC}"
 TEST_DIR="/tmp/steam-guard-test-$(date +%s)"
 mkdir -p "$TEST_DIR"/{saves,game,steam}
-echo -e "${GREEN}✓ Test directory: $TEST_DIR${NC}"
+echo -e "${GREEN}鉁?Test directory: $TEST_DIR${NC}"
 echo ""
 
-# 启动测试容器
+# 鍚姩娴嬭瘯瀹瑰櫒
 echo -e "${YELLOW}[3/5] Starting test container...${NC}"
 docker run -d \
   --name test-steam-guard \
@@ -54,27 +54,27 @@ docker run -d \
   -v "$TEST_DIR/saves:/home/steam/.config/StardewValley:rw" \
   -v "$TEST_DIR/game:/home/steam/stardewvalley:rw" \
   -v "$TEST_DIR/steam:/home/steam/Steam:rw" \
-  truemanlive/puppy-stardew-server:latest
+  truemanlive/nothing-stardew-server:latest
 
 if [ $? -ne 0 ]; then
-    echo -e "${RED}✗ Failed to start container${NC}"
+    echo -e "${RED}鉁?Failed to start container${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}✓ Container started${NC}"
+echo -e "${GREEN}鉁?Container started${NC}"
 echo ""
 
-# 等待初始化
+# 绛夊緟鍒濆鍖?
 echo -e "${YELLOW}[4/5] Waiting for Steam Guard prompt (30s)...${NC}"
 sleep 30
 echo ""
 
-# 检查日志
+# 妫€鏌ユ棩蹇?
 echo -e "${YELLOW}[5/5] Checking logs for Steam Guard prompt...${NC}"
 LOG=$(docker logs test-steam-guard 2>&1)
 
 if echo "$LOG" | grep -q "STEAM GUARD CODE REQUIRED"; then
-    echo -e "${GREEN}✓ Steam Guard prompt detected${NC}"
+    echo -e "${GREEN}鉁?Steam Guard prompt detected${NC}"
     echo ""
     echo -e "${CYAN}========================================${NC}"
     echo -e "${CYAN}  ACTION REQUIRED${NC}"
@@ -91,24 +91,24 @@ if echo "$LOG" | grep -q "STEAM GUARD CODE REQUIRED"; then
     echo -e "Monitor logs: ${GREEN}docker logs -f test-steam-guard${NC}"
     echo ""
 
-    # 等待用户输入
+    # 绛夊緟鐢ㄦ埛杈撳叆
     read -p "Press ENTER after you've entered the Steam Guard code..."
 
-    # 再次检查日志
+    # 鍐嶆妫€鏌ユ棩蹇?
     sleep 10
     LOG=$(docker logs test-steam-guard 2>&1)
 
     if echo "$LOG" | grep -q "Game downloaded successfully"; then
-        echo -e "${GREEN}✓✓✓ TEST PASSED ✓✓✓${NC}"
+        echo -e "${GREEN}鉁撯湏鉁?TEST PASSED 鉁撯湏鉁?{NC}"
         echo -e "${GREEN}Steam Guard flow works correctly!${NC}"
         echo ""
         echo "Cleaning up test container..."
         docker stop test-steam-guard
         docker rm test-steam-guard
-        echo -e "${GREEN}✓ Test complete${NC}"
+        echo -e "${GREEN}鉁?Test complete${NC}"
         exit 0
     else
-        echo -e "${YELLOW}⚠ Game download status unclear${NC}"
+        echo -e "${YELLOW}鈿?Game download status unclear${NC}"
         echo "Showing last 20 lines of log:"
         echo "$LOG" | tail -20
         echo ""
@@ -118,8 +118,8 @@ if echo "$LOG" | grep -q "STEAM GUARD CODE REQUIRED"; then
     fi
 
 elif echo "$LOG" | grep -q "Game downloaded successfully"; then
-    echo -e "${GREEN}✓ Game downloaded without Steam Guard${NC}"
-    echo -e "${GREEN}✓✓✓ TEST PASSED ✓✓✓${NC}"
+    echo -e "${GREEN}鉁?Game downloaded without Steam Guard${NC}"
+    echo -e "${GREEN}鉁撯湏鉁?TEST PASSED 鉁撯湏鉁?{NC}"
     echo ""
     echo "Cleaning up..."
     docker stop test-steam-guard
@@ -127,7 +127,7 @@ elif echo "$LOG" | grep -q "Game downloaded successfully"; then
     exit 0
 
 else
-    echo -e "${RED}✗ Unexpected state${NC}"
+    echo -e "${RED}鉁?Unexpected state${NC}"
     echo "Last 30 lines of log:"
     echo "$LOG" | tail -30
     echo ""

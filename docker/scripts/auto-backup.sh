@@ -6,7 +6,7 @@
 # 在配置的时间每天运行，保留可配置数量的备份。
 
 SAVE_DIR="/home/steam/.config/StardewValley"
-BACKUP_DIR="/home/steam/.local/share/puppy-stardew/backups"
+BACKUP_DIR="/home/steam/.local/share/nothing-stardew/backups"
 MAX_BACKUPS=${MAX_BACKUPS:-7}          # Keep last 7 backups
 BACKUP_HOUR=${BACKUP_HOUR:-4}          # Backup at 4 AM server time
 BACKUP_COMPRESSION_LEVEL=${BACKUP_COMPRESSION_LEVEL:-1}  # gzip level 1-9

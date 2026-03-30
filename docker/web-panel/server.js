@@ -14,10 +14,10 @@ const PORT = parseInt(process.env.PANEL_PORT || '18642', 10);
 
 // Paths (inside container)
 const DATA_DIR = process.env.PANEL_DATA_DIR || path.join(__dirname, 'data');
-const STATUS_FILE = process.env.STATUS_FILE || '/home/steam/.local/share/puppy-stardew/status.json';
-const LOG_DIR = process.env.LOG_DIR || '/home/steam/.local/share/puppy-stardew/logs';
+const STATUS_FILE = process.env.STATUS_FILE || '/home/steam/.local/share/nothing-stardew/status.json';
+const LOG_DIR = process.env.LOG_DIR || '/home/steam/.local/share/nothing-stardew/logs';
 const SAVES_DIR = process.env.SAVES_DIR || '/home/steam/.config/StardewValley/Saves';
-const BACKUPS_DIR = process.env.BACKUPS_DIR || '/home/steam/.local/share/puppy-stardew/backups';
+const BACKUPS_DIR = process.env.BACKUPS_DIR || '/home/steam/.local/share/nothing-stardew/backups';
 const GAME_DIR = process.env.GAME_DIR || '/home/steam/stardewvalley';
 const SMAPI_LOG = process.env.SMAPI_LOG || '/home/steam/.config/StardewValley/ErrorLogs/SMAPI-latest.txt';
 const ENV_FILE = process.env.ENV_FILE || '/home/steam/web-panel/data/runtime.env';

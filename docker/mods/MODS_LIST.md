@@ -18,7 +18,7 @@ This document lists all the mods included in the Puppy Stardew Server Docker ima
   - data/ directory with 3 JSON files (111 bytes each)
 
 ### 2. Server Auto Load
-- **Author**: Puppy-Stardew
+- **Author**: Nothing-Stardew
 - **Version**: 1.1.0
 - **Description**: Save management and auto-load helper for dedicated servers. Automatically loads the most recent save on startup.
 - **Unique ID**: puppystardew.ServerAutoLoad
@@ -44,7 +44,7 @@ This document lists all the mods included in the Puppy Stardew Server Docker ima
   - manifest.json
 
 ### 4. Skill Level Guard
-- **Author**: Puppy-Stardew
+- **Author**: Nothing-Stardew
 - **Version**: 1.1.0
 - **Description**: Prevents Always On Server from forcing host to Level 10, restores real XP-based levels safely.
 - **Unique ID**: Puppy.SkillLevelGuard

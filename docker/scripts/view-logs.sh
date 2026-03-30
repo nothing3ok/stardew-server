@@ -2,8 +2,8 @@
 # Puppy Stardew Server - Log Viewer
 # 小狗星谷服务器 - 日志查看器
 #
-# Usage: docker exec -it puppy-stardew /home/steam/scripts/view-logs.sh [option]
-# 使用方法：docker exec -it puppy-stardew /home/steam/scripts/view-logs.sh [选项]
+# Usage: docker exec -it nothing-stardew /home/steam/scripts/view-logs.sh [option]
+# 使用方法：docker exec -it nothing-stardew /home/steam/scripts/view-logs.sh [选项]
 
 set -e
 
@@ -15,8 +15,8 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Log directories
-CATEGORIZED_DIR="/home/steam/.local/share/puppy-stardew/logs/categorized"
-ARCHIVE_DIR="/home/steam/.local/share/puppy-stardew/logs/archive"
+CATEGORIZED_DIR="/home/steam/.local/share/nothing-stardew/logs/categorized"
+ARCHIVE_DIR="/home/steam/.local/share/nothing-stardew/logs/archive"
 
 show_menu() {
     echo -e "${GREEN}=== Puppy Stardew Server Log Viewer ===${NC}"
@@ -113,7 +113,7 @@ show_menu() {
 # Check if running as steam user
 if [ "$(whoami)" != "steam" ]; then
     echo -e "${YELLOW}Warning: This script should be run as the steam user.${NC}"
-    echo "Use: docker exec -it puppy-stardew /home/steam/scripts/view-logs.sh"
+    echo "Use: docker exec -it nothing-stardew /home/steam/scripts/view-logs.sh"
 fi
 
 # Start menu

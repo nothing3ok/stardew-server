@@ -7,8 +7,8 @@ Date: 2026-03-09
 ### 1. High: `PUT /api/config` allows arbitrary `.env` injection and persistence of unsupported keys
 
 Files:
-- [docker/web-panel/api/config.js](/root/puppy-stardew-server/docker/web-panel/api/config.js#L141)
-- [docker/web-panel/api/config.js](/root/puppy-stardew-server/docker/web-panel/api/config.js#L79)
+- [docker/web-panel/api/config.js](/root/nothing-stardew-server/docker/web-panel/api/config.js#L141)
+- [docker/web-panel/api/config.js](/root/nothing-stardew-server/docker/web-panel/api/config.js#L79)
 
 `updateConfig()` only blocks keys marked `readonly`, then passes the remaining request body straight into `writeEnvFile()`. `writeEnvFile()` writes `key=value` lines without any allowlist, type validation, or CR/LF sanitization. An authenticated caller can therefore:
 
@@ -27,11 +27,11 @@ Recommended fix:
 ### 2. High: the panel still ships with a known default password and logs it in plaintext
 
 Files:
-- [docker/web-panel/auth.js](/root/puppy-stardew-server/docker/web-panel/auth.js#L41)
-- [docker/web-panel/server.js](/root/puppy-stardew-server/docker/web-panel/server.js#L174)
-- [docker-compose.yml](/root/puppy-stardew-server/docker-compose.yml#L91)
-- [README.md](/root/puppy-stardew-server/README.md)
-- [README_CN.md](/root/puppy-stardew-server/README_CN.md)
+- [docker/web-panel/auth.js](/root/nothing-stardew-server/docker/web-panel/auth.js#L41)
+- [docker/web-panel/server.js](/root/nothing-stardew-server/docker/web-panel/server.js#L174)
+- [docker-compose.yml](/root/nothing-stardew-server/docker-compose.yml#L91)
+- [README.md](/root/nothing-stardew-server/README.md)
+- [README_CN.md](/root/nothing-stardew-server/README_CN.md)
 
 First boot hashes `PANEL_PASSWORD` or falls back to `admin123`, and startup logs print the password back out. That means anyone with access to container logs, default docs, or an unchanged deployment can authenticate as admin. This is the highest-risk issue in the current web panel.
 
@@ -44,9 +44,9 @@ Recommended fix:
 ### 3. High: VNC access defaults to a weak password and the password is echoed to logs
 
 Files:
-- [docker/scripts/entrypoint.sh](/root/puppy-stardew-server/docker/scripts/entrypoint.sh#L378)
-- [docker/scripts/entrypoint.sh](/root/puppy-stardew-server/docker/scripts/entrypoint.sh#L396)
-- [docker-compose.yml](/root/puppy-stardew-server/docker-compose.yml#L57)
+- [docker/scripts/entrypoint.sh](/root/nothing-stardew-server/docker/scripts/entrypoint.sh#L378)
+- [docker/scripts/entrypoint.sh](/root/nothing-stardew-server/docker/scripts/entrypoint.sh#L396)
+- [docker-compose.yml](/root/nothing-stardew-server/docker-compose.yml#L57)
 
 When `ENABLE_VNC=true`, the container defaults to `stardew1`, then prints the effective password to stdout. That exposes a remotely reachable control channel through normal container logs and gives deployments a well-known default credential.
 
@@ -58,9 +58,9 @@ Recommended fix:
 ### 4. Medium: backup downloads from the UI are broken, and the current token flow would leak if fixed naively
 
 Files:
-- [docker/web-panel/public/js/app.js](/root/puppy-stardew-server/docker/web-panel/public/js/app.js#L449)
-- [docker/web-panel/server.js](/root/puppy-stardew-server/docker/web-panel/server.js#L70)
-- [docker/web-panel/auth.js](/root/puppy-stardew-server/docker/web-panel/auth.js#L197)
+- [docker/web-panel/public/js/app.js](/root/nothing-stardew-server/docker/web-panel/public/js/app.js#L449)
+- [docker/web-panel/server.js](/root/nothing-stardew-server/docker/web-panel/server.js#L70)
+- [docker/web-panel/auth.js](/root/nothing-stardew-server/docker/web-panel/auth.js#L197)
 
 The saves page builds download links as `/api/saves/download/<file>?token=<jwt>`, but the backend only accepts `Authorization: Bearer ...`. As shipped, the button cannot authenticate successfully. If the server were later changed to accept `?token=`, the JWT would be exposed in browser history, logs, and referrers.
 
@@ -71,7 +71,7 @@ Recommended fix:
 ### 5. Medium: log reads are synchronous whole-file loads, which will block the panel on large SMAPI logs
 
 Files:
-- [docker/web-panel/api/logs.js](/root/puppy-stardew-server/docker/web-panel/api/logs.js#L37)
+- [docker/web-panel/api/logs.js](/root/nothing-stardew-server/docker/web-panel/api/logs.js#L37)
 
 `getLogs()` loads the entire log file into memory on every request, splits it, filters it, then slices the tail. SMAPI logs can grow large enough that this blocks the Node event loop and spikes memory use, especially with the current 300-line polling/search behavior in the UI.
 
@@ -83,7 +83,7 @@ Recommended fix:
 ### 6. Medium: documented container resource limits may not apply in normal `docker compose` deployments
 
 Files:
-- [docker-compose.yml](/root/puppy-stardew-server/docker-compose.yml#L154)
+- [docker-compose.yml](/root/nothing-stardew-server/docker-compose.yml#L154)
 
 The compose file uses `deploy.resources`, which is not enforced in many non-Swarm `docker compose` setups. Users can believe the container is capped at 2 CPU / 2 GB when it may actually run unconstrained.
 

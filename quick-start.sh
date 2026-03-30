@@ -1,10 +1,10 @@
 #!/bin/bash
 # =============================================================================
 # Puppy Stardew Server - Quick Start Script
-# 小狗星谷服务器 - 快速启动脚本
+# 灏忕嫍鏄熻胺鏈嶅姟鍣?- 蹇€熷惎鍔ㄨ剼鏈?
 # =============================================================================
 # This script will help you set up a Stardew Valley dedicated server in minutes!
-# 此脚本将帮助您在几分钟内设置星露谷物语专用服务器！
+# 姝よ剼鏈皢甯姪鎮ㄥ湪鍑犲垎閽熷唴璁剧疆鏄熼湶璋风墿璇笓鐢ㄦ湇鍔″櫒锛?
 # =============================================================================
 
 # Don't exit on error - we handle errors manually
@@ -25,26 +25,26 @@ BOLD='\033[1m'
 
 print_header() {
     echo ""
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}${BOLD}  🐶 Puppy Stardew Server - Quick Start${NC}"
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
+    echo -e "${CYAN}${BOLD}  馃惗 Puppy Stardew Server - Quick Start${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo ""
 }
 
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}鉁?$1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}鉂?$1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}鈿狅笍  $1${NC}"
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+    echo -e "${BLUE}鈩癸笍  $1${NC}"
 }
 
 print_step() {
@@ -53,7 +53,7 @@ print_step() {
 }
 
 ask_question() {
-    echo -e "${CYAN}❓ $1${NC}"
+    echo -e "${CYAN}鉂?$1${NC}"
 }
 
 # Docker Compose command (global variable, set in check_docker)
@@ -215,9 +215,9 @@ configure_steam() {
     cp .env.example .env
 
     echo ""
-    print_info "═══════════════════════════════════════════════════"
+    print_info "鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     print_info "  Configuration Method"
-    print_info "═══════════════════════════════════════════════════"
+    print_info "鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
     echo ""
     ask_question "Do you want to manually input configuration in terminal? (y/n)"
     echo -e "${CYAN}  y${NC} - Input Steam username, password and VNC password now"
@@ -336,15 +336,15 @@ start_server() {
     # Wait for init container to complete
     print_info "Waiting for init container to complete..."
     for i in {1..30}; do
-        INIT_STATUS=$(docker inspect --format='{{.State.Status}}' puppy-stardew-init 2>/dev/null)
+        INIT_STATUS=$(docker inspect --format='{{.State.Status}}' nothing-stardew-init 2>/dev/null)
         if [ "$INIT_STATUS" = "exited" ]; then
-            INIT_EXIT=$(docker inspect --format='{{.State.ExitCode}}' puppy-stardew-init 2>/dev/null)
+            INIT_EXIT=$(docker inspect --format='{{.State.ExitCode}}' nothing-stardew-init 2>/dev/null)
             if [ "$INIT_EXIT" = "0" ]; then
                 print_success "Init container completed successfully!"
                 break
             else
                 print_error "Init container failed (exit code: $INIT_EXIT)!"
-                echo "Check logs: docker logs puppy-stardew-init"
+                echo "Check logs: docker logs nothing-stardew-init"
                 exit 1
             fi
         fi
@@ -356,10 +356,10 @@ start_server() {
     sleep 5
 
     # Check if container is running
-    if ! docker ps | grep -q puppy-stardew; then
+    if ! docker ps | grep -q nothing-stardew; then
         print_error "Container failed to start!"
         echo ""
-        echo "Check logs with: docker logs puppy-stardew"
+        echo "Check logs with: docker logs nothing-stardew"
         exit 1
     fi
 
@@ -367,11 +367,11 @@ start_server() {
 }
 
 show_next_steps() {
-    print_step "🎉 Setup Complete! Here's what to do next:"
+    print_step "馃帀 Setup Complete! Here's what to do next:"
 
     echo ""
     echo -e "${BOLD}1. Monitor the download progress:${NC}"
-    echo "   docker logs -f puppy-stardew"
+    echo "   docker logs -f nothing-stardew"
     echo ""
     echo -e "${YELLOW}   The first startup will download ~1.5GB game files.${NC}"
     echo -e "${YELLOW}   This usually takes 5-15 minutes depending on your internet speed.${NC}"
@@ -379,15 +379,15 @@ show_next_steps() {
 
     echo -e "${BOLD}2. If Steam Guard is enabled:${NC}"
     echo "   - Check logs for Steam Guard prompt:"
-    echo -e "     ${CYAN}docker logs puppy-stardew | grep -i \"steam guard\"${NC}"
+    echo -e "     ${CYAN}docker logs nothing-stardew | grep -i \"steam guard\"${NC}"
     echo "   - If you see \"Steam Guard code:\" prompt, attach to the container:"
-    echo -e "     ${CYAN}docker attach puppy-stardew${NC}"
+    echo -e "     ${CYAN}docker attach nothing-stardew${NC}"
     echo "   - Enter your Steam Guard code from email/mobile app and press Enter"
     echo -e "   - ${YELLOW}Important:${NC} Wait 3-5 seconds after entering to confirm game download starts"
     echo -e "   - Then press ${YELLOW}Ctrl+P Ctrl+Q${NC} to detach (${RED}NOT Ctrl+C!${NC})"
     echo ""
 
-    echo -e "${BOLD}3. 🌐 Web Management Panel (Recommended):${NC}"
+    echo -e "${BOLD}3. 馃寪 Web Management Panel (Recommended):${NC}"
     echo -e "   - Browser access: ${CYAN}http://$(get_server_ip):18642${NC}"
     echo "   - First visit: create your admin password in the setup page"
     echo "   - Features: real-time status, logs, terminal, config, saves, mods"
@@ -403,22 +403,22 @@ show_next_steps() {
 
     echo -e "${BOLD}5. Players can connect:${NC}"
     echo "   - Open Stardew Valley"
-    echo "   - Click \"Co-op\" → \"Join LAN Game\""
+    echo "   - Click \"Co-op\" 鈫?\"Join LAN Game\""
     echo "   - Server will appear automatically, or enter server IP manually"
-    echo -e "   ${YELLOW}⚠️  Note: Only IP needed, port 24642 is used by default${NC}"
+    echo -e "   ${YELLOW}鈿狅笍  Note: Only IP needed, port 24642 is used by default${NC}"
     echo ""
 
     echo -e "${BOLD}Useful commands:${NC}"
-    echo -e "   View logs:        ${CYAN}docker logs -f puppy-stardew${NC}"
+    echo -e "   View logs:        ${CYAN}docker logs -f nothing-stardew${NC}"
     echo -e "   Restart server:   ${CYAN}$COMPOSE_CMD down && $COMPOSE_CMD up -d${NC}"
     echo -e "   Stop server:      ${CYAN}$COMPOSE_CMD down${NC}"
     echo -e "   Check health:     ${CYAN}./health-check.sh${NC}"
     echo -e "   Backup saves:     ${CYAN}./backup.sh${NC}"
     echo ""
-    echo -e "${YELLOW}   ⚠️  Note: After modifying .env, you must restart for changes to take effect!${NC}"
+    echo -e "${YELLOW}   鈿狅笍  Note: After modifying .env, you must restart for changes to take effect!${NC}"
     echo ""
 
-    echo -e "${GREEN}${BOLD}🌟 Enjoy your instant-sleep Stardew Valley server!${NC}"
+    echo -e "${GREEN}${BOLD}馃専 Enjoy your instant-sleep Stardew Valley server!${NC}"
     echo ""
 
     # Smart detection of Steam Guard requirement
@@ -427,21 +427,21 @@ show_next_steps() {
     sleep 2
 
     NEEDS_STEAM_GUARD=false
-    RECENT_LOGS=$(docker logs --tail 50 puppy-stardew 2>&1 || true)
+    RECENT_LOGS=$(docker logs --tail 50 nothing-stardew 2>&1 || true)
     if echo "$RECENT_LOGS" | grep -qi "steam guard\|two-factor\|two factor\|auth code\|verification code\|Enter the current code"; then
         NEEDS_STEAM_GUARD=true
     fi
 
     if [ "$NEEDS_STEAM_GUARD" = "true" ]; then
         echo ""
-        print_warning "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        print_warning "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
         print_warning "  Steam Guard verification code required!"
-        print_warning "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        print_warning "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
         echo ""
         print_info "You need to attach to the container to enter the Steam Guard code."
         print_info "Follow these steps:"
         echo ""
-        echo -e "  ${CYAN}1.${NC} Run: ${CYAN}docker attach puppy-stardew${NC}"
+        echo -e "  ${CYAN}1.${NC} Run: ${CYAN}docker attach nothing-stardew${NC}"
         echo -e "  ${CYAN}2.${NC} Enter the code from your email/mobile app and press Enter"
         echo -e "  ${CYAN}3.${NC} Wait 3-5 seconds to confirm game download starts"
         echo -e "  ${CYAN}4.${NC} Press ${YELLOW}Ctrl+P Ctrl+Q${NC} to detach (${RED}NOT Ctrl+C!${NC})"
@@ -449,8 +449,8 @@ show_next_steps() {
     else
         echo ""
         ask_question "What would you like to do next?"
-        echo -e "  ${CYAN}1${NC} - View live logs: ${CYAN}docker logs -f puppy-stardew${NC}"
-        echo -e "  ${CYAN}2${NC} - Attach to container (for entering verification code): ${CYAN}docker attach puppy-stardew${NC}"
+        echo -e "  ${CYAN}1${NC} - View live logs: ${CYAN}docker logs -f nothing-stardew${NC}"
+        echo -e "  ${CYAN}2${NC} - Attach to container (for entering verification code): ${CYAN}docker attach nothing-stardew${NC}"
         echo ""
         print_info "You can copy and run the commands above in your terminal."
     fi

@@ -2,7 +2,7 @@
 
 Dockerized Stardew Valley multiplayer server with persistent storage, bundled SMAPI mods, and a browser-based management panel.
 
-[中文说明](README_CN.md)
+[涓枃璇存槑](README_CN.md)
 
 ## Overview
 
@@ -133,13 +133,13 @@ docker compose up -d
 #### 6. Watch startup logs
 
 ```bash
-docker logs -f puppy-stardew
+docker logs -f nothing-stardew
 ```
 
 If Steam Guard is enabled:
 
 ```bash
-docker attach puppy-stardew
+docker attach nothing-stardew
 ```
 
 Enter the code, wait a few seconds, then detach with `Ctrl+P Ctrl+Q`.
@@ -232,13 +232,13 @@ docker compose down
 Logs:
 
 ```bash
-docker logs -f puppy-stardew
+docker logs -f nothing-stardew
 ```
 
 Open container shell:
 
 ```bash
-docker exec -it puppy-stardew bash
+docker exec -it nothing-stardew bash
 ```
 
 ## Troubleshooting
@@ -271,7 +271,7 @@ docker compose restart
 Attach to the container and enter the code:
 
 ```bash
-docker attach puppy-stardew
+docker attach nothing-stardew
 ```
 
 Detach with `Ctrl+P Ctrl+Q`, not `Ctrl+C`.

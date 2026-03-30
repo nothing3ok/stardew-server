@@ -1,61 +1,61 @@
 # Contributing to Puppy Stardew Server
 
-感谢您对Puppy Stardew Server项目的关注！
+鎰熻阿鎮ㄥPuppy Stardew Server椤圭洰鐨勫叧娉紒
 
-## 如何贡献
+## 濡備綍璐＄尞
 
-### 报告Bug
+### 鎶ュ憡Bug
 
-在提交Bug前，请：
+鍦ㄦ彁浜ug鍓嶏紝璇凤細
 
-1. **搜索现有Issue** - 确认问题未被报告
-2. **收集信息**：
-   - 完整的错误日志：`docker logs puppy-stardew > logs.txt`
-   - Docker版本：`docker --version`
-   - 操作系统信息
-   - docker-compose.yml配置（删除敏感信息）
-3. **创建Issue** - 使用Bug模板
+1. **鎼滅储鐜版湁Issue** - 纭闂鏈鎶ュ憡
+2. **鏀堕泦淇℃伅**锛?
+   - 瀹屾暣鐨勯敊璇棩蹇楋細`docker logs nothing-stardew > logs.txt`
+   - Docker鐗堟湰锛歚docker --version`
+   - 鎿嶄綔绯荤粺淇℃伅
+   - docker-compose.yml閰嶇疆锛堝垹闄ゆ晱鎰熶俊鎭級
+3. **鍒涘缓Issue** - 浣跨敤Bug妯℃澘
 
-### 提交功能请求
+### 鎻愪氦鍔熻兘璇锋眰
 
-请说明：
-- 功能的具体用途
-- 为什么需要这个功能
-- 可能的实现方案（可选）
+璇疯鏄庯細
+- 鍔熻兘鐨勫叿浣撶敤閫?
+- 涓轰粈涔堥渶瑕佽繖涓姛鑳?
+- 鍙兘鐨勫疄鐜版柟妗堬紙鍙€夛級
 
-### 提交Pull Request
+### 鎻愪氦Pull Request
 
-1. **Fork项目**
-2. **创建功能分支**：`git checkout -b feature/my-feature`
-3. **开发并测试**
-4. **提交变更**：遵循提交规范（见下文）
-5. **推送到Fork**：`git push origin feature/my-feature`
-6. **创建Pull Request**
+1. **Fork椤圭洰**
+2. **鍒涘缓鍔熻兘鍒嗘敮**锛歚git checkout -b feature/my-feature`
+3. **寮€鍙戝苟娴嬭瘯**
+4. **鎻愪氦鍙樻洿**锛氶伒寰彁浜よ鑼冿紙瑙佷笅鏂囷級
+5. **鎺ㄩ€佸埌Fork**锛歚git push origin feature/my-feature`
+6. **鍒涘缓Pull Request**
 
-## 开发环境设置
+## 寮€鍙戠幆澧冭缃?
 
 ```bash
-# 1. Clone仓库
+# 1. Clone浠撳簱
 git clone https://github.com/nothing3ok/stardew-server.git
 cd stardew-server
 
-# 2. 设置Steam凭证（用于测试）
+# 2. 璁剧疆Steam鍑瘉锛堢敤浜庢祴璇曪級
 export STEAM_USERNAME="your_test_account"
 export STEAM_PASSWORD="your_password"
 
-# 3. 构建测试镜像
+# 3. 鏋勫缓娴嬭瘯闀滃儚
 docker build -t test-stardew:dev -f docker/Dockerfile docker/
 
-# 4. 运行测试
+# 4. 杩愯娴嬭瘯
 ./tests/test-steam-guard.sh
 ```
 
-## 代码规范
+## 浠ｇ爜瑙勮寖
 
-### Shell脚本
+### Shell鑴氭湰
 
 ```bash
-# ✓ 好的实践
+# 鉁?濂界殑瀹炶返
 function_name() {
     local variable="$1"
 
@@ -67,46 +67,46 @@ function_name() {
     echo "$variable"
 }
 
-# ❌ 避免
-# - 不加引号的变量：echo $variable
-# - 使用set -e而不是显式错误处理
-# - 没有函数封装的长脚本
-# - 缺少注释的复杂逻辑
+# 鉂?閬垮厤
+# - 涓嶅姞寮曞彿鐨勫彉閲忥細echo $variable
+# - 浣跨敤set -e鑰屼笉鏄樉寮忛敊璇鐞?
+# - 娌℃湁鍑芥暟灏佽鐨勯暱鑴氭湰
+# - 缂哄皯娉ㄩ噴鐨勫鏉傞€昏緫
 ```
 
 ### Dockerfile
 
 ```dockerfile
-# ✓ 好的实践
+# 鉁?濂界殑瀹炶返
 RUN apt-get update && \
     apt-get install -y package && \
     rm -rf /var/lib/apt/lists/*
 
-# ❌ 避免
-# - 分开的RUN命令（增加层数）
-# - 不清理apt缓存
-# - 使用latest标签（无版本控制）
+# 鉂?閬垮厤
+# - 鍒嗗紑鐨凴UN鍛戒护锛堝鍔犲眰鏁帮級
+# - 涓嶆竻鐞哸pt缂撳瓨
+# - 浣跨敤latest鏍囩锛堟棤鐗堟湰鎺у埗锛?
 ```
 
-### 提交规范
+### 鎻愪氦瑙勮寖
 
 ```
-类型(范围): 简短描述
+绫诲瀷(鑼冨洿): 绠€鐭弿杩?
 
-详细描述（可选）
+璇︾粏鎻忚堪锛堝彲閫夛級
 
-关联Issue: #123
+鍏宠仈Issue: #123
 ```
 
-**类型：**
-- `feat`: 新功能
-- `fix`: Bug修复
-- `docs`: 文档更新
-- `refactor`: 重构
-- `test`: 测试相关
-- `chore`: 构建/工具相关
+**绫诲瀷锛?*
+- `feat`: 鏂板姛鑳?
+- `fix`: Bug淇
+- `docs`: 鏂囨。鏇存柊
+- `refactor`: 閲嶆瀯
+- `test`: 娴嬭瘯鐩稿叧
+- `chore`: 鏋勫缓/宸ュ叿鐩稿叧
 
-**示例：**
+**绀轰緥锛?*
 ```
 fix(entrypoint): remove pipe to fix stdin blocking
 
@@ -116,61 +116,61 @@ Removed '| tee' to preserve stdin for user input.
 Fixes: #42
 ```
 
-## 测试要求
+## 娴嬭瘯瑕佹眰
 
-提交PR前请确保：
+鎻愪氦PR鍓嶈纭繚锛?
 
-- [ ] 代码通过基本测试
-- [ ] 添加了必要的注释
-- [ ] 更新了相关文档
-- [ ] 测试了Steam Guard流程（如果修改了entrypoint.sh）
-- [ ] 测试了模组加载（如果修改了模组配置）
+- [ ] 浠ｇ爜閫氳繃鍩烘湰娴嬭瘯
+- [ ] 娣诲姞浜嗗繀瑕佺殑娉ㄩ噴
+- [ ] 鏇存柊浜嗙浉鍏虫枃妗?
+- [ ] 娴嬭瘯浜哠team Guard娴佺▼锛堝鏋滀慨鏀逛簡entrypoint.sh锛?
+- [ ] 娴嬭瘯浜嗘ā缁勫姞杞斤紙濡傛灉淇敼浜嗘ā缁勯厤缃級
 
-### 运行测试
+### 杩愯娴嬭瘯
 
 ```bash
-# Steam Guard测试
+# Steam Guard娴嬭瘯
 ./tests/test-steam-guard.sh
 
-# 部署验证
+# 閮ㄧ讲楠岃瘉
 ./verify-deployment.sh
 
-# 清理测试环境
+# 娓呯悊娴嬭瘯鐜
 ./tests/cleanup-tests.sh
 ```
 
-## 文档要求
+## 鏂囨。瑕佹眰
 
-修改代码时，请同时更新：
+淇敼浠ｇ爜鏃讹紝璇峰悓鏃舵洿鏂帮細
 
-- **DEVELOPMENT.md** - 开发文档
-- **README.md** - 用户文档
-- **代码注释** - 复杂逻辑的说明
+- **DEVELOPMENT.md** - 寮€鍙戞枃妗?
+- **README.md** - 鐢ㄦ埛鏂囨。
+- **浠ｇ爜娉ㄩ噴** - 澶嶆潅閫昏緫鐨勮鏄?
 
-## 问题排查
+## 闂鎺掓煡
 
-遇到问题？查看：
+閬囧埌闂锛熸煡鐪嬶細
 
-1. **DEVELOPMENT.md** - 常见问题排查
-2. **GitHub Issues** - 已知问题
-3. **Docker logs** - `docker logs puppy-stardew`
+1. **DEVELOPMENT.md** - 甯歌闂鎺掓煡
+2. **GitHub Issues** - 宸茬煡闂
+3. **Docker logs** - `docker logs nothing-stardew`
 
-## 行为准则
+## 琛屼负鍑嗗垯
 
-- 尊重所有贡献者
-- 保持讨论专业和建设性
-- 接受建设性批评
-- 关注项目最佳利益
+- 灏婇噸鎵€鏈夎础鐚€?
+- 淇濇寔璁ㄨ涓撲笟鍜屽缓璁炬€?
+- 鎺ュ彈寤鸿鎬ф壒璇?
+- 鍏虫敞椤圭洰鏈€浣冲埄鐩?
 
-## 许可证
+## 璁稿彲璇?
 
-提交贡献表示您同意按照项目的MIT许可证授权您的贡献。
+鎻愪氦璐＄尞琛ㄧず鎮ㄥ悓鎰忔寜鐓ч」鐩殑MIT璁稿彲璇佹巿鏉冩偍鐨勮础鐚€?
 
-## 联系方式
+## 鑱旂郴鏂瑰紡
 
 - **Issues**: https://github.com/nothing3ok/stardew-server/issues
-- **Docker Hub**: https://hub.docker.com/r/truemanlive/puppy-stardew-server
+- **Docker Hub**: https://hub.docker.com/r/truemanlive/nothing-stardew-server
 
 ---
 
-感谢您的贡献！🎮
+鎰熻阿鎮ㄧ殑璐＄尞锛侌煄?

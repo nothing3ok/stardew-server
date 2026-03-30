@@ -9,7 +9,7 @@ const DEFAULT_ENV_FILE = `${PROJECT_DIR}/.env`;
 const RUNTIME_ENV_FILE = `${PROJECT_DIR}/data/panel/runtime.env`;
 const ALLOWED_SERVICES = new Set(['stardew-server']);
 const SERVICE_CONTAINERS = {
-  'stardew-server': 'puppy-stardew',
+  'stardew-server': 'nothing-stardew',
 };
 
 function sendJson(res, statusCode, data) {

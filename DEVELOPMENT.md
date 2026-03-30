@@ -1,120 +1,120 @@
 # Development Guide
 
-## 项目架构
+## 椤圭洰鏋舵瀯
 
-### 核心组件
-
-```
-puppy-stardew-server/
-├── docker/
-│   ├── Dockerfile              # 镜像构建定义
-│   ├── mods/                   # 预装模组
-│   │   ├── AlwaysOnServer/     # 24/7运行模组
-│   │   ├── AutoHideHost/       # 自动隐藏主机模组
-│   │   └── ServerAutoLoad/     # 自动加载存档模组
-│   └── scripts/
-│       ├── entrypoint.sh       # 容器启动脚本（主要逻辑）
-│       ├── log-monitor.sh      # 日志监控
-│       ├── log-manager.sh      # 日志轮转
-│       └── view-logs.sh        # 日志查看工具
-├── tests/                      # 测试脚本
-│   └── test-steam-guard.sh     # Steam Guard测试
-├── quick-start.sh              # 一键部署脚本
-├── verify-deployment.sh        # 部署验证脚本
-└── docker-compose.yml          # Docker编排配置
-```
-
-### 启动流程
+### 鏍稿績缁勪欢
 
 ```
-1. entrypoint.sh 启动
-   ↓
-2. 验证Steam凭证
-   ↓
-3. 修复libcurl兼容性
-   ↓
-4. 下载游戏（如果需要）
-   ├─→ 需要Steam Guard？
-   │   └─→ 等待用户通过docker attach输入验证码
-   └─→ 直接下载
-   ↓
-5. 安装SMAPI
-   ↓
-6. 复制预装模组
-   ↓
-7. 启动Xvfb虚拟显示
-   ↓
-8. 启动VNC服务器（可选）
-   ↓
-9. 启动日志监控（可选）
-   ↓
-10. 启动游戏服务器（./StardewModdingAPI --server）
+nothing-stardew-server/
+鈹溾攢鈹€ docker/
+鈹?  鈹溾攢鈹€ Dockerfile              # 闀滃儚鏋勫缓瀹氫箟
+鈹?  鈹溾攢鈹€ mods/                   # 棰勮妯＄粍
+鈹?  鈹?  鈹溾攢鈹€ AlwaysOnServer/     # 24/7杩愯妯＄粍
+鈹?  鈹?  鈹溾攢鈹€ AutoHideHost/       # 鑷姩闅愯棌涓绘満妯＄粍
+鈹?  鈹?  鈹斺攢鈹€ ServerAutoLoad/     # 鑷姩鍔犺浇瀛樻。妯＄粍
+鈹?  鈹斺攢鈹€ scripts/
+鈹?      鈹溾攢鈹€ entrypoint.sh       # 瀹瑰櫒鍚姩鑴氭湰锛堜富瑕侀€昏緫锛?
+鈹?      鈹溾攢鈹€ log-monitor.sh      # 鏃ュ織鐩戞帶
+鈹?      鈹溾攢鈹€ log-manager.sh      # 鏃ュ織杞浆
+鈹?      鈹斺攢鈹€ view-logs.sh        # 鏃ュ織鏌ョ湅宸ュ叿
+鈹溾攢鈹€ tests/                      # 娴嬭瘯鑴氭湰
+鈹?  鈹斺攢鈹€ test-steam-guard.sh     # Steam Guard娴嬭瘯
+鈹溾攢鈹€ quick-start.sh              # 涓€閿儴缃茶剼鏈?
+鈹溾攢鈹€ verify-deployment.sh        # 閮ㄧ讲楠岃瘉鑴氭湰
+鈹斺攢鈹€ docker-compose.yml          # Docker缂栨帓閰嶇疆
 ```
 
-## 关键设计决策
+### 鍚姩娴佺▼
 
-### 1. Steam Guard处理
+```
+1. entrypoint.sh 鍚姩
+   鈫?
+2. 楠岃瘉Steam鍑瘉
+   鈫?
+3. 淇libcurl鍏煎鎬?
+   鈫?
+4. 涓嬭浇娓告垙锛堝鏋滈渶瑕侊級
+   鈹溾攢鈫?闇€瑕丼team Guard锛?
+   鈹?  鈹斺攢鈫?绛夊緟鐢ㄦ埛閫氳繃docker attach杈撳叆楠岃瘉鐮?
+   鈹斺攢鈫?鐩存帴涓嬭浇
+   鈫?
+5. 瀹夎SMAPI
+   鈫?
+6. 澶嶅埗棰勮妯＄粍
+   鈫?
+7. 鍚姩Xvfb铏氭嫙鏄剧ず
+   鈫?
+8. 鍚姩VNC鏈嶅姟鍣紙鍙€夛級
+   鈫?
+9. 鍚姩鏃ュ織鐩戞帶锛堝彲閫夛級
+   鈫?
+10. 鍚姩娓告垙鏈嶅姟鍣紙./StardewModdingAPI --server锛?
+```
 
-**v1.0.34及之前的问题：**
+## 鍏抽敭璁捐鍐崇瓥
+
+### 1. Steam Guard澶勭悊
+
+**v1.0.34鍙婁箣鍓嶇殑闂锛?*
 ```bash
-# ❌ 错误：使用管道阻断了stdin
+# 鉂?閿欒锛氫娇鐢ㄧ閬撻樆鏂簡stdin
 steamcmd.sh ... 2>&1 | tee /tmp/log
 ```
 
-**v1.0.35修复：**
+**v1.0.35淇锛?*
 ```bash
-# ✓ 正确：直接运行，保留stdin
+# 鉁?姝ｇ‘锛氱洿鎺ヨ繍琛岋紝淇濈暀stdin
 steamcmd.sh ...
 ```
 
-**原理：**
-- Bash管道会重定向stdin到管道输入端
-- steamcmd需要从终端读取验证码
-- `docker attach`将用户终端连接到容器stdin
-- 如果stdin被管道阻断，用户输入无法到达steamcmd
+**鍘熺悊锛?*
+- Bash绠￠亾浼氶噸瀹氬悜stdin鍒扮閬撹緭鍏ョ
+- steamcmd闇€瑕佷粠缁堢璇诲彇楠岃瘉鐮?
+- `docker attach`灏嗙敤鎴风粓绔繛鎺ュ埌瀹瑰櫒stdin
+- 濡傛灉stdin琚閬撻樆鏂紝鐢ㄦ埛杈撳叆鏃犳硶鍒拌揪steamcmd
 
-### 2. 用户权限
+### 2. 鐢ㄦ埛鏉冮檺
 
-- 容器以`steam`用户（UID 1000）运行
-- 数据卷必须由UID 1000:1000所有
-- `init.sh`脚本负责初始化权限
+- 瀹瑰櫒浠steam`鐢ㄦ埛锛圲ID 1000锛夎繍琛?
+- 鏁版嵁鍗峰繀椤荤敱UID 1000:1000鎵€鏈?
+- `init.sh`鑴氭湰璐熻矗鍒濆鍖栨潈闄?
 
-### 3. 模组管理
+### 3. 妯＄粍绠＄悊
 
-**Always On Server：**
-- 使游戏在没有玩家时继续运行
-- 配置时间流速、睡眠时间等
+**Always On Server锛?*
+- 浣挎父鎴忓湪娌℃湁鐜╁鏃剁户缁繍琛?
+- 閰嶇疆鏃堕棿娴侀€熴€佺潯鐪犳椂闂寸瓑
 
-**AutoHideHost：**
-- 自动将主机玩家传送到沙漠(0,0)
-- 避免主机角色影响游戏体验
+**AutoHideHost锛?*
+- 鑷姩灏嗕富鏈虹帺瀹朵紶閫佸埌娌欐紶(0,0)
+- 閬垮厤涓绘満瑙掕壊褰卞搷娓告垙浣撻獙
 
-**ServerAutoLoad：**
-- 自动检测并加载Co-op存档
-- 重启后自动恢复游戏状态
-- ⚠️ 已知限制：需要VNC手动重新加载以初始化多人服务器
+**ServerAutoLoad锛?*
+- 鑷姩妫€娴嬪苟鍔犺浇Co-op瀛樻。
+- 閲嶅惎鍚庤嚜鍔ㄦ仮澶嶆父鎴忕姸鎬?
+- 鈿狅笍 宸茬煡闄愬埗锛氶渶瑕乂NC鎵嬪姩閲嶆柊鍔犺浇浠ュ垵濮嬪寲澶氫汉鏈嶅姟鍣?
 
-## 开发工作流
+## 寮€鍙戝伐浣滄祦
 
-### 本地测试
+### 鏈湴娴嬭瘯
 
 ```bash
-# 1. 构建镜像
-cd /root/github-puppy-stardew
+# 1. 鏋勫缓闀滃儚
+cd /root/github-nothing-stardew
 docker build -t test-stardew:dev -f docker/Dockerfile docker/
 
-# 2. 运行测试容器
+# 2. 杩愯娴嬭瘯瀹瑰櫒
 docker run -it --rm \
   -e STEAM_USERNAME="test_user" \
   -e STEAM_PASSWORD="test_pass" \
   -e ENABLE_VNC=true \
   test-stardew:dev
 
-# 3. 查看日志
+# 3. 鏌ョ湅鏃ュ織
 docker logs -f <container_id>
 ```
 
-### 测试Steam Guard流程
+### 娴嬭瘯Steam Guard娴佺▼
 
 ```bash
 export STEAM_USERNAME="your_username"
@@ -122,234 +122,234 @@ export STEAM_PASSWORD="your_password"
 ./tests/test-steam-guard.sh
 ```
 
-### 验证部署
+### 楠岃瘉閮ㄧ讲
 
 ```bash
-# 运行验证脚本
+# 杩愯楠岃瘉鑴氭湰
 ./verify-deployment.sh
 
-# 手动检查关键指标
-docker logs puppy-stardew | grep -i "error"
-docker logs puppy-stardew | grep "mod loaded"
-docker exec puppy-stardew ps aux | grep -i smapi
+# 鎵嬪姩妫€鏌ュ叧閿寚鏍?
+docker logs nothing-stardew | grep -i "error"
+docker logs nothing-stardew | grep "mod loaded"
+docker exec nothing-stardew ps aux | grep -i smapi
 ```
 
-## 常见问题排查
+## 甯歌闂鎺掓煡
 
-### Steam Guard卡住
+### Steam Guard鍗′綇
 
-**症状：** 输入验证码后无响应
+**鐥囩姸锛?* 杈撳叆楠岃瘉鐮佸悗鏃犲搷搴?
 
-**原因：** entrypoint.sh使用了管道（`| tee`），阻断stdin
+**鍘熷洜锛?* entrypoint.sh浣跨敤浜嗙閬擄紙`| tee`锛夛紝闃绘柇stdin
 
-**解决：** 使用v1.0.35+，已移除管道
+**瑙ｅ喅锛?* 浣跨敤v1.0.35+锛屽凡绉婚櫎绠￠亾
 
-### 游戏下载失败
+### 娓告垙涓嬭浇澶辫触
 
-**可能原因：**
-1. Steam API速率限制
-2. 网络超时
-3. 磁盘空间不足
-4. 权限问题（UID不是1000）
+**鍙兘鍘熷洜锛?*
+1. Steam API閫熺巼闄愬埗
+2. 缃戠粶瓒呮椂
+3. 纾佺洏绌洪棿涓嶈冻
+4. 鏉冮檺闂锛圲ID涓嶆槸1000锛?
 
-**排查步骤：**
+**鎺掓煡姝ラ锛?*
 ```bash
-# 检查磁盘空间
+# 妫€鏌ョ鐩樼┖闂?
 df -h
 
-# 检查权限
+# 妫€鏌ユ潈闄?
 ls -la data/
 
-# 查看详细日志
-docker logs puppy-stardew 2>&1 | grep -A 10 "download"
+# 鏌ョ湅璇︾粏鏃ュ織
+docker logs nothing-stardew 2>&1 | grep -A 10 "download"
 ```
 
-### 模组未加载
+### 妯＄粍鏈姞杞?
 
-**检查步骤：**
+**妫€鏌ユ楠わ細**
 ```bash
-# 1. 确认模组文件存在
-docker exec puppy-stardew ls -la /home/steam/stardewvalley/Mods/
+# 1. 纭妯＄粍鏂囦欢瀛樺湪
+docker exec nothing-stardew ls -la /home/steam/stardewvalley/Mods/
 
-# 2. 查看SMAPI日志
-docker exec puppy-stardew cat /home/steam/.config/StardewValley/ErrorLogs/SMAPI-latest.txt
+# 2. 鏌ョ湅SMAPI鏃ュ織
+docker exec nothing-stardew cat /home/steam/.config/StardewValley/ErrorLogs/SMAPI-latest.txt
 
-# 3. 检查模组配置
-docker exec puppy-stardew cat /home/steam/stardewvalley/Mods/AutoHideHost/manifest.json
+# 3. 妫€鏌ユā缁勯厤缃?
+docker exec nothing-stardew cat /home/steam/stardewvalley/Mods/AutoHideHost/manifest.json
 ```
 
-## 发布流程
+## 鍙戝竷娴佺▼
 
-### 版本号规范
+### 鐗堟湰鍙疯鑼?
 
-- v1.0.X：补丁版本（bug修复、小改进）
-- v1.X.0：次版本（新功能、模组更新）
-- vX.0.0：主版本（重大变更、架构改动）
+- v1.0.X锛氳ˉ涓佺増鏈紙bug淇銆佸皬鏀硅繘锛?
+- v1.X.0锛氭鐗堟湰锛堟柊鍔熻兘銆佹ā缁勬洿鏂帮級
+- vX.0.0锛氫富鐗堟湰锛堥噸澶у彉鏇淬€佹灦鏋勬敼鍔級
 
-### 发布检查清单
+### 鍙戝竷妫€鏌ユ竻鍗?
 
-- [ ] 更新Dockerfile中的version标签
-- [ ] 更新CLAUDE.md中的版本信息
-- [ ] 测试Steam Guard流程
-- [ ] 测试模组加载
-- [ ] 测试VNC连接
-- [ ] 验证玩家能够连接
-- [ ] 更新README.md（如有文档变更）
-- [ ] Git提交（不包含AI标记）
-- [ ] 构建Docker镜像
-- [ ] 推送到Docker Hub
-- [ ] 创建GitHub Release（可选）
+- [ ] 鏇存柊Dockerfile涓殑version鏍囩
+- [ ] 鏇存柊CLAUDE.md涓殑鐗堟湰淇℃伅
+- [ ] 娴嬭瘯Steam Guard娴佺▼
+- [ ] 娴嬭瘯妯＄粍鍔犺浇
+- [ ] 娴嬭瘯VNC杩炴帴
+- [ ] 楠岃瘉鐜╁鑳藉杩炴帴
+- [ ] 鏇存柊README.md锛堝鏈夋枃妗ｅ彉鏇达級
+- [ ] Git鎻愪氦锛堜笉鍖呭惈AI鏍囪锛?
+- [ ] 鏋勫缓Docker闀滃儚
+- [ ] 鎺ㄩ€佸埌Docker Hub
+- [ ] 鍒涘缓GitHub Release锛堝彲閫夛級
 
-### 发布命令
+### 鍙戝竷鍛戒护
 
 ```bash
 VERSION="1.0.36"
 
-# 1. Git提交
+# 1. Git鎻愪氦
 git add [files]
 git commit -m "v${VERSION}: description"
 git push origin main
 
-# 2. 构建镜像
-docker build -t truemanlive/puppy-stardew-server:v${VERSION} -f docker/Dockerfile docker/
-docker tag truemanlive/puppy-stardew-server:v${VERSION} truemanlive/puppy-stardew-server:latest
+# 2. 鏋勫缓闀滃儚
+docker build -t truemanlive/nothing-stardew-server:v${VERSION} -f docker/Dockerfile docker/
+docker tag truemanlive/nothing-stardew-server:v${VERSION} truemanlive/nothing-stardew-server:latest
 
-# 3. 推送到Docker Hub
-docker push truemanlive/puppy-stardew-server:v${VERSION}
-docker push truemanlive/puppy-stardew-server:latest
+# 3. 鎺ㄩ€佸埌Docker Hub
+docker push truemanlive/nothing-stardew-server:v${VERSION}
+docker push truemanlive/nothing-stardew-server:latest
 ```
 
-## 代码规范
+## 浠ｇ爜瑙勮寖
 
-### Shell脚本
+### Shell鑴氭湰
 
 ```bash
-# 1. 使用明确的错误处理（不要用set -e）
+# 1. 浣跨敤鏄庣‘鐨勯敊璇鐞嗭紙涓嶈鐢╯et -e锛?
 if ! command; then
     log_error "Command failed"
     return 1
 fi
 
-# 2. 所有变量加引号
+# 2. 鎵€鏈夊彉閲忓姞寮曞彿
 echo "$VARIABLE"
 
-# 3. 使用函数封装重复逻辑
+# 3. 浣跨敤鍑芥暟灏佽閲嶅閫昏緫
 download_game() {
     local username="$1"
     # ...
 }
 
-# 4. 添加注释解释复杂逻辑
+# 4. 娣诲姞娉ㄩ噴瑙ｉ噴澶嶆潅閫昏緫
 # This handles Steam Guard by preserving stdin
-# 通过保留stdin处理Steam Guard
+# 閫氳繃淇濈暀stdin澶勭悊Steam Guard
 steamcmd.sh ...
 
-# 5. 统一日志函数
+# 5. 缁熶竴鏃ュ織鍑芥暟
 log_info "Information message"
 log_warn "Warning message"
 log_error "Error message"
 ```
 
-### Docker最佳实践
+### Docker鏈€浣冲疄璺?
 
 ```dockerfile
-# 1. 合并RUN命令减少层数
+# 1. 鍚堝苟RUN鍛戒护鍑忓皯灞傛暟
 RUN apt-get update && \
     apt-get install -y package && \
     rm -rf /var/lib/apt/lists/*
 
-# 2. 固定版本号
+# 2. 鍥哄畾鐗堟湰鍙?
 RUN wget -qO smapi.zip 'https://.../SMAPI-4.3.2-installer.zip'
 
-# 3. 使用非root用户
+# 3. 浣跨敤闈瀝oot鐢ㄦ埛
 USER steam
 
-# 4. 清理缓存
+# 4. 娓呯悊缂撳瓨
 RUN ... && rm -rf /tmp/*
 ```
 
-## 性能优化
+## 鎬ц兘浼樺寲
 
-### 资源使用
+### 璧勬簮浣跨敤
 
-- **内存：** ~1.5-2GB（基础）+ 玩家数×200MB
-- **CPU：** 1-2核心
-- **磁盘：** ~2GB游戏文件 + ~500MB SMAPI/mods
-- **网络：** 上传 50-100 Kbps/玩家
+- **鍐呭瓨锛?* ~1.5-2GB锛堝熀纭€锛? 鐜╁鏁懊?00MB
+- **CPU锛?* 1-2鏍稿績
+- **纾佺洏锛?* ~2GB娓告垙鏂囦欢 + ~500MB SMAPI/mods
+- **缃戠粶锛?* 涓婁紶 50-100 Kbps/鐜╁
 
-### 优化建议
+### 浼樺寲寤鸿
 
-1. 禁用VNC可节省~50MB内存
-2. 调整资源限制在docker-compose.yml
-3. 使用SSD提升游戏加载速度
-4. 考虑CDN加速客户端连接
+1. 绂佺敤VNC鍙妭鐪亊50MB鍐呭瓨
+2. 璋冩暣璧勬簮闄愬埗鍦╠ocker-compose.yml
+3. 浣跨敤SSD鎻愬崌娓告垙鍔犺浇閫熷害
+4. 鑰冭檻CDN鍔犻€熷鎴风杩炴帴
 
-## 安全考虑
+## 瀹夊叏鑰冭檻
 
-### 敏感信息处理
+### 鏁忔劅淇℃伅澶勭悊
 
-- ❌ 永远不要将Steam凭证提交到Git
-- ✓ 使用环境变量传递凭证
-- ✓ .gitignore包含.env文件
-- ✓ CLAUDE.md在.gitignore中
+- 鉂?姘歌繙涓嶈灏哠team鍑瘉鎻愪氦鍒癎it
+- 鉁?浣跨敤鐜鍙橀噺浼犻€掑嚟璇?
+- 鉁?.gitignore鍖呭惈.env鏂囦欢
+- 鉁?CLAUDE.md鍦?gitignore涓?
 
-### 容器安全
+### 瀹瑰櫒瀹夊叏
 
-- ✓ 以非root用户运行
-- ✓ 只开放必要端口
-- ✓ 使用只读挂载（如果可能）
-- ⚠️ 定期更新基础镜像
+- 鉁?浠ラ潪root鐢ㄦ埛杩愯
+- 鉁?鍙紑鏀惧繀瑕佺鍙?
+- 鉁?浣跨敤鍙鎸傝浇锛堝鏋滃彲鑳斤級
+- 鈿狅笍 瀹氭湡鏇存柊鍩虹闀滃儚
 
-## 贡献指南
+## 璐＄尞鎸囧崡
 
-### 提交Bug报告
+### 鎻愪氦Bug鎶ュ憡
 
-请包含：
-1. 完整的docker logs输出
-2. docker-compose.yml配置
-3. 系统信息（OS、Docker版本）
-4. 复现步骤
+璇峰寘鍚細
+1. 瀹屾暣鐨刣ocker logs杈撳嚭
+2. docker-compose.yml閰嶇疆
+3. 绯荤粺淇℃伅锛圤S銆丏ocker鐗堟湰锛?
+4. 澶嶇幇姝ラ
 
-### 提交功能请求
+### 鎻愪氦鍔熻兘璇锋眰
 
-请说明：
-1. 功能描述
-2. 使用场景
-3. 预期行为
-4. 可选实现方案
+璇疯鏄庯細
+1. 鍔熻兘鎻忚堪
+2. 浣跨敤鍦烘櫙
+3. 棰勬湡琛屼负
+4. 鍙€夊疄鐜版柟妗?
 
-### Pull Request规范
+### Pull Request瑙勮寖
 
-1. 描述清楚修改内容
-2. 包含测试步骤
-3. 更新相关文档
-4. 遵循代码规范
+1. 鎻忚堪娓呮淇敼鍐呭
+2. 鍖呭惈娴嬭瘯姝ラ
+3. 鏇存柊鐩稿叧鏂囨。
+4. 閬靛惊浠ｇ爜瑙勮寖
 
-## 未来改进计划
+## 鏈潵鏀硅繘璁″垝
 
-### 短期（已完成✓）
+### 鐭湡锛堝凡瀹屾垚鉁擄級
 
-- [x] 修复stdin阻断问题
-- [x] 简化entrypoint.sh逻辑
-- [x] 添加部署验证脚本
-- [x] 创建Steam Guard测试脚本
+- [x] 淇stdin闃绘柇闂
+- [x] 绠€鍖杄ntrypoint.sh閫昏緫
+- [x] 娣诲姞閮ㄧ讲楠岃瘉鑴氭湰
+- [x] 鍒涘缓Steam Guard娴嬭瘯鑴氭湰
 
-### 中期（进行中）
+### 涓湡锛堣繘琛屼腑锛?
 
-- [ ] 模块化entrypoint.sh（拆分为多个函数）
-- [ ] 添加自动化测试CI/CD
-- [ ] 改进错误消息（更友好的提示）
-- [ ] 统一日志格式
+- [ ] 妯″潡鍖杄ntrypoint.sh锛堟媶鍒嗕负澶氫釜鍑芥暟锛?
+- [ ] 娣诲姞鑷姩鍖栨祴璇旵I/CD
+- [ ] 鏀硅繘閿欒娑堟伅锛堟洿鍙嬪ソ鐨勬彁绀猴級
+- [ ] 缁熶竴鏃ュ織鏍煎紡
 
-### 长期（计划中）
+### 闀挎湡锛堣鍒掍腑锛?
 
-- [ ] 支持多架构（ARM64）
-- [ ] Web管理界面
-- [ ] 自动备份系统
-- [ ] 性能监控仪表板
-- [ ] 插件系统（动态加载模组）
+- [ ] 鏀寔澶氭灦鏋勶紙ARM64锛?
+- [ ] Web绠＄悊鐣岄潰
+- [ ] 鑷姩澶囦唤绯荤粺
+- [ ] 鎬ц兘鐩戞帶浠〃鏉?
+- [ ] 鎻掍欢绯荤粺锛堝姩鎬佸姞杞芥ā缁勶級
 
 ---
 
-**最后更新：** 2025-11-04
-**当前版本：** v1.0.35
+**鏈€鍚庢洿鏂帮細** 2025-11-04
+**褰撳墠鐗堟湰锛?* v1.0.35

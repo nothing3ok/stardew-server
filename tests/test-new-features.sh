@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Comprehensive Test Suite for Puppy Stardew Server New Scripts
-# 小狗星谷服务器新脚本综合测试套件
+# 灏忕嫍鏄熻胺鏈嶅姟鍣ㄦ柊鑴氭湰缁煎悎娴嬭瘯濂椾欢
 #
 # Runs WITHOUT Docker or the game. Tests logic, syntax, and behavior of each
 # new script using temporary directories for full isolation.
@@ -37,7 +37,7 @@ cleanup_tmpdir() {
     [ -n "$TMPDIR_ROOT" ] && rm -rf "$TMPDIR_ROOT"
 }
 
-# Called at exit – always clean up
+# Called at exit 鈥?always clean up
 trap cleanup_tmpdir EXIT
 
 pass() {
@@ -55,13 +55,13 @@ fail() {
 
 section() {
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?{NC}"
     echo -e "${BLUE}  $1${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
 }
 
 # =============================================================================
-# 1. SYNTAX VALIDATION – bash -n on every new script
+# 1. SYNTAX VALIDATION 鈥?bash -n on every new script
 # =============================================================================
 test_syntax_validation() {
     section "1. Syntax Validation (bash -n)"
@@ -91,7 +91,7 @@ test_syntax_validation() {
         local name
         name=$(basename "$script")
         if [ ! -f "$script" ]; then
-            # Script doesn't exist – skip silently (not all may be present)
+            # Script doesn't exist 鈥?skip silently (not all may be present)
             continue
         fi
 
@@ -104,15 +104,15 @@ test_syntax_validation() {
 }
 
 # =============================================================================
-# 2. CRASH-MONITOR.SH – test can_restart() rate-limiting logic
+# 2. CRASH-MONITOR.SH 鈥?test can_restart() rate-limiting logic
 # =============================================================================
 test_crash_monitor() {
-    section "2. crash-monitor.sh – can_restart() rate-limiting"
+    section "2. crash-monitor.sh 鈥?can_restart() rate-limiting"
 
     # We extract can_restart and supporting variables into a sub-shell so we
     # don't execute the main loop (which does cd + exec).
 
-    # 2a. Fresh state – should allow restart
+    # 2a. Fresh state 鈥?should allow restart
     local result
     result=$(bash -c '
         MAX_RESTARTS=3
@@ -136,7 +136,7 @@ test_crash_monitor() {
         fail "can_restart should allow restart with empty history (got: $result)"
     fi
 
-    # 2b. After MAX_RESTARTS recent restarts – should deny
+    # 2b. After MAX_RESTARTS recent restarts 鈥?should deny
     result=$(bash -c '
         MAX_RESTARTS=3
         RESTART_WINDOW=300
@@ -184,7 +184,7 @@ test_crash_monitor() {
         fail "can_restart should allow when restarts are outside the window (got: $result)"
     fi
 
-    # 2d. Mixed: 2 recent + 1 old with MAX_RESTARTS=3 – should allow
+    # 2d. Mixed: 2 recent + 1 old with MAX_RESTARTS=3 鈥?should allow
     result=$(bash -c '
         MAX_RESTARTS=3
         RESTART_WINDOW=300
@@ -245,10 +245,10 @@ test_crash_monitor() {
 }
 
 # =============================================================================
-# 3. INIT-CONTAINER.SH – directory creation & chown logic
+# 3. INIT-CONTAINER.SH 鈥?directory creation & chown logic
 # =============================================================================
 test_init_container() {
-    section "3. init-container.sh – directory creation & chown logic"
+    section "3. init-container.sh 鈥?directory creation & chown logic"
 
     local td="$TMPDIR_ROOT/init-test"
     mkdir -p "$td"
@@ -260,8 +260,8 @@ test_init_container() {
             "$HOME_BASE/.config/StardewValley"
             "$HOME_BASE/stardewvalley"
             "$HOME_BASE/Steam"
-            "$HOME_BASE/.local/share/puppy-stardew/logs"
-            "$HOME_BASE/.local/share/puppy-stardew/backups"
+            "$HOME_BASE/.local/share/nothing-stardew/logs"
+            "$HOME_BASE/.local/share/nothing-stardew/backups"
         )
         for dir in "${DIRS[@]}"; do
             mkdir -p "$dir"
@@ -284,8 +284,8 @@ test_init_container() {
         "$td/.config/StardewValley"
         "$td/stardewvalley"
         "$td/Steam"
-        "$td/.local/share/puppy-stardew/logs"
-        "$td/.local/share/puppy-stardew/backups"
+        "$td/.local/share/nothing-stardew/logs"
+        "$td/.local/share/nothing-stardew/backups"
     )
     local all_exist=true
     for d in "${expected_dirs[@]}"; do
@@ -305,7 +305,7 @@ test_init_container() {
     result=$(bash -c '
         DIR="'"$td"'/stardewvalley"
         touch "$DIR/testfile1" "$DIR/testfile2"
-        # Simulate the counting logic (all files owned by current user → 0 wrong)
+        # Simulate the counting logic (all files owned by current user 鈫?0 wrong)
         WRONG_OWNER=$(find "$DIR" ! -uid $(id -u) 2>/dev/null | wc -l)
         echo "$WRONG_OWNER"
     ')
@@ -351,16 +351,16 @@ test_init_container() {
 }
 
 # =============================================================================
-# 4. SAVE-SELECTOR.SH – test with/without SAVE_NAME env var
+# 4. SAVE-SELECTOR.SH 鈥?test with/without SAVE_NAME env var
 # =============================================================================
 test_save_selector() {
-    section "4. save-selector.sh – SAVE_NAME logic"
+    section "4. save-selector.sh 鈥?SAVE_NAME logic"
 
     local td="$TMPDIR_ROOT/save-test"
     local save_dir="$td/Saves"
     mkdir -p "$save_dir/MyFarm_12345"
 
-    # 4a. No SAVE_NAME → default logic message
+    # 4a. No SAVE_NAME 鈫?default logic message
     result=$(SAVE_NAME="" SAVE_DIR="$save_dir" bash -c '
         SAVE_DIR="'"$save_dir"'"
         SAVE_NAME="${SAVE_NAME:-}"
@@ -372,12 +372,12 @@ test_save_selector() {
         fi
     ')
     if [ "$result" = "DEFAULT" ]; then
-        pass "no SAVE_NAME → uses default logic"
+        pass "no SAVE_NAME 鈫?uses default logic"
     else
         fail "no SAVE_NAME should use default logic (got: $result)"
     fi
 
-    # 4b. SAVE_NAME set + save exists → writes .selected_save marker
+    # 4b. SAVE_NAME set + save exists 鈫?writes .selected_save marker
     result=$(bash -c '
         SAVE_DIR="'"$save_dir"'"
         SAVE_NAME="MyFarm_12345"
@@ -396,7 +396,7 @@ test_save_selector() {
         local marker_content
         marker_content=$(cat "$save_dir/.selected_save")
         if [ "$marker_content" = "MyFarm_12345" ]; then
-            pass "SAVE_NAME set + save exists → .selected_save marker written correctly"
+            pass "SAVE_NAME set + save exists 鈫?.selected_save marker written correctly"
         else
             fail ".selected_save content mismatch (got: $marker_content)"
         fi
@@ -418,7 +418,7 @@ test_save_selector() {
         fi
     ')
     if [ "$result" = "NOT_FOUND" ]; then
-        pass "SAVE_NAME set + save missing → correctly reports not found"
+        pass "SAVE_NAME set + save missing 鈫?correctly reports not found"
     else
         fail "SAVE_NAME with missing save should report NOT_FOUND (got: $result)"
     fi
@@ -450,10 +450,10 @@ test_save_selector() {
 }
 
 # =============================================================================
-# 5. PLAYER-ACCESS.SH – whitelist/blacklist logic
+# 5. PLAYER-ACCESS.SH 鈥?whitelist/blacklist logic
 # =============================================================================
 test_player_access() {
-    section "5. player-access.sh – whitelist/blacklist logic"
+    section "5. player-access.sh 鈥?whitelist/blacklist logic"
 
     local td="$TMPDIR_ROOT/access-test"
     mkdir -p "$td"
@@ -513,14 +513,14 @@ test_player_access() {
         }
     '
 
-    # 5a. No config file → disabled mode → allow everyone
+    # 5a. No config file 鈫?disabled mode 鈫?allow everyone
     rm -f "$td/player-access.conf"
     result=$(bash -c "$FUNCS"'
         mode=$(load_config)
         echo "$mode"
     ')
     if [ "$result" = "disabled" ]; then
-        pass "no config file → disabled mode"
+        pass "no config file 鈫?disabled mode"
     else
         fail "no config file should give disabled mode (got: $result)"
     fi
@@ -535,7 +535,7 @@ test_player_access() {
         fail "disabled mode should allow any player (got: $result)"
     fi
 
-    # 5c. Whitelist mode – allowed player
+    # 5c. Whitelist mode 鈥?allowed player
     cat > "$td/player-access.conf" << 'EOF'
 # Test whitelist config
 MODE=whitelist
@@ -552,7 +552,7 @@ EOF
         fail "whitelist should allow Alice (got: $result)"
     fi
 
-    # 5d. Whitelist mode – denied player
+    # 5d. Whitelist mode 鈥?denied player
     result=$(bash -c "$FUNCS"'
         should_allow_player "Griefer123" && echo "ALLOW" || echo "DENY"
     ')
@@ -562,7 +562,7 @@ EOF
         fail "whitelist should deny Griefer123 (got: $result)"
     fi
 
-    # 5e. Blacklist mode – blocked player
+    # 5e. Blacklist mode 鈥?blocked player
     cat > "$td/player-access.conf" << 'EOF'
 MODE=blacklist
 Griefer123
@@ -577,7 +577,7 @@ EOF
         fail "blacklist should block Griefer123 (got: $result)"
     fi
 
-    # 5f. Blacklist mode – allowed player
+    # 5f. Blacklist mode 鈥?allowed player
     result=$(bash -c "$FUNCS"'
         should_allow_player "NicePlayer" && echo "ALLOW" || echo "DENY"
     ')
@@ -654,10 +654,10 @@ EOF
 }
 
 # =============================================================================
-# 6. STATUS-REPORTER.SH – metric collection functions (mocked data)
+# 6. STATUS-REPORTER.SH 鈥?metric collection functions (mocked data)
 # =============================================================================
 test_status_reporter() {
-    section "6. status-reporter.sh – metric collection functions"
+    section "6. status-reporter.sh 鈥?metric collection functions"
 
     local td="$TMPDIR_ROOT/status-test"
     mkdir -p "$td"
@@ -937,10 +937,10 @@ EOJSON
 }
 
 # =============================================================================
-# 7. ENTRYPOINT.SH – Docker Secrets reading logic
+# 7. ENTRYPOINT.SH 鈥?Docker Secrets reading logic
 # =============================================================================
 test_entrypoint() {
-    section "7. entrypoint.sh – Docker Secrets reading logic"
+    section "7. entrypoint.sh 鈥?Docker Secrets reading logic"
 
     local td="$TMPDIR_ROOT/entrypoint-test"
     mkdir -p "$td/secrets"
@@ -992,7 +992,7 @@ test_entrypoint() {
         fail "env var should take precedence (got: $result)"
     fi
 
-    # 7d. Missing credentials → exit 1
+    # 7d. Missing credentials 鈫?exit 1
     result=$(bash -c '
         STEAM_USERNAME=""
         STEAM_PASSWORD=""
@@ -1024,7 +1024,7 @@ test_entrypoint() {
         fail "trailing newlines should be stripped (got: $result)"
     fi
 
-    # 7f. Secret file does not exist → env stays empty
+    # 7f. Secret file does not exist 鈫?env stays empty
     result=$(bash -c '
         STEAM_USERNAME=""
         SECRET_FILE="/nonexistent/steam_username"
@@ -1053,7 +1053,7 @@ test_entrypoint() {
         fail "STEAM_GUARD_CODE args should include the code (got: $result)"
     fi
 
-    # 7h. No STEAM_GUARD_CODE → empty args
+    # 7h. No STEAM_GUARD_CODE 鈫?empty args
     result=$(bash -c '
         unset STEAM_GUARD_CODE
         STEAM_GUARD_ARGS=""
@@ -1063,7 +1063,7 @@ test_entrypoint() {
         echo "[$STEAM_GUARD_ARGS]"
     ')
     if [ "$result" = "[]" ]; then
-        pass "no STEAM_GUARD_CODE → empty args"
+        pass "no STEAM_GUARD_CODE 鈫?empty args"
     else
         fail "no STEAM_GUARD_CODE should give empty args (got: $result)"
     fi
@@ -1082,7 +1082,7 @@ test_entrypoint() {
         fail "VNC password should be truncated to 'verylong' (got: $result)"
     fi
 
-    # 7j. VNC password ≤8 chars kept intact
+    # 7j. VNC password 鈮? chars kept intact
     result=$(bash -c '
         VNC_PASSWORD="short"
         if [ ${#VNC_PASSWORD} -gt 8 ]; then
@@ -1091,7 +1091,7 @@ test_entrypoint() {
         echo "$VNC_PASSWORD"
     ')
     if [ "$result" = "short" ]; then
-        pass "VNC password ≤8 chars kept intact"
+        pass "VNC password 鈮? chars kept intact"
     else
         fail "VNC password should stay 'short' (got: $result)"
     fi
@@ -1124,12 +1124,12 @@ test_entrypoint() {
 }
 
 # =============================================================================
-# BONUS: EVENT-HANDLER.SH – cooldown logic
+# BONUS: EVENT-HANDLER.SH 鈥?cooldown logic
 # =============================================================================
 test_event_handler() {
-    section "BONUS: event-handler.sh – cooldown logic"
+    section "BONUS: event-handler.sh 鈥?cooldown logic"
 
-    # 8a. check_cooldown: expired cooldown → allow
+    # 8a. check_cooldown: expired cooldown 鈫?allow
     result=$(bash -c '
         check_cooldown() {
             local last_time="$1"
@@ -1150,7 +1150,7 @@ test_event_handler() {
         fail "check_cooldown should return expired (got: $result)"
     fi
 
-    # 8b. check_cooldown: active cooldown → deny
+    # 8b. check_cooldown: active cooldown 鈫?deny
     result=$(bash -c '
         check_cooldown() {
             local last_time="$1"
@@ -1171,7 +1171,7 @@ test_event_handler() {
         fail "check_cooldown should return active (got: $result)"
     fi
 
-    # 8c. check_cooldown with time=0 (never happened) → expired
+    # 8c. check_cooldown with time=0 (never happened) 鈫?expired
     result=$(bash -c '
         check_cooldown() {
             local last_time="$1"
@@ -1186,7 +1186,7 @@ test_event_handler() {
         check_cooldown 0 30 && echo "EXPIRED" || echo "ACTIVE"
     ')
     if [ "$result" = "EXPIRED" ]; then
-        pass "check_cooldown: time=0 (never happened) → expired"
+        pass "check_cooldown: time=0 (never happened) 鈫?expired"
     else
         fail "check_cooldown with time=0 should be expired (got: $result)"
     fi
@@ -1206,10 +1206,10 @@ test_event_handler() {
 }
 
 # =============================================================================
-# BONUS: AUTO-BACKUP.SH – backup rotation logic
+# BONUS: AUTO-BACKUP.SH 鈥?backup rotation logic
 # =============================================================================
 test_auto_backup() {
-    section "BONUS: auto-backup.sh – backup rotation logic"
+    section "BONUS: auto-backup.sh 鈥?backup rotation logic"
 
     local td="$TMPDIR_ROOT/backup-test"
     local backup_dir="$td/backups"
@@ -1244,7 +1244,7 @@ test_auto_backup() {
         echo "$(printf "%02d" $BACKUP_HOUR)"
     ')
     if [ "$result" = "04" ]; then
-        pass "backup hour formatting: 4 → 04"
+        pass "backup hour formatting: 4 鈫?04"
     else
         fail "backup hour should format to '04' (got: $result)"
     fi
@@ -1276,12 +1276,12 @@ test_auto_backup() {
 # Run all tests
 # =============================================================================
 main() {
-    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║  Puppy Stardew Server – New Features Test Suite                  ║${NC}"
-    echo -e "${CYAN}║  小狗星谷服务器 – 新功能测试套件                                    ║${NC}"
-    echo -e "${CYAN}║                                                                   ║${NC}"
-    echo -e "${CYAN}║  Tests run WITHOUT Docker or game – pure logic & syntax checks    ║${NC}"
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}鈺斺晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?{NC}"
+    echo -e "${CYAN}鈺? Puppy Stardew Server 鈥?New Features Test Suite                  鈺?{NC}"
+    echo -e "${CYAN}鈺? 灏忕嫍鏄熻胺鏈嶅姟鍣?鈥?鏂板姛鑳芥祴璇曞浠?                                   鈺?{NC}"
+    echo -e "${CYAN}鈺?                                                                  鈺?{NC}"
+    echo -e "${CYAN}鈺? Tests run WITHOUT Docker or game 鈥?pure logic & syntax checks    鈺?{NC}"
+    echo -e "${CYAN}鈺氣晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?{NC}"
 
     setup_tmpdir
 
@@ -1297,9 +1297,9 @@ main() {
 
     # ---- Summary ------------------------------------------------------------
     echo ""
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo -e "${CYAN}  TEST SUMMARY${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo ""
     echo -e "  Total:   ${TESTS_RUN}"
     echo -e "  ${GREEN}Passed:  ${TESTS_PASSED}${NC}"
@@ -1309,17 +1309,17 @@ main() {
     if [ "$TESTS_FAILED" -gt 0 ]; then
         echo -e "  ${RED}Failed tests:${NC}"
         for name in "${FAILED_NAMES[@]}"; do
-            echo -e "    ${RED}✗${NC} $name"
+            echo -e "    ${RED}鉁?{NC} $name"
         done
         echo ""
-        echo -e "  ${RED}╔═══════════════════╗${NC}"
-        echo -e "  ${RED}║   TESTS FAILED    ║${NC}"
-        echo -e "  ${RED}╚═══════════════════╝${NC}"
+        echo -e "  ${RED}鈺斺晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?{NC}"
+        echo -e "  ${RED}鈺?  TESTS FAILED    鈺?{NC}"
+        echo -e "  ${RED}鈺氣晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?{NC}"
         exit 1
     else
-        echo -e "  ${GREEN}╔═══════════════════╗${NC}"
-        echo -e "  ${GREEN}║  ALL TESTS PASS   ║${NC}"
-        echo -e "  ${GREEN}╚═══════════════════╝${NC}"
+        echo -e "  ${GREEN}鈺斺晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?{NC}"
+        echo -e "  ${GREEN}鈺? ALL TESTS PASS   鈺?{NC}"
+        echo -e "  ${GREEN}鈺氣晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?{NC}"
         exit 0
     fi
 }

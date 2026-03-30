@@ -16,8 +16,8 @@
 #   puppy_stardew_events_offline_total - Total offline-mode events
 #   puppy_stardew_script_healthy       - Whether background scripts are alive (1/0)
 
-STATUS_FILE="/home/steam/.local/share/puppy-stardew/status.json"
-METRICS_FILE="/home/steam/.local/share/puppy-stardew/metrics.prom"
+STATUS_FILE="/home/steam/.local/share/nothing-stardew/status.json"
+METRICS_FILE="/home/steam/.local/share/nothing-stardew/metrics.prom"
 SMAPI_LOG="/home/steam/.config/StardewValley/ErrorLogs/SMAPI-latest.txt"
 METRICS_PORT=${METRICS_PORT:-9090}
 UPDATE_INTERVAL=15

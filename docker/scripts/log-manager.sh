@@ -12,7 +12,7 @@ set -e
 
 # Configuration
 LOG_BASE_DIR="/home/steam/.config/StardewValley/ErrorLogs"
-ARCHIVE_DIR="/home/steam/.local/share/puppy-stardew/logs/archive"
+ARCHIVE_DIR="/home/steam/.local/share/nothing-stardew/logs/archive"
 KEEP_DAYS=7           # Keep uncompressed logs for 7 days
 ARCHIVE_DAYS=30       # Keep compressed archives for 30 days
 MAX_LOG_SIZE_MB=50    # Rotate if log exceeds this size

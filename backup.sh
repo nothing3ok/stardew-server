@@ -1,10 +1,10 @@
 #!/bin/bash
 # =============================================================================
 # Puppy Stardew Server - Backup Script
-# 小狗星谷服务器 - 备份脚本
+# 灏忕嫍鏄熻胺鏈嶅姟鍣?- 澶囦唤鑴氭湰
 # =============================================================================
 # This script backs up your Stardew Valley save files.
-# 此脚本备份您的星露谷物语存档文件。
+# 姝よ剼鏈浠芥偍鐨勬槦闇茶胺鐗╄瀛樻。鏂囦欢銆?
 # =============================================================================
 
 set -e
@@ -31,26 +31,26 @@ BACKUP_FILE="stardew-backup-$TIMESTAMP.tar.gz"
 
 print_header() {
     echo ""
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}${BOLD}  💾 Puppy Stardew Server - Backup${NC}"
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
+    echo -e "${CYAN}${BOLD}  馃捑 Puppy Stardew Server - Backup${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo ""
 }
 
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}鉁?$1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}鉂?$1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}鈿狅笍  $1${NC}"
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+    echo -e "${BLUE}鈩癸笍  $1${NC}"
 }
 
 # =============================================================================
@@ -61,7 +61,7 @@ check_saves_dir() {
     if [ ! -d "$SAVES_DIR" ]; then
         print_error "Saves directory not found: $SAVES_DIR"
         echo ""
-        echo "Make sure you're running this script from the puppy-stardew-server directory."
+        echo "Make sure you're running this script from the nothing-stardew-server directory."
         exit 1
     fi
 
@@ -119,7 +119,7 @@ list_backups() {
         date = $6 " " $7 " " $8
         file = $9
         gsub(/.*\//, "", file)
-        printf "  📦 %-40s %8s  %s\n", file, size, date
+        printf "  馃摝 %-40s %8s  %s\n", file, size, date
     }'
 
     echo ""
@@ -167,7 +167,7 @@ main() {
     # Show restore instructions
     show_restore_instructions
 
-    echo -e "${GREEN}${BOLD}✨ Backup complete!${NC}"
+    echo -e "${GREEN}${BOLD}鉁?Backup complete!${NC}"
     echo ""
 }
 

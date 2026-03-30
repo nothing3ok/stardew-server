@@ -1,5 +1,5 @@
 #!/bin/bash
-# VNC诊断脚本
+# VNC璇婃柇鑴氭湰
 # VNC Diagnostic Script
 
 GREEN='\033[0;32m'
@@ -9,47 +9,47 @@ NC='\033[0m'
 
 echo "========================================"
 echo "  VNC Diagnostic Tool"
-echo "  VNC诊断工具"
+echo "  VNC璇婃柇宸ュ叿"
 echo "========================================"
 echo ""
 
-# 1. 检查容器是否运行
+# 1. 妫€鏌ュ鍣ㄦ槸鍚﹁繍琛?
 echo "[1/8] Checking container status..."
-if ! docker ps | grep -q puppy-stardew; then
+if ! docker ps | grep -q nothing-stardew; then
     echo -e "${RED}ERROR: Container not running${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Container is running${NC}"
+echo -e "${GREEN}鉁?Container is running${NC}"
 echo ""
 
-# 2. 检查VNC环境变量
+# 2. 妫€鏌NC鐜鍙橀噺
 echo "[2/8] Checking VNC environment variable..."
-VNC_ENABLED=$(docker exec puppy-stardew env | grep ENABLE_VNC)
+VNC_ENABLED=$(docker exec nothing-stardew env | grep ENABLE_VNC)
 echo "ENABLE_VNC setting: $VNC_ENABLED"
 if echo "$VNC_ENABLED" | grep -q "true"; then
-    echo -e "${GREEN}✓ VNC is enabled${NC}"
+    echo -e "${GREEN}鉁?VNC is enabled${NC}"
 else
     echo -e "${YELLOW}WARNING: VNC may not be enabled${NC}"
 fi
 echo ""
 
-# 3. 检查Xvfb进程
+# 3. 妫€鏌vfb杩涚▼
 echo "[3/8] Checking Xvfb (virtual display)..."
-docker exec puppy-stardew ps aux | grep -i xvfb | grep -v grep
+docker exec nothing-stardew ps aux | grep -i xvfb | grep -v grep
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Xvfb is running${NC}"
+    echo -e "${GREEN}鉁?Xvfb is running${NC}"
 else
-    echo -e "${RED}✗ Xvfb is NOT running${NC}"
+    echo -e "${RED}鉁?Xvfb is NOT running${NC}"
 fi
 echo ""
 
-# 4. 检查x11vnc进程
+# 4. 妫€鏌11vnc杩涚▼
 echo "[4/8] Checking x11vnc process..."
-docker exec puppy-stardew ps aux | grep -i x11vnc | grep -v grep
+docker exec nothing-stardew ps aux | grep -i x11vnc | grep -v grep
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ x11vnc is running${NC}"
+    echo -e "${GREEN}鉁?x11vnc is running${NC}"
 else
-    echo -e "${RED}✗ x11vnc is NOT running${NC}"
+    echo -e "${RED}鉁?x11vnc is NOT running${NC}"
     echo ""
     echo "Possible reasons:"
     echo "  1. VNC not enabled (set ENABLE_VNC=true in .env)"
@@ -58,33 +58,33 @@ else
 fi
 echo ""
 
-# 5. 检查端口监听
+# 5. 妫€鏌ョ鍙ｇ洃鍚?
 echo "[5/8] Checking if port 5900 is listening in container..."
-docker exec puppy-stardew netstat -tuln 2>/dev/null | grep 5900
+docker exec nothing-stardew netstat -tuln 2>/dev/null | grep 5900
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Port 5900 is listening${NC}"
+    echo -e "${GREEN}鉁?Port 5900 is listening${NC}"
 else
-    echo -e "${RED}✗ Port 5900 is NOT listening${NC}"
+    echo -e "${RED}鉁?Port 5900 is NOT listening${NC}"
 fi
 echo ""
 
-# 6. 检查主机端口映射
+# 6. 妫€鏌ヤ富鏈虹鍙ｆ槧灏?
 echo "[6/8] Checking host port mapping..."
-docker port puppy-stardew 5900 2>/dev/null
+docker port nothing-stardew 5900 2>/dev/null
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Port 5900 is mapped${NC}"
+    echo -e "${GREEN}鉁?Port 5900 is mapped${NC}"
 else
-    echo -e "${RED}✗ Port 5900 is NOT mapped${NC}"
+    echo -e "${RED}鉁?Port 5900 is NOT mapped${NC}"
     echo "Run container with: -p 5900:5900/tcp"
 fi
 echo ""
 
-# 7. 检查防火墙
+# 7. 妫€鏌ラ槻鐏
 echo "[7/8] Checking host firewall..."
 if command -v ufw >/dev/null 2>&1; then
     ufw status | grep 5900
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ Firewall rule exists${NC}"
+        echo -e "${GREEN}鉁?Firewall rule exists${NC}"
     else
         echo -e "${YELLOW}WARNING: No firewall rule for port 5900${NC}"
         echo "Add with: sudo ufw allow 5900/tcp"
@@ -94,9 +94,9 @@ else
 fi
 echo ""
 
-# 8. 查看容器日志中的VNC相关信息
+# 8. 鏌ョ湅瀹瑰櫒鏃ュ織涓殑VNC鐩稿叧淇℃伅
 echo "[8/8] Checking container logs for VNC..."
-docker logs puppy-stardew 2>&1 | grep -i vnc | tail -5
+docker logs nothing-stardew 2>&1 | grep -i vnc | tail -5
 echo ""
 
 echo "========================================"
@@ -104,10 +104,10 @@ echo "  Diagnostic Summary"
 echo "========================================"
 echo ""
 echo "To manually start VNC in the container:"
-echo "  docker exec puppy-stardew x11vnc -display :99 -forever -shared -rfbport 5900"
+echo "  docker exec nothing-stardew x11vnc -display :99 -forever -shared -rfbport 5900"
 echo ""
 echo "To test VNC connection from host:"
 echo "  nc -zv localhost 5900"
 echo ""
 echo "To view full container logs:"
-echo "  docker logs puppy-stardew"
+echo "  docker logs nothing-stardew"

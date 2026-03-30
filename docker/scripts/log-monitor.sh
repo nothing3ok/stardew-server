@@ -9,7 +9,7 @@ set -e
 
 # Configuration
 SMAPI_LOG="/home/steam/.config/StardewValley/ErrorLogs/SMAPI-latest.txt"
-OUTPUT_DIR="/home/steam/.local/share/puppy-stardew/logs/categorized"
+OUTPUT_DIR="/home/steam/.local/share/nothing-stardew/logs/categorized"
 ERROR_LOG="$OUTPUT_DIR/errors.log"
 MOD_LOG="$OUTPUT_DIR/mods.log"
 SERVER_LOG="$OUTPUT_DIR/server.log"

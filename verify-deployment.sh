@@ -1,5 +1,5 @@
 #!/bin/bash
-# 部署验证脚本 - 检查所有功能是否正常
+# 閮ㄧ讲楠岃瘉鑴氭湰 - 妫€鏌ユ墍鏈夊姛鑳芥槸鍚︽甯?
 # Deployment verification script
 
 GREEN='\033[0;32m'
@@ -14,31 +14,31 @@ FAIL=0
 WARN=0
 
 check_pass() {
-    echo -e "${GREEN}✓ PASS${NC} - $1"
+    echo -e "${GREEN}鉁?PASS${NC} - $1"
     PASS=$((PASS + 1))
 }
 
 check_fail() {
-    echo -e "${RED}✗ FAIL${NC} - $1"
+    echo -e "${RED}鉁?FAIL${NC} - $1"
     FAIL=$((FAIL + 1))
 }
 
 check_warn() {
-    echo -e "${YELLOW}⚠ WARN${NC} - $1"
+    echo -e "${YELLOW}鈿?WARN${NC} - $1"
     WARN=$((WARN + 1))
 }
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Puppy Stardew Server Verification${NC}"
-echo -e "${BLUE}  部署验证检查${NC}"
+echo -e "${BLUE}  閮ㄧ讲楠岃瘉妫€鏌?{NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# 获取日志
-LOG=$(docker logs puppy-stardew 2>&1)
+# 鑾峰彇鏃ュ織
+LOG=$(docker logs nothing-stardew 2>&1)
 
 echo -e "${CYAN}[1/10] Container Status${NC}"
-if docker ps | grep -q puppy-stardew; then
+if docker ps | grep -q nothing-stardew; then
     check_pass "Container is running"
 else
     check_fail "Container is not running"
@@ -128,7 +128,7 @@ else
 fi
 echo ""
 
-# 检查错误
+# 妫€鏌ラ敊璇?
 echo -e "${CYAN}[Error Check] Searching for errors...${NC}"
 if echo "$LOG" | grep -iq "error" | grep -v "ERROR (Rate Limit)" | head -5; then
     ERROR_LINES=$(echo "$LOG" | grep -i "error" | grep -v "Rate Limit" | tail -3)
@@ -144,7 +144,7 @@ else
 fi
 echo ""
 
-# 端口检查
+# 绔彛妫€鏌?
 echo -e "${CYAN}[Port Check] Checking open ports...${NC}"
 if netstat -tuln 2>/dev/null | grep -q ":24642"; then
     check_pass "Game port 24642/udp is listening"
@@ -159,9 +159,9 @@ else
 fi
 echo ""
 
-# 总结
+# 鎬荤粨
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  Summary / 总结${NC}"
+echo -e "${BLUE}  Summary / 鎬荤粨${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo -e "${GREEN}Passed: $PASS${NC}"
 echo -e "${YELLOW}Warnings: $WARN${NC}"
@@ -169,18 +169,18 @@ echo -e "${RED}Failed: $FAIL${NC}"
 echo ""
 
 if [ $FAIL -eq 0 ]; then
-    echo -e "${GREEN}✓ Deployment looks good!${NC}"
-    echo -e "${GREEN}✓ 部署看起来正常！${NC}"
+    echo -e "${GREEN}鉁?Deployment looks good!${NC}"
+    echo -e "${GREEN}鉁?閮ㄧ讲鐪嬭捣鏉ユ甯革紒${NC}"
     echo ""
     echo -e "Next steps:"
     echo -e "  1. Connect via VNC: localhost:5900 or server-ip:5900"
-    echo -e "  2. Click CO-OP → Start new co-op farm"
+    echo -e "  2. Click CO-OP 鈫?Start new co-op farm"
     echo -e "  3. Players can connect via invite code"
     exit 0
 else
-    echo -e "${RED}✗ Deployment has issues${NC}"
-    echo -e "${RED}✗ 部署存在问题${NC}"
+    echo -e "${RED}鉁?Deployment has issues${NC}"
+    echo -e "${RED}鉁?閮ㄧ讲瀛樺湪闂${NC}"
     echo ""
-    echo -e "Review full logs with: docker logs puppy-stardew"
+    echo -e "Review full logs with: docker logs nothing-stardew"
     exit 1
 fi

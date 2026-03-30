@@ -1,10 +1,10 @@
 #!/bin/bash
 # =============================================================================
 # Puppy Stardew Server - Health Check Script
-# 小狗星谷服务器 - 健康检查脚本
+# 灏忕嫍鏄熻胺鏈嶅姟鍣?- 鍋ュ悍妫€鏌ヨ剼鏈?
 # =============================================================================
 # This script checks if your Stardew Valley server is running correctly.
-# 此脚本检查您的星露谷物语服务器是否正常运行。
+# 姝よ剼鏈鏌ユ偍鐨勬槦闇茶胺鐗╄鏈嶅姟鍣ㄦ槸鍚︽甯歌繍琛屻€?
 # =============================================================================
 
 set -e
@@ -19,7 +19,7 @@ NC='\033[0m'
 BOLD='\033[1m'
 
 # Container name
-CONTAINER_NAME="puppy-stardew"
+CONTAINER_NAME="nothing-stardew"
 
 # Test results
 TESTS_PASSED=0
@@ -32,29 +32,29 @@ WARNINGS=0
 
 print_header() {
     echo ""
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}${BOLD}  🏥 Puppy Stardew Server - Health Check${NC}"
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
+    echo -e "${CYAN}${BOLD}  馃彞 Puppy Stardew Server - Health Check${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo ""
 }
 
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}鉁?$1${NC}"
     ((TESTS_PASSED++))
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}鉂?$1${NC}"
     ((TESTS_FAILED++))
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}鈿狅笍  $1${NC}"
     ((WARNINGS++))
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+    echo -e "${BLUE}鈩癸笍  $1${NC}"
 }
 
 print_test() {
@@ -150,7 +150,7 @@ check_mods_loaded() {
         # List loaded mods
         print_info "Checking for core mods..."
         docker logs --tail 200 $CONTAINER_NAME 2>&1 | grep "Loaded.*mod" | grep -i "AlwaysOnServer\|AutoHideHost\|ServerAutoLoad" | while read -r line; do
-            echo "  ${CYAN}→${NC} $(echo "$line" | grep -oP 'Loaded \K.*')"
+            echo "  ${CYAN}鈫?{NC} $(echo "$line" | grep -oP 'Loaded \K.*')"
         done
     elif [ "$mod_count" -gt 0 ]; then
         print_warning "Some mods loaded ($mod_count), but expected at least 3"
@@ -239,25 +239,25 @@ check_firewall() {
 
 show_summary() {
     echo ""
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo -e "${BOLD}Summary:${NC}"
-    echo -e "${GREEN}  ✅ Tests passed:  $TESTS_PASSED${NC}"
+    echo -e "${GREEN}  鉁?Tests passed:  $TESTS_PASSED${NC}"
     if [ $TESTS_FAILED -gt 0 ]; then
-        echo -e "${RED}  ❌ Tests failed:  $TESTS_FAILED${NC}"
+        echo -e "${RED}  鉂?Tests failed:  $TESTS_FAILED${NC}"
     fi
     if [ $WARNINGS -gt 0 ]; then
-        echo -e "${YELLOW}  ⚠️  Warnings:     $WARNINGS${NC}"
+        echo -e "${YELLOW}  鈿狅笍  Warnings:     $WARNINGS${NC}"
     fi
-    echo -e "${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}${BOLD}鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣${NC}"
     echo ""
 
     if [ $TESTS_FAILED -eq 0 ]; then
-        echo -e "${GREEN}${BOLD}🎉 Server is healthy!${NC}"
+        echo -e "${GREEN}${BOLD}馃帀 Server is healthy!${NC}"
         echo ""
         echo "Players can connect to your server at:"
         echo "  ${CYAN}$(get_server_ip):24642${NC}"
     else
-        echo -e "${YELLOW}${BOLD}⚠️  Some issues detected!${NC}"
+        echo -e "${YELLOW}${BOLD}鈿狅笍  Some issues detected!${NC}"
         echo ""
         echo "Check the errors above and:"
         echo "  1. Review logs: ${CYAN}docker logs -f $CONTAINER_NAME${NC}"

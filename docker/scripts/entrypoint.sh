@@ -65,15 +65,15 @@ XVFB_FB_ARGS=()
 
 # Logging functions
 log_info() {
-    echo -e "${GREEN}[Puppy-Stardew]${NC} $1"
+    echo -e "${GREEN}[Nothing-Stardew]${NC} $1"
 }
 
 log_warn() {
-    echo -e "${YELLOW}[Puppy-Stardew]${NC} $1"
+    echo -e "${YELLOW}[Nothing-Stardew]${NC} $1"
 }
 
 log_error() {
-    echo -e "${RED}[Puppy-Stardew]${NC} $1"
+    echo -e "${RED}[Nothing-Stardew]${NC} $1"
 }
 
 log_step() {
@@ -179,8 +179,8 @@ download_game_via_steam() {
     log_info ""
     log_info "To input Steam Guard code:"
     log_info "输入 Steam Guard 验证码："
-    log_info "  1. You should already have run: docker attach puppy-stardew"
-    log_info "  1. 您应该已经运行了：docker attach puppy-stardew"
+    log_info "  1. You should already have run: docker attach nothing-stardew"
+    log_info "  1. 您应该已经运行了：docker attach nothing-stardew"
     log_info "  2. Enter the code when prompted below"
     log_info "  2. 在下面提示时输入验证码"
     log_info "  3. Press ENTER"
@@ -324,11 +324,11 @@ if [ "$(id -u)" = "0" ]; then
         }
     fi
 
-    mkdir -p /home/steam/.local/share/puppy-stardew \
-             /home/steam/.local/share/puppy-stardew/logs \
-             /home/steam/.local/share/puppy-stardew/backups \
+    mkdir -p /home/steam/.local/share/nothing-stardew \
+             /home/steam/.local/share/nothing-stardew/logs \
+             /home/steam/.local/share/nothing-stardew/backups \
              /home/steam/web-panel/data
-    chown -R 1000:1000 /home/steam/.local/share/puppy-stardew /home/steam/web-panel/data 2>/dev/null || true
+    chown -R 1000:1000 /home/steam/.local/share/nothing-stardew /home/steam/web-panel/data 2>/dev/null || true
 
     log_info "Switching to steam user..."
 

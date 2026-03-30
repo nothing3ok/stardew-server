@@ -2,15 +2,15 @@
 
 ## Project Structure & Module Organization
 
-Core runtime files live at the repo root: [`docker-compose.yml`](/root/puppy-stardew-server/docker-compose.yml), [`.env.example`](/root/puppy-stardew-server/.env.example), and the one-click installers [`quick-start.sh`](/root/puppy-stardew-server/quick-start.sh) and [`quick-start-zh.sh`](/root/puppy-stardew-server/quick-start-zh.sh).  
-Container build assets are under [`docker/`](/root/puppy-stardew-server/docker): startup scripts in [`docker/scripts/`](/root/puppy-stardew-server/docker/scripts), preinstalled mods in [`docker/mods/`](/root/puppy-stardew-server/docker/mods), web panel backend/frontend in [`docker/web-panel/`](/root/puppy-stardew-server/docker/web-panel), and the restart helper service in [`docker/manager/`](/root/puppy-stardew-server/docker/manager).  
-Tests are shell-based in [`tests/`](/root/puppy-stardew-server/tests). Screenshots and docs assets live in [`screenshots/`](/root/puppy-stardew-server/screenshots). Do not commit runtime data from `data/` or vendored code under `docker/web-panel/node_modules/`.
+Core runtime files live at the repo root: [`docker-compose.yml`](/root/nothing-stardew-server/docker-compose.yml), [`.env.example`](/root/nothing-stardew-server/.env.example), and the one-click installers [`quick-start.sh`](/root/nothing-stardew-server/quick-start.sh) and [`quick-start-zh.sh`](/root/nothing-stardew-server/quick-start-zh.sh).  
+Container build assets are under [`docker/`](/root/nothing-stardew-server/docker): startup scripts in [`docker/scripts/`](/root/nothing-stardew-server/docker/scripts), preinstalled mods in [`docker/mods/`](/root/nothing-stardew-server/docker/mods), web panel backend/frontend in [`docker/web-panel/`](/root/nothing-stardew-server/docker/web-panel), and the restart helper service in [`docker/manager/`](/root/nothing-stardew-server/docker/manager).  
+Tests are shell-based in [`tests/`](/root/nothing-stardew-server/tests). Screenshots and docs assets live in [`screenshots/`](/root/nothing-stardew-server/screenshots). Do not commit runtime data from `data/` or vendored code under `docker/web-panel/node_modules/`.
 
 ## Build, Test, and Development Commands
 
 - `docker-compose up -d --build`: build and start the full stack locally.
 - `docker-compose down`: stop containers before switching branches or test environments.
-- `bash tests/test-new-features.sh`: run the repository’s shell test suite without launching the game.
+- `bash tests/test-new-features.sh`: run the repository鈥檚 shell test suite without launching the game.
 - `bash -n docker/scripts/*.sh quick-start.sh quick-start-zh.sh`: syntax-check Bash scripts.
 - `node --check docker/web-panel/server.js docker/web-panel/api/*.js docker/web-panel/public/js/*.js`: syntax-check panel JavaScript.
 - `docker-compose config`: validate rendered Compose configuration before release.
@@ -21,7 +21,7 @@ Use 2 spaces for JSON/HTML/CSS and 4 spaces only where an existing shell block a
 
 ## Testing Guidelines
 
-Add or extend tests in [`tests/test-new-features.sh`](/root/puppy-stardew-server/tests/test-new-features.sh) when changing shell/runtime behavior. Name test helpers after the script or feature they cover. For web panel changes, pair static checks (`node --check`) with a brief manual verification note in the PR if browser interaction is affected.
+Add or extend tests in [`tests/test-new-features.sh`](/root/nothing-stardew-server/tests/test-new-features.sh) when changing shell/runtime behavior. Name test helpers after the script or feature they cover. For web panel changes, pair static checks (`node --check`) with a brief manual verification note in the PR if browser interaction is affected.
 
 ## Commit & Pull Request Guidelines
 
