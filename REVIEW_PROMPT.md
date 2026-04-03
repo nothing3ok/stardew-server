@@ -1,208 +1,208 @@
-# GPU 娓叉煋鏀寔淇敼瀹℃煡鎻愮ず璇?(Issue #19)
+# GPU 渲染支持修改审查提示 (Issue #19)
 
-## 瀹℃煡鑳屾櫙
+## 审查背景
 
-鎴戜滑涓?Stardew Valley 鏈嶅姟鍣ㄦ坊鍔犱簡 GPU 纭欢鍔犻€熸敮鎸侊紝浠ラ檷浣庝簯鏈嶅姟鍣ㄤ笂鐨?CPU 鍗犵敤銆傚綋鍓嶄娇鐢?Xvfb锛堣蒋浠舵覆鏌擄級瀵艰嚧 CPU 鍗犵敤鏋侀珮锛岀幇鍦ㄦ敮鎸侀€氳繃 Xorg + GPU 杩涜纭欢鍔犻€熸覆鏌撱€?
+我们为 Stardew Valley 服务器添加了 GPU 硬件加速支持，以降低云服务器上的 CPU 占用。当前使用 Xvfb（软件渲染）导致 CPU 占用极高，现在支持通过 Xorg + GPU 进行硬件加速渲染。
 
-## 淇敼鐩爣
+## 修改目标
 
-1. 鏀寔 GPU 纭欢鍔犻€燂紙閫氳繃 Xorg + modesetting 椹卞姩锛?
-2. 淇濇寔鍚戝悗鍏煎锛堣嚜鍔ㄥ洖閫€鍒?Xvfb 杞欢娓叉煋锛?
-3. 鐢ㄦ埛鍙€氳繃 `USE_GPU=true` 鐜鍙橀噺鍚敤
-4. 鏀寔鑷畾涔夊垎杈ㄧ巼锛圧ESOLUTION_WIDTH/HEIGHT/REFRESH_RATE锛?
+1. 支持 GPU 硬件加速（通过 Xorg + modesetting 驱动）
+2. 保持向后兼容（自动回退到 Xvfb 软件渲染）
+3. 用户可通过 `USE_GPU=true` 环境变量启用
+4. 支持自定义分辨率（`RESOLUTION_WIDTH` / `RESOLUTION_HEIGHT` / `REFRESH_RATE`）
 
-## 鏍稿績閫昏緫娴佺▼
+## 核心逻辑流程
 
+```text
+启动流程：
+1. Root 阶段：
+   - 如果 `USE_GPU=true` 且 `/dev/dri` 可用，则启动 `Xorg :99`
+   - 否则，跳过，等待 steam 阶段
+
+2. Steam 阶段：
+   - 检查 `Xorg` 进程是否运行
+   - 如果运行，则使用 `Xorg`（GPU 加速）
+   - 如果未运行，则启动 `Xvfb`（软件渲染回退）
+
+3. VNC 连接到当前 `DISPLAY=:99`
 ```
-鍚姩娴佺▼锛?
-1. Root 闃舵锛?
-   - 濡傛灉 USE_GPU=true 涓?/dev/dri 鍙敤 鈫?鍚姩 Xorg :99
-   - 鍚﹀垯 鈫?璺宠繃锛岀瓑寰?steam 闃舵
 
-2. Steam 闃舵锛?
-   - 妫€娴?Xorg 杩涚▼鏄惁杩愯
-   - 濡傛灉杩愯 鈫?浣跨敤 Xorg锛圙PU 鍔犻€燂級
-   - 濡傛灉鏈繍琛?鈫?鍚姩 Xvfb锛堣蒋浠舵覆鏌撳洖閫€锛?
+## 需要审查的关键点
 
-3. VNC 杩炴帴鍒板綋鍓?DISPLAY锛?99锛?
-```
+### 1. Dockerfile 审查要点
 
-## 闇€瑕佸鏌ョ殑鍏抽敭鐐?
+**文件路径**: `docker/Dockerfile`
 
-### 1. Dockerfile 瀹℃煡瑕佺偣
+检查项：
+- [ ] 版本号是否正确更新为 `1.0.64`
+- [ ] GPU 相关依赖包是否完整：
+  - `libgl1-mesa-dri`, `libgl1-mesa-glx`, `mesa-utils`, `libegl1-mesa`
+  - `xserver-xorg-core`, `xserver-xorg-video-modesetting`
+  - `x11-xserver-utils`, `x11-apps`
+- [ ] `steam` 用户是否加入 `video` 组：`usermod -aG video steam`
+- [ ] `20-modesetting.conf` 配置是否正确创建（`modesetting` 驱动 + `glamor` + `DRI3`）
+- [ ] `set-resolution.sh` 是否正确 `COPY`
+- [ ] `10-monitor.conf` 是否正确 `COPY` 到 `/etc/X11/xorg.conf.d/`
 
-**鏂囦欢璺緞**: `docker/Dockerfile`
-
-妫€鏌ラ」锛?
-- [ ] 鐗堟湰鍙锋槸鍚︽纭洿鏂颁负 1.0.64
-- [ ] GPU 鐩稿叧渚濊禆鍖呮槸鍚﹀畬鏁达細
-  - libgl1-mesa-dri, libgl1-mesa-glx, mesa-utils, libegl1-mesa
-  - xserver-xorg-core, xserver-xorg-video-modesetting
-  - x11-xserver-utils, x11-apps
-- [ ] steam 鐢ㄦ埛鏄惁鍔犲叆 video 缁勶細`usermod -aG video steam`
-- [ ] 20-modesetting.conf 閰嶇疆鏄惁姝ｇ‘鍒涘缓锛坢odesetting 椹卞姩 + glamor + DRI3锛?
-- [ ] set-resolution.sh 鏄惁姝ｇ‘ COPY
-- [ ] 10-monitor.conf 鏄惁姝ｇ‘ COPY 鍒?/etc/X11/xorg.conf.d/
-
-**娼滃湪闂**锛?
-- 渚濊禆鍖呮槸鍚︿細瀵艰嚧闀滃儚浣撶Н杩囧ぇ锛?
-- 20-modesetting.conf 鐨?EOF heredoc 璇硶鏄惁姝ｇ‘锛?
+**潜在问题**：
+- 依赖包是否会导致镜像体积过大？
+- `20-modesetting.conf` 的 `EOF heredoc` 语法是否正确？
 
 ---
 
-### 2. entrypoint.sh 瀹℃煡瑕佺偣
+### 2. entrypoint.sh 审查要点
 
-**鏂囦欢璺緞**: `docker/scripts/entrypoint.sh`
+**文件路径**: `docker/scripts/entrypoint.sh`
 
-妫€鏌ラ」锛?
-- [ ] 鐗堟湰鍙锋槸鍚︽洿鏂颁负 1.0.64
-- [ ] 鍒嗚鲸鐜囩幆澧冨彉閲忛粯璁ゅ€兼槸鍚﹀悎鐞嗭紙1280x720@60Hz锛?
-- [ ] `start_gpu_xorg()` 鍑芥暟閫昏緫锛?
-  - [ ] USE_GPU != true 鏃舵槸鍚︽纭繑鍥炲苟璺宠繃
-  - [ ] /dev/dri 妫€娴嬮€昏緫鏄惁姝ｇ‘
-  - [ ] Xorg 鍚姩鍛戒护鏄惁姝ｇ‘锛?noreset +extension GLX +extension RANDR :99锛?
-  - [ ] set-resolution.sh 璋冪敤鏄惁姝ｇ‘浼犻€掑弬鏁?
-  - [ ] glxinfo 妫€娴?OpenGL renderer 鏄惁姝ｇ‘
-- [ ] Root 闃舵鏄惁姝ｇ‘璋冪敤 `start_gpu_xorg "root"`
-- [ ] `exec runuser` 鏄惁姝ｇ‘浼犻€?DISPLAY 鐜鍙橀噺
-- [ ] Steam 闃舵铏氭嫙鏄剧ず閫昏緫锛?
-  - [ ] 鏄惁姝ｇ‘妫€娴?Xorg 杩涚▼锛坧grep -x Xorg锛?
-  - [ ] 鍥為€€鍒?Xvfb 鐨勯€昏緫鏄惁姝ｇ‘
-  - [ ] Xvfb 鍚姩鍛戒护鏄惁浣跨敤鍔ㄦ€佸垎杈ㄧ巼鍙橀噺
-- [ ] VNC 鍚姩鏄惁浣跨敤鍔ㄦ€?DISPLAY 鍙橀噺锛堜笉鍐嶇‖缂栫爜 :99锛?
+检查项：
+- [ ] 版本号是否更新为 `1.0.64`
+- [ ] 分辨率环境变量默认值是否合理（`1280x720@60Hz`）
+- [ ] `start_gpu_xorg()` 函数逻辑：
+  - [ ] `USE_GPU != true` 时是否正确返回并跳过
+  - [ ] `/dev/dri` 检测逻辑是否正确
+  - [ ] `Xorg` 启动命令是否正确（`-noreset +extension GLX +extension RANDR :99`）
+  - [ ] `set-resolution.sh` 调用是否正确传递参数
+  - [ ] `glxinfo` 检查 `OpenGL renderer` 是否正确
+- [ ] Root 阶段是否正确调用 `start_gpu_xorg "root"`
+- [ ] `exec runuser` 是否正确传递 `DISPLAY` 环境变量
+- [ ] Steam 阶段虚拟显示逻辑：
+  - [ ] 是否正确检查 `Xorg` 进程（`pgrep -x Xorg`）
+  - [ ] 回退到 `Xvfb` 的逻辑是否正确
+  - [ ] `Xvfb` 启动命令是否使用动态分辨率变量
+- [ ] VNC 启动是否使用动态 `DISPLAY` 变量（不再硬编码 `:99`）
 
-**娼滃湪闂**锛?
-- Xorg 鍚姩澶辫触鏃舵槸鍚︿細瀵艰嚧瀹瑰櫒閫€鍑猴紵锛堝簲璇ュ洖閫€鍒?Xvfb锛?
-- DISPLAY 鐜鍙橀噺浼犻€掓槸鍚︿細鍦?runuser 鍒囨崲鐢ㄦ埛鏃朵涪澶憋紵
-- set-resolution.sh 澶辫触鏄惁浼氶樆濉炲惎鍔紵锛堝簲璇ュ彧鏄鍛婏級
-
----
-
-### 3. docker-compose.yml 瀹℃煡瑕佺偣
-
-**鏂囦欢璺緞**: `docker-compose.yml`
-
-妫€鏌ラ」锛?
-- [ ] 闀滃儚鐗堟湰鏄惁浠嶄负 v1.0.61锛堥渶瑕佹墜鍔ㄦ洿鏂颁负 v1.0.64锛?
-- [ ] 鏂板鐜鍙橀噺鏄惁姝ｇ‘锛?
-  - [ ] USE_GPU=${USE_GPU:-false}
-  - [ ] RESOLUTION_WIDTH=${RESOLUTION_WIDTH:-1280}
-  - [ ] RESOLUTION_HEIGHT=${RESOLUTION_HEIGHT:-720}
-  - [ ] REFRESH_RATE=${REFRESH_RATE:-60}
-- [ ] /dev/dri 璁惧鏄犲皠娉ㄩ噴鏄惁娓呮櫚
-- [ ] 娉ㄩ噴鏄惁璇存槑闇€瑕佸彇娑堟敞閲婃墠鑳藉惎鐢?GPU
-
-**娼滃湪闂**锛?
-- 闀滃儚鐗堟湰鍙锋槸鍚﹂渶瑕佹洿鏂帮紵锛堝綋鍓嶄粛涓?v1.0.61锛?
+**潜在问题**：
+- `Xorg` 启动失败时是否会导致容器退出？（应该回退到 `Xvfb`）
+- `DISPLAY` 环境变量传递是否会在 `runuser` 切换用户时丢失？
+- `set-resolution.sh` 失败是否会阻塞启动？（应该只是警告）
 
 ---
 
-### 4. .env.example 瀹℃煡瑕佺偣
+### 3. docker-compose.yml 审查要点
 
-**鏂囦欢璺緞**: `.env.example`
+**文件路径**: `docker-compose.yml`
 
-妫€鏌ラ」锛?
-- [ ] USE_GPU 璇存槑鏄惁娓呮櫚锛堥粯璁?false锛岄渶瑕?/dev/dri锛?
-- [ ] 鍒嗚鲸鐜囪缃鏄庢槸鍚︽竻鏅?
-- [ ] 鏄惁璇存槑浜嗗惎鐢?GPU 鐨勮姹傦紙瀹夸富鏈?/dev/dri + docker-compose.yml 鏄犲皠锛?
+检查项：
+- [ ] 镜像版本是否仍为 `v1.0.61`（需要手动更新为 `v1.0.64`）
+- [ ] 新增环境变量是否正确：
+  - [ ] `USE_GPU=${USE_GPU:-false}`
+  - [ ] `RESOLUTION_WIDTH=${RESOLUTION_WIDTH:-1280}`
+  - [ ] `RESOLUTION_HEIGHT=${RESOLUTION_HEIGHT:-720}`
+  - [ ] `REFRESH_RATE=${REFRESH_RATE:-60}`
+- [ ] `/dev/dri` 设备映射注释是否清晰
+- [ ] 注释是否说明需要取消注释才能启用 GPU
 
-**娼滃湪闂**锛?
-- 鐢ㄦ埛鏄惁鑳芥竻妤氱悊瑙ｅ浣曞惎鐢?GPU锛?
+**潜在问题**：
+- 镜像版本号是否需要更新？（当前仍为 `v1.0.61`）
 
 ---
 
-### 5. 宸插瓨鍦ㄦ枃浠舵鏌?
+### 4. .env.example 审查要点
 
-**鏂囦欢璺緞**:
+**文件路径**: `.env.example`
+
+检查项：
+- [ ] `USE_GPU` 说明是否清晰（默认为 `false`，需要 `/dev/dri`）
+- [ ] 分辨率设置说明是否清晰
+- [ ] 是否说明了启用 GPU 的要求（宿主机 `/dev/dri` + `docker-compose.yml` 映射）
+
+**潜在问题**：
+- 用户是否能清楚理解如何启用 GPU？
+
+---
+
+### 5. 已存在文件检查
+
+**文件路径**:
 - `docker/scripts/set-resolution.sh`
 - `docker/config/10-monitor.conf`
 
-妫€鏌ラ」锛?
-- [ ] set-resolution.sh 鏄惁鏈夋墽琛屾潈闄?
-- [ ] set-resolution.sh 閫昏緫鏄惁姝ｇ‘锛坸randr 璁剧疆鍒嗚鲸鐜?+ cvt 鍥為€€锛?
-- [ ] 10-monitor.conf 閰嶇疆鏄惁姝ｇ‘锛?280x720_60.00 + modesetting + glamor锛?
+检查项：
+- [ ] `set-resolution.sh` 是否有执行权限
+- [ ] `set-resolution.sh` 逻辑是否正确（`xrandr` 设置分辨率 + `cvt` 回退）
+- [ ] `10-monitor.conf` 配置是否正确（`1280x720_60.00` + `modesetting` + `glamor`）
 
 ---
 
-## 鍏煎鎬ф鏌?
+## 兼容性检查
 
-### 鍚戝悗鍏煎鎬?
-- [ ] USE_GPU 鏈缃垨涓?false 鏃讹紝鏄惁姝ｅ父浣跨敤 Xvfb锛?
-- [ ] /dev/dri 涓嶅瓨鍦ㄦ椂锛屾槸鍚︽甯稿洖閫€鍒?Xvfb锛?
-- [ ] 鐜版湁鐢ㄦ埛鍗囩骇鍚庢槸鍚︽棤闇€淇敼閰嶇疆鍗冲彲姝ｅ父杩愯锛?
+### 向后兼容性
+- [ ] `USE_GPU` 未设置或为 `false` 时，是否正常使用 `Xvfb`
+- [ ] `/dev/dri` 不存在时，是否正常回退到 `Xvfb`
+- [ ] 现有用户升级后是否无需修改配置即可正常运行
 
-### 閿欒澶勭悊
-- [ ] Xorg 鍚姩澶辫触鏃舵槸鍚︽湁鏄庣‘鏃ュ織锛?
-- [ ] set-resolution.sh 澶辫触鏃舵槸鍚﹀彧鏄鍛婅€屼笉闃诲锛?
-- [ ] /dev/dri 鏉冮檺涓嶈冻鏃舵槸鍚︽湁娓呮櫚鎻愮ず锛?
+### 错误处理
+- [ ] `Xorg` 启动失败时是否有明确日志
+- [ ] `set-resolution.sh` 失败时是否只是警告而不阻塞
+- [ ] `/dev/dri` 权限不足时是否有清晰提示
 
 ---
 
-## 娴嬭瘯鍦烘櫙
+## 测试场景
 
-### 鍦烘櫙 1: 榛樿琛屼负锛堜笉鍚敤 GPU锛?
+### 场景 1: 默认行为（不启用 GPU）
 ```bash
-# .env 涓笉璁剧疆 USE_GPU 鎴?USE_GPU=false
-# docker-compose.yml 涓嶆槧灏?/dev/dri
+# .env 中不设置 USE_GPU 或 USE_GPU=false
+# docker-compose.yml 不映射 /dev/dri
 docker compose up -d
 ```
-**棰勬湡**锛氫娇鐢?Xvfb 杞欢娓叉煋锛屼笌涔嬪墠鐗堟湰琛屼负涓€鑷?
+**预期**：使用 `Xvfb` 软件渲染，与之前版本行为一致
 
-### 鍦烘櫙 2: 鍚敤 GPU锛堟湁 /dev/dri锛?
+### 场景 2: 启用 GPU（有 /dev/dri）
 ```bash
-# .env 涓缃?USE_GPU=true
-# docker-compose.yml 鍙栨秷娉ㄩ噴 devices: - /dev/dri:/dev/dri
+# .env 中设置 USE_GPU=true
+# docker-compose.yml 取消注释 devices: - /dev/dri:/dev/dri
 docker compose up -d
 ```
-**棰勬湡**锛氫娇鐢?Xorg + GPU 纭欢鍔犻€燂紝鏃ュ織鏄剧ず OpenGL renderer
+**预期**：使用 `Xorg + GPU` 硬件加速，日志显示 `OpenGL renderer`
 
-### 鍦烘櫙 3: 鍚敤 GPU锛堟棤 /dev/dri锛?
+### 场景 3: 启用 GPU（无 /dev/dri）
 ```bash
-# .env 涓缃?USE_GPU=true
-# docker-compose.yml 涓嶆槧灏?/dev/dri
+# .env 中设置 USE_GPU=true
+# docker-compose.yml 不映射 /dev/dri
 docker compose up -d
 ```
-**棰勬湡**锛氭娴嬪埌 /dev/dri 涓嶅彲鐢紝鍥為€€鍒?Xvfb锛屾棩蹇楁湁璀﹀憡
+**预期**：检测到 `/dev/dri` 不可用，回退到 `Xvfb`，日志有警告
 
-### 鍦烘櫙 4: 鑷畾涔夊垎杈ㄧ巼
+### 场景 4: 自定义分辨率
 ```bash
-# .env 涓缃?
+# .env 中设置：
 RESOLUTION_WIDTH=1920
 RESOLUTION_HEIGHT=1080
 REFRESH_RATE=60
 docker compose up -d
 ```
-**棰勬湡**锛氳櫄鎷熸樉绀轰娇鐢?1920x1080@60Hz
+**预期**：虚拟显示使用 `1920x1080@60Hz`
 
 ---
 
-## 瀹℃煡杈撳嚭鏍煎紡
+## 审查输出格式
 
-璇锋寜浠ヤ笅鏍煎紡杈撳嚭瀹℃煡缁撴灉锛?
+请按以下格式输出审查结果：
 
-```
-## 瀹℃煡缁撴灉
+```text
+## 审查结果
 
-### 鉁?閫氳繃鐨勬鏌ラ」
-- [鍒楀嚭鎵€鏈夐€氳繃鐨勬鏌ラ」]
+### 通过的检查项
+- [列出所有通过的检查项]
 
-### 鈿狅笍 闇€瑕佹敞鎰忕殑闂
-- [鍒楀嚭娼滃湪闂鎴栨敼杩涘缓璁甝
+### 需要注意的问题
+- [列出潜在问题或改进建议]
 
-### 鉂?鍙戠幇鐨勯敊璇?
-- [鍒楀嚭鏄庣‘鐨勯敊璇紝闇€瑕佷慨澶峕
+### 发现的错误
+- [列出明确的错误，需要修复]
 
-### 馃摑 寤鸿
-- [鍏朵粬寤鸿鎴栦紭鍖栨柟鍚慮
+### 建议
+- [其他建议或优化方向]
 
-### 鎬讳綋璇勪环
+### 总体评价
 [PASS / NEEDS_FIX / NEEDS_IMPROVEMENT]
 ```
 
 ---
 
-## 鍙傝€冨疄鐜?
+## 参考实现
 
-鍙傝€冨垎鏀細`dezhishen/nothing-stardew-server` 鐨?`feat/xorg` 鍒嗘敮
+参考分支：`dezhishen/nothing-stardew-server` 的 `feat/xorg` 分支
 - Dockerfile: https://github.com/dezhishen/nothing-stardew-server/blob/feat/xorg/docker/Dockerfile
 - entrypoint.sh: https://github.com/dezhishen/nothing-stardew-server/blob/feat/xorg/docker/scripts/entrypoint.sh
